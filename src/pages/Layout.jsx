@@ -16,9 +16,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import AvatarDisplay from "./components/avatar/AvatarDisplay";
-import PetDisplay from "./components/rewards/PetDisplay";
-import InstallPrompt from "./components/InstallPrompt";
+import AvatarDisplay from "../components/avatar/AvatarDisplay";
+import PetDisplay from "../components/rewards/PetDisplay";
+import InstallPrompt from "../components/InstallPrompt";
 import { format, startOfDay } from "date-fns";
 
 export default function Layout({ children, currentPageName }) {
