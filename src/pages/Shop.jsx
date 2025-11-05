@@ -1,0 +1,551 @@
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { base44 } from "@/api/base44Client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ShoppingBag, Star, Coins, Lock, Sparkles, Crown, Package, Palette, Zap } from "lucide-react";
+import PetDisplay from "../components/rewards/PetDisplay";
+import BadgeDisplay from "../components/rewards/BadgeDisplay";
+import DailyLoginRewards from "../components/rewards/DailyLoginRewards";
+
+const shopItems = {
+  pets: [
+    { id: "dragon", name: "Dragon", emoji: "🐉", price: 50, gradient: "from-red-400 to-orange-500", evolveLevel: 5, description: "Breathe fire and soar!" },
+    { id: "unicorn", name: "Unicorn", emoji: "🦄", price: 50, gradient: "from-pink-400 to-purple-500", evolveLevel: 5, description: "Magical and sparkly!" },
+    { id: "owl", name: "Owl", emoji: "🦉", price: 50, gradient: "from-indigo-400 to-purple-500", evolveLevel: 5, description: "Wise and clever!" },
+    { id: "fox", name: "Fox", emoji: "🦊", price: 50, gradient: "from-orange-400 to-red-500", evolveLevel: 5, description: "Cunning and quick!" },
+    { id: "cat", name: "Cat", emoji: "🐱", price: 50, gradient: "from-gray-400 to-slate-500", evolveLevel: 5, description: "Playful and curious!" },
+    { id: "dog", name: "Dog", emoji: "🐶", price: 50, gradient: "from-yellow-400 to-orange-500", evolveLevel: 5, description: "Loyal and friendly!" },
+  ],
+  avatarItems: [
+    // Hair styles
+    { id: "curly", name: "Curly Hair", emoji: "🦱", price: 20, category: "hair", type: "avatar_hair_style" },
+    { id: "spiky", name: "Spiky Hair", emoji: "⚡", price: 20, category: "hair", type: "avatar_hair_style" },
+    { id: "ponytail", name: "Ponytail", emoji: "🎀", price: 25, category: "hair", type: "avatar_hair_style" },
+    { id: "braids", name: "Braids", emoji: "🧵", price: 25, category: "hair", type: "avatar_hair_style" },
+    { id: "afro", name: "Afro", emoji: "🌀", price: 30, category: "hair", type: "avatar_hair_style" },
+    { id: "mohawk", name: "Mohawk", emoji: "🔥", price: 30, category: "hair", type: "avatar_hair_style" },
+    { id: "bun", name: "Bun", emoji: "🍔", price: 25, category: "hair", type: "avatar_hair_style" },
+    
+    // Hair colors
+    { id: "red", name: "Red Hair", emoji: "❤️", price: 15, category: "hair", type: "avatar_hair_color" },
+    { id: "blue", name: "Blue Hair", emoji: "💙", price: 15, category: "hair", type: "avatar_hair_color" },
+    { id: "pink", name: "Pink Hair", emoji: "💗", price: 15, category: "hair", type: "avatar_hair_color" },
+    { id: "purple", name: "Purple Hair", emoji: "💜", price: 15, category: "hair", type: "avatar_hair_color" },
+    { id: "green", name: "Green Hair", emoji: "💚", price: 15, category: "hair", type: "avatar_hair_color" },
+    { id: "orange", name: "Orange Hair", emoji: "🧡", price: 15, category: "hair", type: "avatar_hair_color" },
+    { id: "white", name: "White Hair", emoji: "🤍", price: 20, category: "hair", type: "avatar_hair_color" },
+    { id: "rainbow", name: "Rainbow Hair", emoji: "🌈", price: 40, category: "hair", type: "avatar_hair_color" },
+    
+    // Clothing
+    { id: "hoodie", name: "Hoodie", emoji: "🧥", price: 30, category: "clothing", type: "avatar_shirt" },
+    { id: "tank_top", name: "Tank Top", emoji: "👙", price: 25, category: "clothing", type: "avatar_shirt" },
+    { id: "sweater", name: "Sweater", emoji: "🧶", price: 30, category: "clothing", type: "avatar_shirt" },
+    { id: "jersey", name: "Jersey", emoji: "⚽", price: 35, category: "clothing", type: "avatar_shirt" },
+    { id: "button_up", name: "Button Up", emoji: "👔", price: 35, category: "clothing", type: "avatar_shirt" },
+    { id: "graphic_tee", name: "Graphic Tee", emoji: "🎨", price: 30, category: "clothing", type: "avatar_shirt" },
+    { id: "t_shirt_stripe", name: "Striped Tee", emoji: "👔", price: 25, category: "clothing", type: "avatar_shirt" },
+    { id: "polo", name: "Polo Shirt", emoji: "👕", price: 30, category: "clothing", type: "avatar_shirt" },
+    
+    { id: "shorts", name: "Shorts", emoji: "🩳", price: 25, category: "clothing", type: "avatar_pants" },
+    { id: "skirt", name: "Skirt", emoji: "👗", price: 25, category: "clothing", type: "avatar_pants" },
+    { id: "dress_pants", name: "Dress Pants", emoji: "👔", price: 30, category: "clothing", type: "avatar_pants" },
+    { id: "joggers", name: "Joggers", emoji: "🏃", price: 30, category: "clothing", type: "avatar_pants" },
+    { id: "overalls", name: "Overalls", emoji: "👖", price: 35, category: "clothing", type: "avatar_pants" },
+    { id: "leggings", name: "Leggings", emoji: "🩱", price: 25, category: "clothing", type: "avatar_pants" },
+    { id: "cargo_pants", name: "Cargo Pants", emoji: "🎒", price: 30, category: "clothing", type: "avatar_pants" },
+    
+    { id: "boots", name: "Boots", emoji: "🥾", price: 30, category: "clothing", type: "avatar_shoes" },
+    { id: "sandals", name: "Sandals", emoji: "🩴", price: 20, category: "clothing", type: "avatar_shoes" },
+    { id: "dress_shoes", name: "Dress Shoes", emoji: "👞", price: 35, category: "clothing", type: "avatar_shoes" },
+    { id: "high_tops", name: "High Tops", emoji: "👟", price: 35, category: "clothing", type: "avatar_shoes" },
+    { id: "cleats", name: "Cleats", emoji: "⚽", price: 35, category: "clothing", type: "avatar_shoes" },
+    { id: "slippers", name: "Slippers", emoji: "🩴", price: 20, category: "clothing", type: "avatar_shoes" },
+    
+    // Accessories
+    { id: "baseball_cap", name: "Baseball Cap", emoji: "🧢", price: 25, category: "accessories", type: "avatar_hat" },
+    { id: "beanie", name: "Beanie", emoji: "🎩", price: 25, category: "accessories", type: "avatar_hat" },
+    { id: "sun_hat", name: "Sun Hat", emoji: "👒", price: 25, category: "accessories", type: "avatar_hat" },
+    { id: "wizard_hat", name: "Wizard Hat", emoji: "🧙", price: 40, category: "accessories", type: "avatar_hat" },
+    { id: "party_hat", name: "Party Hat", emoji: "🎉", price: 30, category: "accessories", type: "avatar_hat" },
+    { id: "graduation_cap", name: "Graduation Cap", emoji: "🎓", price: 35, category: "accessories", type: "avatar_hat" },
+    { id: "crown", name: "Crown", emoji: "👑", price: 50, category: "accessories", type: "avatar_hat" },
+    { id: "top_hat", name: "Top Hat", emoji: "🎩", price: 35, category: "accessories", type: "avatar_hat" },
+    { id: "cowboy_hat", name: "Cowboy Hat", emoji: "🤠", price: 30, category: "accessories", type: "avatar_hat" },
+    
+    { id: "regular", name: "Glasses", emoji: "👓", price: 25, category: "accessories", type: "avatar_glasses" },
+    { id: "sunglasses", name: "Sunglasses", emoji: "😎", price: 30, category: "accessories", type: "avatar_glasses" },
+    { id: "reading", name: "Reading Glasses", emoji: "🤓", price: 25, category: "accessories", type: "avatar_glasses" },
+    { id: "safety_goggles", name: "Safety Goggles", emoji: "🥽", price: 30, category: "accessories", type: "avatar_glasses" },
+    { id: "3d_glasses", name: "3D Glasses", emoji: "🕶️", price: 30, category: "accessories", type: "avatar_glasses" },
+    { id: "heart_shaped", name: "Heart Glasses", emoji: "😍", price: 35, category: "accessories", type: "avatar_glasses" },
+    { id: "star_shaped", name: "Star Glasses", emoji: "🤩", price: 35, category: "accessories", type: "avatar_glasses" },
+    
+    { id: "backpack", name: "Backpack", emoji: "🎒", price: 30, category: "accessories", type: "avatar_accessory" },
+    { id: "cape", name: "Cape", emoji: "🦸", price: 40, category: "accessories", type: "avatar_accessory" },
+    { id: "scarf", name: "Scarf", emoji: "🧣", price: 25, category: "accessories", type: "avatar_accessory" },
+    { id: "bow_tie", name: "Bow Tie", emoji: "🎀", price: 25, category: "accessories", type: "avatar_accessory" },
+    { id: "necklace", name: "Necklace", emoji: "📿", price: 30, category: "accessories", type: "avatar_accessory" },
+    { id: "watch", name: "Watch", emoji: "⌚", price: 35, category: "accessories", type: "avatar_accessory" },
+    { id: "headphones", name: "Headphones", emoji: "🎧", price: 35, category: "accessories", type: "avatar_accessory" },
+    { id: "earrings", name: "Earrings", emoji: "💎", price: 30, category: "accessories", type: "avatar_accessory" },
+    { id: "bracelet", name: "Bracelet", emoji: "📿", price: 25, category: "accessories", type: "avatar_accessory" },
+    
+    // Backgrounds
+    { id: "stars", name: "Starry Background", emoji: "⭐", price: 40, category: "backgrounds", type: "avatar_background" },
+    { id: "rainbow", name: "Rainbow Background", emoji: "🌈", price: 40, category: "backgrounds", type: "avatar_background" },
+    { id: "clouds", name: "Cloudy Background", emoji: "☁️", price: 35, category: "backgrounds", type: "avatar_background" },
+    { id: "space", name: "Space Background", emoji: "🚀", price: 45, category: "backgrounds", type: "avatar_background" },
+    { id: "underwater", name: "Underwater Background", emoji: "🌊", price: 45, category: "backgrounds", type: "avatar_background" },
+    { id: "forest", name: "Forest Background", emoji: "🌲", price: 40, category: "backgrounds", type: "avatar_background" },
+    { id: "city", name: "City Background", emoji: "🏙️", price: 40, category: "backgrounds", type: "avatar_background" },
+    { id: "beach", name: "Beach Background", emoji: "🏖️", price: 40, category: "backgrounds", type: "avatar_background" },
+    
+    // Eyes
+    { id: "cool", name: "Cool Eyes", emoji: "😎", price: 20, category: "facial", type: "avatar_eyes" },
+    { id: "star", name: "Star Eyes", emoji: "🤩", price: 25, category: "facial", type: "avatar_eyes" },
+    { id: "heart", name: "Heart Eyes", emoji: "😍", price: 25, category: "facial", type: "avatar_eyes" },
+    { id: "sleepy", name: "Sleepy Eyes", emoji: "😴", price: 20, category: "facial", type: "avatar_eyes" },
+    { id: "angry", name: "Determined Eyes", emoji: "😠", price: 20, category: "facial", type: "avatar_eyes" },
+    { id: "surprised", name: "Surprised Eyes", emoji: "😲", price: 20, category: "facial", type: "avatar_eyes" },
+    { id: "wink", name: "Winking Eyes", emoji: "😉", price: 25, category: "facial", type: "avatar_eyes" },
+    
+    // Face expressions
+    { id: "laughing", name: "Laughing Face", emoji: "😆", price: 20, category: "facial", type: "avatar_face" },
+    { id: "determined", name: "Determined Face", emoji: "😤", price: 20, category: "facial", type: "avatar_face" },
+    { id: "neutral", name: "Neutral Face", emoji: "😐", price: 15, category: "facial", type: "avatar_face" },
+    { id: "tongue_out", name: "Playful Face", emoji: "😛", price: 20, category: "facial", type: "avatar_face" },
+  ],
+  badges: [
+    { id: "first_game", name: "First Game", emoji: "🎮", gradient: "from-green-400 to-emerald-500", description: "Completed your first game!", requirement: "Play 1 game" },
+    { id: "star_collector", name: "Star Collector", emoji: "⭐", gradient: "from-yellow-400 to-orange-500", description: "Earned 50 stars!", requirement: "Earn 50 stars" },
+    { id: "speed_demon", name: "Speed Demon", emoji: "⚡", gradient: "from-blue-400 to-cyan-500", description: "Complete a game in under 60 seconds", requirement: "Complete game < 60s" },
+    { id: "perfectionist", name: "Perfectionist", emoji: "💯", gradient: "from-pink-400 to-purple-500", description: "Get 100% accuracy", requirement: "100% accuracy" },
+    { id: "daily_warrior", name: "Daily Warrior", emoji: "🗓️", gradient: "from-red-400 to-orange-500", description: "Complete 7 daily challenges", requirement: "7 daily challenges" },
+  ],
+  powerUps: [
+    { id: "time_freeze", name: "Time Freeze", emoji: "⏰", price: 10, coins: true, description: "Stop the timer for 10 seconds" },
+    { id: "hint_helper", name: "Hint Helper", emoji: "💡", price: 5, coins: true, description: "Get a hint on a problem" },
+    { id: "skip_question", name: "Skip Question", emoji: "⏭️", price: 8, coins: true, description: "Skip one difficult question" },
+    { id: "double_stars", name: "Double Stars", emoji: "⭐⭐", price: 15, coins: true, description: "Earn 2x stars for next game" },
+  ],
+};
+
+export default function Shop() {
+  const queryClient = useQueryClient();
+  const [purchaseSuccess, setPurchaseSuccess] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("pets");
+
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
+  const { data: progress = [] } = useQuery({
+    queryKey: ['gameProgress'],
+    queryFn: () => base44.entities.GameProgress.list(),
+    initialData: [],
+  });
+
+  const purchaseMutation = useMutation({
+    mutationFn: async ({ itemId, price, type, coins = false }) => {
+      const updates = {};
+      
+      if (coins) {
+        updates.coins = (user?.coins || 0) - price;
+        updates.power_ups = {
+          ...(user?.power_ups || {}),
+          [itemId]: ((user?.power_ups || {})[itemId] || 0) + 1,
+        };
+      } else {
+        // Stars purchase
+        const totalStars = progress.reduce((sum, p) => sum + (p.stars_earned || 0), 0);
+        const starsSpent = user?.stars_spent || 0;
+        const availableStars = totalStars - starsSpent;
+        
+        if (availableStars < price) {
+          throw new Error("Not enough stars!");
+        }
+
+        updates.stars_spent = starsSpent + price;
+        
+        if (type === "pet") {
+          updates.owned_pets = [...(user?.owned_pets || []), itemId];
+          if (!user?.active_pet) {
+            updates.active_pet = itemId;
+          }
+        } else {
+          updates.purchased_items = [...(user?.purchased_items || []), itemId];
+        }
+      }
+      
+      return base44.auth.updateMe(updates);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      setPurchaseSuccess(variables.itemId);
+      setTimeout(() => setPurchaseSuccess(null), 3000);
+    },
+  });
+
+  const activatePetMutation = useMutation({
+    mutationFn: (petId) => base44.auth.updateMe({ active_pet: petId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    },
+  });
+
+  const handlePurchase = (item, type = "avatar", coins = false) => {
+    purchaseMutation.mutate({ 
+      itemId: item.id, 
+      price: item.price, 
+      type,
+      coins 
+    });
+  };
+
+  const handleActivatePet = (petId) => {
+    activatePetMutation.mutate(petId);
+  };
+
+  const isOwned = (itemId, type = "avatar") => {
+    if (type === "pet") {
+      return (user?.owned_pets || []).includes(itemId);
+    }
+    return (user?.unlocked_items || []).includes(itemId) || 
+           (user?.purchased_items || []).includes(itemId);
+  };
+
+  const getTotalStars = () => {
+    return progress.reduce((sum, p) => sum + (p.stars_earned || 0), 0);
+  };
+
+  const getAvailableStars = () => {
+    const total = getTotalStars();
+    const spent = user?.stars_spent || 0;
+    return total - spent;
+  };
+
+  const getUserCoins = () => user?.coins || 0;
+
+  if (userLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-xl text-gray-600">Loading shop...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="inline-block mb-4">
+          <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-xl">
+            <ShoppingBag className="w-10 h-10 text-white" />
+          </div>
+        </div>
+        <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+          Rewards Shop
+        </h1>
+        <p className="text-xl text-gray-600">Spend your stars and coins on awesome items!</p>
+      </div>
+
+      {/* Currency Display */}
+      <div className="grid md:grid-cols-2 gap-4 mb-8">
+        <Card className="border-4 border-yellow-300 bg-gradient-to-r from-yellow-50 to-orange-50">
+          <CardContent className="p-6 text-center">
+            <Star className="w-12 h-12 mx-auto mb-2 text-yellow-500 fill-yellow-500" />
+            <div className="text-4xl font-bold text-yellow-600 mb-1">{getAvailableStars()}</div>
+            <p className="text-gray-600">Available Stars</p>
+            <p className="text-xs text-gray-500 mt-1">
+              Total: {getTotalStars()} | Spent: {user?.stars_spent || 0}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-4 border-blue-300 bg-gradient-to-r from-blue-50 to-cyan-50">
+          <CardContent className="p-6 text-center">
+            <Coins className="w-12 h-12 mx-auto mb-2 text-blue-500" />
+            <div className="text-4xl font-bold text-blue-600 mb-1">{getUserCoins()}</div>
+            <p className="text-gray-600">Coins</p>
+            <p className="text-xs text-gray-500 mt-1">For power-ups and boosts</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {purchaseSuccess && (
+        <Alert className="mb-6 bg-green-50 border-green-200">
+          <Sparkles className="w-4 h-4 text-green-600" />
+          <AlertDescription className="text-green-800">
+            Purchase successful! Item added to your collection 🎉
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Daily Login Rewards */}
+      <div className="mb-8">
+        <DailyLoginRewards />
+      </div>
+
+      {/* Shop Tabs */}
+      <Card className="border-2 border-purple-200">
+        <CardContent className="p-6">
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
+            <TabsList className="grid w-full grid-cols-4 mb-6">
+              <TabsTrigger value="pets">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Pets
+              </TabsTrigger>
+              <TabsTrigger value="avatar">
+                <Palette className="w-4 h-4 mr-2" />
+                Avatar
+              </TabsTrigger>
+              <TabsTrigger value="badges">
+                <Crown className="w-4 h-4 mr-2" />
+                Badges
+              </TabsTrigger>
+              <TabsTrigger value="powerups">
+                <Zap className="w-4 h-4 mr-2" />
+                Power-Ups
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Pets Tab */}
+            <TabsContent value="pets" className="space-y-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {shopItems.pets.map((pet) => {
+                  const owned = isOwned(pet.id, "pet");
+                  const isActive = user?.active_pet === pet.id;
+                  const canAfford = getAvailableStars() >= pet.price;
+
+                  return (
+                    <Card key={pet.id} className={`border-2 ${isActive ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200'}`}>
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <span>{pet.name}</span>
+                          {isActive && <Badge className="bg-purple-500">Active</Badge>}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex justify-center mb-4">
+                          <PetDisplay 
+                            pet={pet} 
+                            experience={user?.pet_experience?.[pet.id] || 0}
+                            size="large"
+                          />
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">{pet.description}</p>
+                        
+                        {owned ? (
+                          isActive ? (
+                            <Button disabled className="w-full" variant="outline">
+                              Currently Active
+                            </Button>
+                          ) : (
+                            <Button 
+                              onClick={() => handleActivatePet(pet.id)}
+                              className="w-full bg-purple-500 hover:bg-purple-600"
+                            >
+                              Set as Active
+                            </Button>
+                          )
+                        ) : (
+                          <Button
+                            onClick={() => handlePurchase(pet, "pet")}
+                            disabled={!canAfford || purchaseMutation.isPending}
+                            className={`w-full ${canAfford ? 'bg-gradient-to-r from-purple-500 to-pink-500' : ''}`}
+                          >
+                            {canAfford ? (
+                              <>
+                                <Star className="w-4 h-4 mr-2 fill-white" />
+                                Buy for {pet.price} Stars
+                              </>
+                            ) : (
+                              <>
+                                <Lock className="w-4 h-4 mr-2" />
+                                Need {pet.price - getAvailableStars()} more stars
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </TabsContent>
+
+            {/* Avatar Items Tab */}
+            <TabsContent value="avatar" className="space-y-6">
+              <Tabs defaultValue="hair">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="hair">Hair</TabsTrigger>
+                  <TabsTrigger value="clothing">Clothing</TabsTrigger>
+                  <TabsTrigger value="accessories">Accessories</TabsTrigger>
+                  <TabsTrigger value="backgrounds">Backgrounds</TabsTrigger>
+                  <TabsTrigger value="facial">Facial</TabsTrigger>
+                </TabsList>
+
+                {['hair', 'clothing', 'accessories', 'backgrounds', 'facial'].map(category => (
+                  <TabsContent key={category} value={category}>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {shopItems.avatarItems.filter(item => item.category === category).map((item) => {
+                        const owned = isOwned(item.id);
+                        const canAfford = getAvailableStars() >= item.price;
+
+                        return (
+                          <Card key={item.id} className={`border-2 ${owned ? 'border-green-300 bg-green-50' : 'border-gray-200'}`}>
+                            <CardContent className="p-4 text-center">
+                              <div className="text-4xl mb-2">{item.emoji}</div>
+                              <h3 className="font-bold text-sm mb-2">{item.name}</h3>
+                              
+                              {owned ? (
+                                <Badge className="bg-green-500 text-white">Owned</Badge>
+                              ) : (
+                                <Button
+                                  onClick={() => handlePurchase(item)}
+                                  disabled={!canAfford || purchaseMutation.isPending}
+                                  size="sm"
+                                  className={`w-full ${canAfford ? 'bg-gradient-to-r from-purple-500 to-pink-500' : ''}`}
+                                >
+                                  {canAfford ? (
+                                    <>
+                                      <Star className="w-3 h-3 mr-1 fill-white" />
+                                      {item.price}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Lock className="w-3 h-3 mr-1" />
+                                      {item.price}
+                                    </>
+                                  )}
+                                </Button>
+                              )}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </TabsContent>
+
+            {/* Badges Tab */}
+            <TabsContent value="badges" className="space-y-6">
+              <Alert className="bg-blue-50 border-blue-300">
+                <Sparkles className="w-4 h-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
+                  Badges are earned by completing specific achievements. Keep playing to unlock them all!
+                </AlertDescription>
+              </Alert>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {shopItems.badges.map((badge) => (
+                  <Card key={badge.id} className="border-2 border-gray-200">
+                    <CardContent className="p-6 text-center">
+                      <div className="flex justify-center mb-3">
+                        <BadgeDisplay badge={badge} size="large" />
+                      </div>
+                      <h3 className="font-bold text-lg mb-2">{badge.name}</h3>
+                      <p className="text-sm text-gray-600 mb-2">{badge.description}</p>
+                      <Badge variant="outline" className="text-xs">
+                        {badge.requirement}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {/* Power-Ups Tab */}
+            <TabsContent value="powerups" className="space-y-6">
+              <Alert className="bg-cyan-50 border-cyan-300">
+                <Coins className="w-4 h-4 text-cyan-600" />
+                <AlertDescription className="text-cyan-800">
+                  Power-ups are purchased with coins and can be used during games to help you succeed!
+                </AlertDescription>
+              </Alert>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {shopItems.powerUps.map((powerUp) => {
+                  const canAfford = getUserCoins() >= powerUp.price;
+                  const owned = (user?.power_ups || {})[powerUp.id] || 0;
+
+                  return (
+                    <Card key={powerUp.id} className="border-2 border-cyan-200">
+                      <CardContent className="p-6 text-center">
+                        <div className="text-5xl mb-3">{powerUp.emoji}</div>
+                        <h3 className="font-bold mb-2">{powerUp.name}</h3>
+                        <p className="text-xs text-gray-600 mb-3">{powerUp.description}</p>
+                        
+                        {owned > 0 && (
+                          <Badge className="bg-green-500 text-white mb-2">
+                            Owned: {owned}
+                          </Badge>
+                        )}
+
+                        <Button
+                          onClick={() => handlePurchase(powerUp, "powerup", true)}
+                          disabled={!canAfford || purchaseMutation.isPending}
+                          size="sm"
+                          className={`w-full ${canAfford ? 'bg-gradient-to-r from-cyan-500 to-blue-500' : ''}`}
+                        >
+                          {canAfford ? (
+                            <>
+                              <Coins className="w-4 h-4 mr-2" />
+                              Buy for {powerUp.price}
+                            </>
+                          ) : (
+                            <>
+                              <Lock className="w-4 h-4 mr-2" />
+                              Need {powerUp.price - getUserCoins()} coins
+                            </>
+                          )}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Earn More Section */}
+      <Card className="mt-8 bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-purple-600" />
+            How to Earn More
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid md:grid-cols-3 gap-4">
+          <div className="text-center p-4">
+            <div className="text-4xl mb-2">🎮</div>
+            <h3 className="font-bold mb-1">Play Games</h3>
+            <p className="text-sm text-gray-600">Earn up to 3 stars per game</p>
+          </div>
+          <div className="text-center p-4">
+            <div className="text-4xl mb-2">📅</div>
+            <h3 className="font-bold mb-1">Daily Challenges</h3>
+            <p className="text-sm text-gray-600">Get bonus rewards every day</p>
+          </div>
+          <div className="text-center p-4">
+            <div className="text-4xl mb-2">🏆</div>
+            <h3 className="font-bold mb-1">Achievements</h3>
+            <p className="text-sm text-gray-600">Unlock items by achieving goals</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

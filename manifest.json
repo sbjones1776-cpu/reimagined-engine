@@ -1,0 +1,48 @@
+{
+"display_override": ["window-controls-overlay"], 
+"name": "Math Adventure",
+"short_name": "Math Adventure",
+"start_url": "/",
+"display": "standalone",
+"protocol_handlers": [
+    {
+        "protocol": "web+math",
+        "url": "https://math-adventure.com/launch?uri=%s"
+    }
+],
+"description": "An engaging web-based game designed to help kids master fundamental math skills through interactive challenges, rewarding progress, and fun achievements.",
+"lang": "en",
+"dir": "auto",
+"theme_color": "#9333ea",
+"background_color": "#faf5ff",
+"orientation": "any",
+"icons": [
+    {
+        "src": "/icons/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+    },
+    {
+        "src": "/icons/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+    }
+],
+"screenshots": [
+    {
+        "src": "https://www.pwabuilder.com/assets/screenshots/screen1.png",
+        "sizes": "2880x1800",
+        "type": "image/png",
+        "description": "A screenshot of the home page"
+    }
+],
+"shortcuts": [
+    {
+        "name":"Math Adventure",
+        "url":"https://math-adventure.com/launch?uri=%s",
+        "description":"Sign in"
+    }
+]
+}
