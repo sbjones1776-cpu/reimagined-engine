@@ -49,28 +49,33 @@ export default function Subscription() {
   const subscriptionExpires = user?.subscription_expires_at ? new Date(user.subscription_expires_at) : null;
   const daysUntilRenewal = subscriptionExpires ? Math.ceil((subscriptionExpires - new Date()) / (1000 * 60 * 60 * 24)) : 0;
 
-  const handleSubscribe = async (tier) => {
+  // Direct Square payment links for each plan
+  // Payment links for monthly and yearly options
+  const paymentLinks = {
+    premium_player: {
+      monthly: "https://square.link/u/nFpI2tMT",
+      yearly: "https://checkout.square.site/merchant/MLZ8SFCEGD55V/checkout/XKMFTRBKLNNDRTMQWSBJ4TOL"
+    },
+    premium_parent: {
+      monthly: "https://square.link/u/mffPglOm",
+      yearly: "https://checkout.square.site/merchant/MLZ8SFCEGD55V/checkout/LJ7EFZTE5IPACDT2HAO2H2IB"
+    },
+    family_teacher: {
+      monthly: "https://square.link/u/bCQAOVfA",
+      yearly: "https://checkout.square.site/merchant/MLZ8SFCEGD55V/checkout/VYNFU5WKRO4AU5KBQAG2S3NM"
+    }
+  };
+
+  const handleSubscribe = (tier, period = "monthly") => {
     if (!isExternalBrowser) {
-      // In-app: Show message to use external browser
       alert("Please open this page in your web browser to subscribe. Use the 'Open in Browser' button above.");
       return;
     }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await base44.functions.invoke('createSquareCheckout', { tier });
-      
-      if (response.data.checkout_url) {
-        window.location.href = response.data.checkout_url;
-      } else {
-        throw new Error('No checkout URL received');
-      }
-    } catch (err) {
-      console.error('Subscription error:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to create checkout session');
-      setLoading(false);
+    const url = paymentLinks[tier]?.[period];
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      alert('No payment link available for this plan and period.');
     }
   };
 
@@ -187,6 +192,7 @@ export default function Subscription() {
           Unlock Premium Features
         </h1>
         <p className="text-xl text-gray-600 mb-2">Choose the perfect plan for your learning journey</p>
+        <p className="text-md text-green-600 mb-2 font-semibold">Save 20% when you purchase any yearly plan!</p>
         {isExternalBrowser && (
           <p className="text-sm text-gray-500">Secure payment powered by Square</p>
         )}
@@ -323,7 +329,7 @@ export default function Subscription() {
                 ) : (
                   <div className="space-y-2">
                     <Button
-                      onClick={() => handleSubscribe(plan.id)}
+                      onClick={() => handleSubscribe(plan.id, "monthly")}
                       disabled={loading || !isExternalBrowser}
                       className={`w-full h-12 text-lg bg-gradient-to-r ${plan.color} hover:opacity-90 ${
                         !isExternalBrowser ? 'opacity-50 cursor-not-allowed' : ''
@@ -348,7 +354,7 @@ export default function Subscription() {
                     </Button>
                     {isExternalBrowser && (
                       <Button
-                        onClick={() => handleSubscribe(`${plan.id}_annual`)}
+                        onClick={() => handleSubscribe(plan.id, "yearly")}
                         disabled={loading}
                         variant="outline"
                         className="w-full h-12"

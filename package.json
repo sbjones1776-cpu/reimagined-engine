@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "lint": "eslint .",
-  "preview": "vite preview",
-  "deploy": "npm run build && xcopy /E /Y dist\\* ."
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "deploy": "npm run build && xcopy /E /Y dist\\* ."
   },
   "dependencies": {
     "@base44/sdk": "^0.1.2",
@@ -45,6 +45,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.5.2",
+    "firebase": "^12.5.0",
     "framer-motion": "^12.4.7",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.475.0",

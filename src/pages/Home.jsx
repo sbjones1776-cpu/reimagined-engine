@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// import { base44 } from "@/api/base44Client";
 import { Plus, Minus, X, Divide, Star, Lock, Play, Trophy, Award, Brain, Sparkles, Users, AlertCircle, Crown, CreditCard, Calendar, Percent, DollarSign, Clock, Shapes, BookOpen, TrendingUp, Grid3x3, Zap, Target, Binary, Calculator, BarChart3, Palette } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1199,13 +1199,13 @@ export default function Home() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+  // TODO: Replace with new authentication check
   });
 
   const { data: myTeamChallenges = [] } = useQuery({
     queryKey: ['myTeamChallenges'],
     queryFn: async () => {
-      const user = await base44.auth.me();
+  // TODO: Replace with new authentication check
       const all = await base44.entities.TeamChallenge.list();
       return all.filter(tc => 
         (tc.team_members?.includes(user.email) || tc.creator_email === user.email) && 

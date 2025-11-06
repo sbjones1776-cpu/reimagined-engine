@@ -22,4 +22,4 @@ export const Message = base44.entities.Message;
 
 
 // auth sdk:
-export const User = base44.auth;
+// User authentication removed. Implement new authentication system here.

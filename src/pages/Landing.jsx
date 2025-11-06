@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// import { base44 } from "@/api/base44Client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +30,7 @@ export default function Landing() {
     queryKey: ['isAuthenticated'],
     queryFn: async () => {
       try {
-        await base44.auth.me();
+  // TODO: Replace with new authentication check
         return true;
       } catch {
         return false;
@@ -45,7 +45,7 @@ export default function Landing() {
   }, [isAuthenticated, isLoading, navigate]);
 
   const handleGetStarted = () => {
-    base44.auth.redirectToLogin(createPageUrl("Home"));
+  // TODO: Replace with new login redirect logic (if needed)
   };
 
   // Show loading while checking auth
