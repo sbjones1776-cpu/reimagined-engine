@@ -2,7 +2,27 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
+
+// Example: Saving game progress to Firestore
+export const saveGameProgress = async (user, progressData) => {
+  const db = getFirestore(firebaseApp);
+  await addDoc(collection(db, "gameProgress"), {
+    user_email: user.email,
+    ...progressData,
+    created_date: new Date().toISOString()
+  });
+};
+
+// Example: Fetching game progress from Firestore
+export const fetchGameProgress = async (user) => {
+  const db = getFirestore(firebaseApp);
+  const q = query(collection(db, "gameProgress"), where("user_email", "==", user.email));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => doc.data());
+};
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

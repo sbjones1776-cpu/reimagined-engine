@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+// TODO: Replace with your Firebase Function or new backend call for icon generation
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -16,14 +17,18 @@ export default function GenerateIcons() {
     setIcons(null);
 
     try {
-      console.log('Calling generateAppIcons function...');
-      const response = await base44.functions.invoke('generateAppIcons', {});
-      console.log('Response:', response);
-      
-      if (response.data.success && response.data.icons) {
-        setIcons(response.data.icons);
-      } else if (response.data.error) {
-        setError(response.data.message || response.data.error);
+      console.log('Calling Firebase Function generateAppIcons...');
+      const response = await fetch('/generateAppIcons', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      const data = await response.json();
+      console.log('Response:', data);
+      if (data.success && data.icons) {
+        setIcons(data.icons);
+      } else if (data.error) {
+        setError(data.message || data.error);
       } else {
         setError('Unexpected response format');
       }

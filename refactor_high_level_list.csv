@@ -1,0 +1,22 @@
+Feature/File,Refactor Action Needed
+src/pages/Layout.jsx,Replace authentication and user logic with Firebase
+src/pages/Avatar.jsx,Replace user profile and game progress logic
+src/pages/AdminTestAccount.jsx,Replace user management logic
+src/components/parent/ParentalControls.jsx,Replace child account management logic
+src/components/parent/StudentAccountManager.jsx,Replace student account logic
+src/components/MessageInbox.jsx,Replace messaging logic
+src/components/parent/CommunicationCenter.jsx,Replace messaging logic
+src/components/parent/OverviewStats.jsx,Replace stats and messaging logic
+src/pages/DailyChallenge.jsx,Replace daily challenge logic
+src/components/daily/DailyChallengeWidget.jsx,Replace daily challenge logic
+src/pages/Game.jsx,Replace game progress logic
+src/pages/ColorByNumbers.jsx,Replace game progress logic
+src/pages/Home.jsx,Replace game progress and team challenge logic
+src/pages/AITutor.jsx,Replace tutor session logic
+src/components/parent/GoalManager.jsx,Replace goal management logic
+src/components/parent/LessonAssignment.jsx,Replace lesson assignment logic
+src/components/rewards/DailyLoginRewards.jsx,Replace rewards logic
+src/pages/GenerateIcons.jsx,Replace icon generation logic
+src/api/entities.js,Refactor all entity API calls
+src/api/functions.js,Refactor all function API calls
+src/api/integrations.js,Refactor all integration API calls

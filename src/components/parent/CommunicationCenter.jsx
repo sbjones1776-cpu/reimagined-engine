@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, query, where, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,13 +26,10 @@ export default function CommunicationCenter({ childEmail, parentEmail }) {
   const { data: messages = [] } = useQuery({
     queryKey: ['messages', childEmail, parentEmail],
     queryFn: async () => {
-      const allMessages = await base44.entities.Message.list();
-      return allMessages
-        .filter(m => 
-          (m.parent_email === parentEmail && m.child_email === childEmail) ||
-          (m.child_email === parentEmail && m.parent_email === childEmail && m.message_type === 'response')
-        )
-        .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      const db = getFirestore(firebaseApp);
+      const q = query(collection(db, "messages"), where("parent_email", "==", parentEmail), where("child_email", "==", childEmail));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => doc.data()).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
     },
     initialData: [],
     enabled: !!childEmail && !!parentEmail,
@@ -42,7 +41,8 @@ export default function CommunicationCenter({ childEmail, parentEmail }) {
 
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData) => {
-      return base44.entities.Message.create({
+      const db = getFirestore(firebaseApp);
+      await addDoc(collection(db, "messages"), {
         parent_email: parentEmail,
         child_email: childEmail,
         message_type: messageData.type,
@@ -52,6 +52,7 @@ export default function CommunicationCenter({ childEmail, parentEmail }) {
         reply_to_message_id: messageData.replyTo || null,
         is_read: false,
         parent_read: true,
+        created_date: new Date().toISOString(),
       });
     },
     onSuccess: () => {
@@ -67,7 +68,8 @@ export default function CommunicationCenter({ childEmail, parentEmail }) {
 
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId) => {
-      return base44.entities.Message.update(messageId, { parent_read: true });
+      const db = getFirestore(firebaseApp);
+      await updateDoc(doc(db, "messages", messageId), { parent_read: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
@@ -77,7 +79,8 @@ export default function CommunicationCenter({ childEmail, parentEmail }) {
 
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId) => {
-      return base44.entities.Message.delete(messageId);
+      const db = getFirestore(firebaseApp);
+      await deleteDoc(doc(db, "messages", messageId));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });

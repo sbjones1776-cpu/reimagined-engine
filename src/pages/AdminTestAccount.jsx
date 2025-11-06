@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, getDocs, doc, setDoc } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,11 +21,12 @@ export default function AdminTestAccount() {
       setError(null);
       setSuccess(null);
 
-      // Find the user by email
-      const allUsers = await base44.entities.User.list();
-      const user = allUsers.find(u => u.email === email);
+      // Find the user by email in Firestore
+      const db = getFirestore(firebaseApp);
+      const usersSnapshot = await getDocs(collection(db, "users"));
+      const userDoc = usersSnapshot.docs.find(doc => doc.data().email === email);
 
-      if (!user) {
+      if (!userDoc) {
         throw new Error(`User with email ${email} not found. Please create the account first.`);
       }
 
@@ -31,7 +34,7 @@ export default function AdminTestAccount() {
       const expiresAt = new Date();
       expiresAt.setFullYear(expiresAt.getFullYear() + 1); // 1 year from now
 
-      await base44.entities.User.update(user.id, {
+      await setDoc(doc(db, "users", userDoc.id), {
         subscription_tier: "family_teacher",
         subscription_started_at: new Date().toISOString(),
         subscription_expires_at: expiresAt.toISOString(),
@@ -41,7 +44,7 @@ export default function AdminTestAccount() {
         is_premium_player: true,
         coins: 500,
         total_stars_earned: 100,
-      });
+      }, { merge: true });
 
       setSuccess({
         email,

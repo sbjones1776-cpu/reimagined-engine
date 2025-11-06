@@ -2,10 +2,13 @@
 
 
 import React, { useState, useEffect } from "react";
+// Firebase migration
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// TODO: Refactor to use Firebase or new backend. Base44 import removed.
 import { Home, Trophy, Calendar, User as UserIcon, ShoppingBag, Menu, X, Crown, Coins, Award, Users, GraduationCap, Sparkles, LogOut, Settings, BarChart3, CreditCard, ChevronDown, XCircle, Mail, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,18 +29,26 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      try {
-        return await base44.auth.me();
-      } catch (error) {
-        return null;
+  // Firebase user state
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const auth = getAuth(firebaseApp);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // TODO: Map Firebase user to expected user object shape
+        setUser({
+          email: firebaseUser.email,
+          full_name: firebaseUser.displayName,
+          avatar_skin_tone: "medium", // TODO: fetch from Firestore
+          coins: 0, // TODO: fetch from Firestore
+          // ...other fields
+        });
+      } else {
+        setUser(null);
       }
-    },
-    retry: false,
-    staleTime: 1000 * 60 * 5,
-  });
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Get theme preference
   const isDarkMode = user?.app_settings?.theme === "dark";
@@ -86,7 +97,8 @@ export default function Layout({ children, currentPageName }) {
     // Add apple touch icon
     const appleIcon = document.createElement('link');
     appleIcon.rel = 'apple-touch-icon';
-    appleIcon.href = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/render/image/public/base44-prod/public/6903790fd550823a9f857897/587e859d5_icon-192.png';
+  // TODO: Refactor to use Firebase or new backend
+  // appleIcon.href = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/render/image/public/base44-prod/public/6903790fd550823a9f857897/587e859d5_icon-192.png';
     document.head.appendChild(appleIcon);
 
     // Cleanup function
@@ -101,23 +113,14 @@ export default function Layout({ children, currentPageName }) {
   }, [isDarkMode]); // Added isDarkMode as a dependency to ensure theme-color updates if user settings change
 
   // Check for unread messages
-  const { data: unreadMessageCount = 0 } = useQuery({
-    queryKey: ['unreadMessages', user?.email],
-    queryFn: async () => {
-      // Assuming Message.list() returns messages for the current user (child_email)
-      // and that the base44 client can filter by child_email or all messages are retrieved and filtered client-side.
-      // If base44.entities.Message.list() needs an argument for filtering, it should be adjusted.
-      // For now, assuming it lists all messages and we filter client-side.
-      const allMessages = await base44.entities.Message.list();
-      const unreadMessages = allMessages.filter(m =>
-        m.child_email === user?.email && !m.is_read
-      );
-      return unreadMessages.length;
-    },
-    initialData: 0,
-    enabled: !!user?.email,
-    refetchInterval: 30000, // Refetch every 30 seconds for "real-time" feel
-  });
+  // Firebase unread messages (stub)
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  useEffect(() => {
+    if (!user?.email) return;
+    // TODO: Fetch unread messages from Firestore
+    // Example: fetch from 'messages' collection where child_email == user.email && is_read == false
+    setUnreadMessageCount(0); // Replace with actual count
+  }, [user?.email]);
 
   // If on Landing page, render without layout
   if (currentPageName === "Landing") {
@@ -139,7 +142,11 @@ export default function Layout({ children, currentPageName }) {
             Please sign in to continue your learning journey!
           </p>
           <Button
-            onClick={() => base44.auth.redirectToLogin(createPageUrl("Home"))}
+            onClick={() => {
+              const auth = getAuth(firebaseApp);
+              const provider = new GoogleAuthProvider();
+              signInWithPopup(auth, provider);
+            }}
             className="h-16 px-10 text-xl font-black bg-white text-purple-600 hover:bg-yellow-300 hover:text-purple-700 shadow-2xl transform hover:scale-105 transition-all"
           >
             Sign In / Sign Up 🚀
@@ -153,7 +160,8 @@ export default function Layout({ children, currentPageName }) {
 
   const { data: todaysChallenges = [] } = useQuery({
     queryKey: ['dailyChallenges', todayDate],
-    queryFn: () => base44.entities.DailyChallenge.filter({ challenge_date: todayDate }),
+  // TODO: Refactor to use Firebase or new backend
+  // queryFn: () => base44.entities.DailyChallenge.filter({ challenge_date: todayDate }),
     initialData: [],
     enabled: !!user,
   });
@@ -182,7 +190,8 @@ export default function Layout({ children, currentPageName }) {
   const isSubscribed = subscriptionTier !== "free";
 
   const handleLogout = () => {
-    base44.auth.logout();
+    const auth = getAuth(firebaseApp);
+    signOut(auth);
   };
 
   const NavLink = ({ to, icon: Icon, label, badge, badgeColor = "red", isDarkMode }) => {

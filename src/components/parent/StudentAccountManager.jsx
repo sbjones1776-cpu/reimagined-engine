@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, getDocs, doc, setDoc } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,13 +19,13 @@ export default function StudentAccountManager({ myChildren, parentEmail }) {
 
   const updateChildNameMutation = useMutation({
     mutationFn: async ({ childEmail, newName }) => {
-      const allUsers = await base44.entities.User.list();
-      const child = allUsers.find(u => u.email === childEmail);
-      if (!child) throw new Error("Child not found");
-      
-      return base44.entities.User.update(child.id, {
+      const db = getFirestore(firebaseApp);
+      const usersSnapshot = await getDocs(collection(db, "users"));
+      const childDoc = usersSnapshot.docs.find(doc => doc.data().email === childEmail);
+      if (!childDoc) throw new Error("Child not found");
+      await setDoc(doc(db, "users", childDoc.id), {
         child_name: newName,
-      });
+      }, { merge: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });
@@ -34,11 +36,11 @@ export default function StudentAccountManager({ myChildren, parentEmail }) {
 
   const resetParentalControlsMutation = useMutation({
     mutationFn: async (childEmail) => {
-      const allUsers = await base44.entities.User.list();
-      const child = allUsers.find(u => u.email === childEmail);
-      if (!child) throw new Error("Child not found");
-      
-      return base44.entities.User.update(child.id, {
+      const db = getFirestore(firebaseApp);
+      const usersSnapshot = await getDocs(collection(db, "users"));
+      const childDoc = usersSnapshot.docs.find(doc => doc.data().email === childEmail);
+      if (!childDoc) throw new Error("Child not found");
+      await setDoc(doc(db, "users", childDoc.id), {
         parental_controls: {
           daily_time_limit: 0,
           allowed_operations: ["addition", "subtraction", "multiplication", "division"],
@@ -46,7 +48,7 @@ export default function StudentAccountManager({ myChildren, parentEmail }) {
           focus_operations: [],
           disabled_features: [],
         },
-      });
+      }, { merge: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
+// Firebase migration
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// TODO: Refactor to use Firebase or new backend. Base44 import removed.
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,16 +25,40 @@ export default function Avatar() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   
-  const { data: user, isLoading: userLoading } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
-  });
+  // Firebase user state
+  const [user, setUser] = useState(null);
+  const [userLoading, setUserLoading] = useState(true);
+  useEffect(() => {
+    const auth = getAuth(firebaseApp);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Fetch user profile from Firestore
+        const db = getFirestore(firebaseApp);
+        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+        setUser({
+          email: firebaseUser.email,
+          full_name: firebaseUser.displayName,
+          ...userDoc.exists() ? userDoc.data() : {},
+        });
+      } else {
+        setUser(null);
+      }
+      setUserLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  const { data: progress = [] } = useQuery({
-    queryKey: ['gameProgress'],
-    queryFn: () => base44.entities.GameProgress.list(),
-    initialData: [],
-  });
+  // Firebase game progress
+  const [progress, setProgress] = useState([]);
+  useEffect(() => {
+    if (!user) return;
+    const db = getFirestore(firebaseApp);
+    // TODO: Replace 'gameProgress' with your Firestore collection name
+    const q = query(collection(db, "gameProgress"), where("user_email", "==", user.email));
+    getDocs(q).then(snapshot => {
+      setProgress(snapshot.docs.map(doc => doc.data()));
+    });
+  }, [user]);
 
   const [avatarData, setAvatarData] = useState({
     avatar_skin_tone: "medium",
@@ -74,27 +102,28 @@ export default function Avatar() {
     }
   }, [user]);
 
-  const updateAvatarMutation = useMutation({
-    mutationFn: (data) => base44.auth.updateMe(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    },
-  });
+  // Firebase avatar update
+  const handleSave = async () => {
+    if (!user) return;
+    const db = getFirestore(firebaseApp);
+    await setDoc(doc(db, "users", user.email), {
+      ...user,
+      ...avatarData,
+    }, { merge: true });
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
+  };
 
-  const cancelSubscriptionMutation = useMutation({
-    mutationFn: async () => {
-      return base44.auth.updateMe({
-        subscription_cancels_at: user.subscription_expires_at,
-        subscription_auto_renew: false
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      setShowCancelConfirm(false);
-    },
-  });
+  // Firebase cancel subscription (stub)
+  const cancelSubscription = async () => {
+    if (!user) return;
+    const db = getFirestore(firebaseApp);
+    await setDoc(doc(db, "users", user.email), {
+      subscription_cancels_at: user.subscription_expires_at,
+      subscription_auto_renew: false
+    }, { merge: true });
+    setShowCancelConfirm(false);
+  };
 
   const handleChange = (field, value) => {
     setAvatarData(prev => ({ ...prev, [field]: value }));

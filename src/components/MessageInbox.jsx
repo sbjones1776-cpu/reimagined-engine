@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, query, where, getDocs, doc, setDoc, addDoc, updateDoc } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,13 +33,10 @@ export default function MessageInbox({ user }) {
   const { data: messages = [] } = useQuery({
     queryKey: ['childMessages', user?.email],
     queryFn: async () => {
-      const allMessages = await base44.entities.Message.list();
-      return allMessages
-        .filter(m => 
-          m.child_email === user?.email || 
-          (m.parent_email === user?.email && m.message_type === 'response')
-        )
-        .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+      const db = getFirestore(firebaseApp);
+      const q = query(collection(db, "messages"), where("child_email", "==", user?.email));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => doc.data()).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
     },
     initialData: [],
     enabled: !!user?.email,
@@ -49,7 +48,8 @@ export default function MessageInbox({ user }) {
 
   const markAsReadMutation = useMutation({
     mutationFn: async (messageId) => {
-      return base44.entities.Message.update(messageId, { is_read: true });
+      const db = getFirestore(firebaseApp);
+      await updateDoc(doc(db, "messages", messageId), { is_read: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['childMessages'] });
@@ -59,15 +59,17 @@ export default function MessageInbox({ user }) {
 
   const sendReplyMutation = useMutation({
     mutationFn: async ({ messageId, replyText, parentEmail }) => {
-      return base44.entities.Message.create({
-        parent_email: user?.email,  // Child becomes "parent" in reply
-        child_email: parentEmail,    // Parent becomes "child" in reply
+      const db = getFirestore(firebaseApp);
+      await addDoc(collection(db, "messages"), {
+        parent_email: user?.email,
+        child_email: parentEmail,
         message_type: 'response',
         subject: `Re: ${selectedMessage?.subject}`,
         message_text: replyText,
         reply_to_message_id: messageId,
         is_read: false,
         parent_read: false,
+        created_date: new Date().toISOString(),
       });
     },
     onSuccess: () => {

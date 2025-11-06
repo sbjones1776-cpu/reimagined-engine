@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card"; // Added CardContent
@@ -49,16 +51,23 @@ export default function Game() {
   const { data: recentProgress = [] } = useQuery({
     queryKey: ['recentProgress'],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      const all = await base44.entities.GameProgress.filter({ created_by: user.email });
-      return all.slice(0, 5);
+      const db = getFirestore(firebaseApp);
+      // TODO: Replace with actual user email
+      const q = query(collection(db, "gameProgress"), where("created_by", "==", "USER_EMAIL"));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => doc.data()).slice(0, 5);
     },
     initialData: [],
   });
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      const db = getFirestore(firebaseApp);
+      // TODO: Replace with actual user ID
+      // Example: getDoc(doc(db, "users", "USER_ID"))
+      return null;
+    },
   });
 
   // Check parental controls

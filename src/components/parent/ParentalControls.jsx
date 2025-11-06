@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, getDocs, doc, setDoc } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,17 +66,16 @@ export default function ParentalControls({ childEmail, currentControls }) {
 
   const updateControlsMutation = useMutation({
     mutationFn: async () => {
-      const allUsers = await base44.entities.User.list();
-      const childUser = allUsers.find(u => u.email === childEmail);
-      
-      if (!childUser) throw new Error("Child not found");
-      
-      return base44.entities.User.update(childUser.id, {
+      const db = getFirestore(firebaseApp);
+      const usersSnapshot = await getDocs(collection(db, "users"));
+      const childUserDoc = usersSnapshot.docs.find(doc => doc.data().email === childEmail);
+      if (!childUserDoc) throw new Error("Child not found");
+      await setDoc(doc(db, "users", childUserDoc.id), {
         parental_controls: {
           ...controls,
           custom_learning_goals: customGoals,
         },
-      });
+      }, { merge: true });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allUsers'] });

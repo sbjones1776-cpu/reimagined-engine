@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, query, where, getDocs, addDoc, deleteDoc } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,22 +33,25 @@ export default function LessonAssignment({ childEmail, childProgress }) {
   const { data: assignments = [] } = useQuery({
     queryKey: ['lessonAssignments', childEmail],
     queryFn: async () => {
-      return base44.entities.CustomGoal.filter({ 
-        child_email: childEmail,
-        goal_type: "specific_operation" 
-      });
+      const db = getFirestore(firebaseApp);
+      const q = query(collection(db, "customGoals"), where("child_email", "==", childEmail), where("goal_type", "==", "specific_operation"));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     },
     initialData: [],
     enabled: !!childEmail,
   });
 
   const createLessonMutation = useMutation({
-    mutationFn: (lessonData) => base44.entities.CustomGoal.create({
-      ...lessonData,
-      child_email: childEmail,
-      goal_type: "specific_operation",
-      target_value: lessonData.target_games,
-    }),
+    mutationFn: async (lessonData) => {
+      const db = getFirestore(firebaseApp);
+      await addDoc(collection(db, "customGoals"), {
+        ...lessonData,
+        child_email: childEmail,
+        goal_type: "specific_operation",
+        target_value: lessonData.target_games,
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lessonAssignments'] });
       queryClient.invalidateQueries({ queryKey: ['childGoals'] });
@@ -65,7 +70,10 @@ export default function LessonAssignment({ childEmail, childProgress }) {
   });
 
   const deleteLessonMutation = useMutation({
-    mutationFn: (lessonId) => base44.entities.CustomGoal.delete(lessonId),
+    mutationFn: async (lessonId) => {
+      const db = getFirestore(firebaseApp);
+      await deleteDoc(doc(db, "customGoals", lessonId));
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lessonAssignments'] });
       queryClient.invalidateQueries({ queryKey: ['childGoals'] });

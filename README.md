@@ -1,8 +1,7 @@
-# Base44 App
 
+# Math Adventure
 
-This app was created automatically by Base44.
-It's a Vite+React app that communicates with the Base44 API.
+This app is built with Vite + React and uses Firebase Authentication and Firestore as its backend.
 
 ## Running the app
 
@@ -17,4 +16,10 @@ npm run dev
 npm run build
 ```
 
-For more information and support, please contact Base44 support at app@base44.com.
+## Backend
+
+- Authentication: Firebase Auth
+- Database: Firestore
+- Functions: Firebase Functions
+
+For more information and support, contact the project maintainer.

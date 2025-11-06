@@ -2,7 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,20 +16,33 @@ export default function DailyChallengeWidget() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      const db = getFirestore(firebaseApp);
+      // TODO: Replace with actual user ID
+      // Example: getDoc(doc(db, "users", "USER_ID"))
+      return null;
+    },
   });
 
   const { data: todaysChallenges = [] } = useQuery({
     queryKey: ['dailyChallenges', todayDate],
-    queryFn: () => base44.entities.DailyChallenge.filter({ challenge_date: todayDate }),
+    queryFn: async () => {
+      const db = getFirestore(firebaseApp);
+      const q = query(collection(db, "dailyChallenges"), where("challenge_date", "==", todayDate));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => doc.data());
+    },
     initialData: [],
   });
 
   const { data: userChallenges = [] } = useQuery({
     queryKey: ['userDailyChallenges'],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      return base44.entities.DailyChallenge.filter({ created_by: user.email });
+      const db = getFirestore(firebaseApp);
+      if (!user?.email) return [];
+      const q = query(collection(db, "dailyChallenges"), where("created_by", "==", user.email));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => doc.data());
     },
     initialData: [],
     enabled: !!user,

@@ -3,7 +3,9 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
-// import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Plus, Minus, X, Divide, Star, Lock, Play, Trophy, Award, Brain, Sparkles, Users, AlertCircle, Crown, CreditCard, Calendar, Percent, DollarSign, Clock, Shapes, BookOpen, TrendingUp, Grid3x3, Zap, Target, Binary, Calculator, BarChart3, Palette } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

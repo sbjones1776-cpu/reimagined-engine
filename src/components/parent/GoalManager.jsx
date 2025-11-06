@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,10 +29,13 @@ export default function GoalManager({ childEmail, childGoals, childProgress, chi
   });
 
   const createGoalMutation = useMutation({
-    mutationFn: (goalData) => base44.entities.CustomGoal.create({
-      ...goalData,
-      child_email: childEmail,
-    }),
+    mutationFn: async (goalData) => {
+      const db = getFirestore(firebaseApp);
+      await addDoc(collection(db, "customGoals"), {
+        ...goalData,
+        child_email: childEmail,
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['childGoals'] });
       setShowAddForm(false);
@@ -48,14 +53,20 @@ export default function GoalManager({ childEmail, childGoals, childProgress, chi
   });
 
   const deleteGoalMutation = useMutation({
-    mutationFn: (goalId) => base44.entities.CustomGoal.delete(goalId),
+    mutationFn: async (goalId) => {
+      const db = getFirestore(firebaseApp);
+      await deleteDoc(doc(db, "customGoals", goalId));
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['childGoals'] });
     },
   });
 
   const updateGoalMutation = useMutation({
-    mutationFn: ({ goalId, data }) => base44.entities.CustomGoal.update(goalId, data),
+    mutationFn: async ({ goalId, data }) => {
+      const db = getFirestore(firebaseApp);
+      await setDoc(doc(db, "customGoals", goalId), data, { merge: true });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['childGoals'] });
     },

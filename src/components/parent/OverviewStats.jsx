@@ -1,6 +1,8 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// Firebase migration
+import { getFirestore, collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Star, CheckCircle, Calendar, MessageSquare } from "lucide-react";
@@ -9,20 +11,21 @@ import { format } from "date-fns";
 export default function OverviewStats({ childProgress, childDailyChallenges, selectedChild }) {
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      const db = getFirestore(firebaseApp);
+      // TODO: Replace with actual user ID
+      const userDoc = await getDoc(doc(db, "users", "USER_ID"));
+      return userDoc.exists() ? userDoc.data() : null;
+    },
   });
 
   const { data: unreadReplies = 0 } = useQuery({
     queryKey: ['unreadChildReplies', selectedChild?.email],
     queryFn: async () => {
-      const allMessages = await base44.entities.Message.list();
-      const replies = allMessages.filter(m => 
-        m.parent_email === user?.email &&
-        m.child_email === selectedChild?.email &&
-        m.message_type === 'response' &&
-        !m.parent_read
-      );
-      return replies.length;
+      const db = getFirestore(firebaseApp);
+      const q = query(collection(db, "messages"), where("parent_email", "==", user?.email), where("child_email", "==", selectedChild?.email), where("message_type", "==", "response"), where("parent_read", "==", false));
+      const snapshot = await getDocs(q);
+      return snapshot.size;
     },
     initialData: 0,
     enabled: !!user?.email && !!selectedChild?.email,
