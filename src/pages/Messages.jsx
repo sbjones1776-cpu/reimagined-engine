@@ -1,13 +1,16 @@
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// import { useQuery } from "@tanstack/react-query";
+// // import { base44 } from "@/api/base44Client";
 import MessageInbox from "../components/MessageInbox";
 
 export default function Messages() {
-  const { data: user } = useQuery({
+  // Placeholder until backend is connected
+  const user = null;
+
+  /* const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
-  });
+  }); */
 
   if (!user) {
     return (

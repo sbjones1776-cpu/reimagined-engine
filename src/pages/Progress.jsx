@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
+// import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Star, Target, Clock, Award, TrendingUp, ShoppingBag, Gift, Brain } from "lucide-react";
@@ -328,3 +328,4 @@ export default function Progress() {
     </div>
   );
 }
+

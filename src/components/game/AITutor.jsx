@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import TextToSpeech from "@/components/ui/TextToSpeech";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Lightbulb, BookOpen, Sparkles, ChevronRight, Brain, AlertCircle, XCircle, CheckCircle } from "lucide-react";
-import { base44 } from "@/api/base44Client";
+// import { base44 } from "@/api/base44Client";
 
 export default function AITutor({ 
   question, 
