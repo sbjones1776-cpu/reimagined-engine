@@ -206,7 +206,7 @@ export default function GenerateIcons() {
                     <p className="font-bold mb-2">📝 Next Steps:</p>
                     <ol className="space-y-2 ml-1 text-sm">
                       <li>1. Download both icons using the buttons above</li>
-                      <li>2. Upload them to your app's <strong>public</strong> folder in Base44</li>
+                      <li>2. Upload them to your app's <strong>public</strong> folder in your hosting environment</li>
                       <li>3. Make sure they're named exactly <code className="bg-blue-100 px-1 rounded">icon-192.png</code> and <code className="bg-blue-100 px-1 rounded">icon-512.png</code></li>
                       <li>4. Your PWA will automatically use them!</li>
                     </ol>

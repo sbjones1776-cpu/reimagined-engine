@@ -19,20 +19,33 @@ export default function AITutor() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      const user = await firebaseAuth.currentUser;
+      return user ? { email: user.email } : null;
+    },
   });
 
   const { data: progress = [] } = useQuery({
     queryKey: ['gameProgress'],
-    queryFn: () => base44.entities.GameProgress.list('-created_date'),
+    queryFn: async () => {
+      // Replace with Firestore query for GameProgress
+      const user = firebaseAuth.currentUser;
+      if (!user) return [];
+      const q = query(collection(db, "gameProgress"), where("user_email", "==", user.email));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => doc.data());
+    },
     initialData: [],
   });
 
   const { data: tutorSessions = [] } = useQuery({
     queryKey: ['tutorSessions'],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      return base44.entities.TutorSession.filter({ created_by: user.email });
+  const user = firebaseAuth.currentUser;
+  if (!user) return [];
+  const q = query(collection(db, "tutorSessions"), where("created_by", "==", user.email));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => doc.data());
     },
     initialData: [],
   });

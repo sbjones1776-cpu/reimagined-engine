@@ -98,7 +98,7 @@ export default function Layout({ children, currentPageName }) {
     const appleIcon = document.createElement('link');
     appleIcon.rel = 'apple-touch-icon';
   // TODO: Refactor to use Firebase or new backend
-  // appleIcon.href = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/render/image/public/base44-prod/public/6903790fd550823a9f857897/587e859d5_icon-192.png';
+  // appleIcon.href = '/icons/apple-touch-icon.png'; // Use your own hosted icon
     document.head.appendChild(appleIcon);
 
     // Cleanup function
@@ -161,7 +161,11 @@ export default function Layout({ children, currentPageName }) {
   const { data: todaysChallenges = [] } = useQuery({
     queryKey: ['dailyChallenges', todayDate],
   // TODO: Refactor to use Firebase or new backend
-  // queryFn: () => base44.entities.DailyChallenge.filter({ challenge_date: todayDate }),
+  // queryFn: async () => {
+  //   const q = query(collection(db, "dailyChallenges"), where("challenge_date", "==", todayDate));
+  //   const snapshot = await getDocs(q);
+  //   return snapshot.docs.map(doc => doc.data());
+  // },
     initialData: [],
     enabled: !!user,
   });

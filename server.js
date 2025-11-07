@@ -99,23 +99,3 @@ app.post('/api/square/webhook', (req, res) => {
 });
 
 app.listen(3000, () => console.log('Server running on port 3000'));
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/mathadventure'); // Use your actual connection string
-
-const User = mongoose.model('User', new mongoose.Schema({
-  email: String,
-  plan: String
-}));if (event.type === 'payment.created') {
-  const payment = event.data.object.payment;
-  const buyerEmail = payment?.buyer_email_address;
-  const plan = payment?.note; // Or use a custom field to indicate plan
-
-  if (buyerEmail && plan) {
-    await User.findOneAndUpdate(
-      { email: buyerEmail },
-      { plan: plan },
-      { new: true, upsert: true }
-    );
-    console.log(`Updated plan for ${buyerEmail} to ${plan}`);
-  }
-}

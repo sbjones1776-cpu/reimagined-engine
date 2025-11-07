@@ -129,9 +129,7 @@ export default function Avatar() {
     setAvatarData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    updateAvatarMutation.mutate(avatarData);
-  };
+  // Removed duplicate handleSave declaration
 
   const isUnlocked = (item) => {
     return (avatarData.unlocked_items || []).includes(item) || 
