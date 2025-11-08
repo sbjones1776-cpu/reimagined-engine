@@ -1311,12 +1311,124 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 flex items-center justify-center p-4">
-        <div className="text-center max-w-md w-full">
-          <Logo size="xl" variant="circle" className="mx-auto mb-6" />
-          <h1 className="text-4xl font-extrabold text-white mb-3 drop-shadow-2xl">Math Adventure</h1>
-          <p className="text-lg text-white mb-6 drop-shadow-lg">Sign in or create an account to start learning!</p>
-          <SimpleAuth />
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 overflow-auto">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <Logo size="xl" variant="circle" className="mx-auto mb-6" />
+            <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-3 drop-shadow-2xl">Math Adventure</h1>
+            <p className="text-xl md:text-2xl text-white mb-2 drop-shadow-lg">Make Learning Math Fun & Engaging!</p>
+            <p className="text-lg text-white/90 drop-shadow-lg">🎮 80+ Math Games • 🏆 Earn Rewards • 🤖 AI Tutor • 📊 Track Progress</p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8 items-start max-w-6xl mx-auto">
+            {/* Auth Form */}
+            <div className="order-2 lg:order-1">
+              <SimpleAuth />
+              
+              {/* Features List */}
+              <Card className="mt-6 bg-white/95 backdrop-blur">
+                <CardContent className="p-6">
+                  <h3 className="font-bold text-lg mb-4 text-gray-800">✨ What You'll Get:</h3>
+                  <ul className="space-y-3 text-sm text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span><strong>80+ Math Concepts</strong> - Addition, subtraction, fractions, geometry & more!</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span><strong>AI Math Tutor</strong> - Get instant help with step-by-step explanations</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span><strong>Daily Challenges</strong> - New problems every day with bonus rewards</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span><strong>Progress Tracking</strong> - See improvement with detailed analytics</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 font-bold">✓</span>
+                      <span><strong>Earn Stars & Rewards</strong> - Unlock pets, avatars, and power-ups!</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-500 font-bold">👑</span>
+                      <span><strong>Free Tier</strong> - Start with 8 basic concepts on Easy level</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* App Screenshots Preview */}
+            <div className="order-1 lg:order-2 space-y-4">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border-2 border-white/20">
+                <h3 className="text-white font-bold text-xl mb-4 text-center">📸 See It In Action</h3>
+                
+                {/* Screenshot 1 - Game Selection */}
+                <div className="bg-white rounded-xl overflow-hidden shadow-2xl mb-4">
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 text-white text-sm font-bold">
+                    🎯 Choose Your Math Game
+                  </div>
+                  <div className="p-4 space-y-2">
+                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg">
+                      <span className="text-3xl">➕</span>
+                      <div className="flex-1">
+                        <div className="font-bold text-sm">Addition</div>
+                        <div className="text-xs text-gray-600">Learn to add numbers</div>
+                      </div>
+                      <div className="flex gap-1">
+                        <span className="text-yellow-400">⭐</span>
+                        <span className="text-yellow-400">⭐</span>
+                        <span className="text-yellow-400">⭐</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg opacity-60">
+                      <span className="text-3xl">✖️</span>
+                      <div className="flex-1">
+                        <div className="font-bold text-sm">Multiplication</div>
+                        <div className="text-xs text-gray-600">Times tables & more</div>
+                      </div>
+                      <span className="text-xs bg-yellow-100 px-2 py-1 rounded">👑 Premium</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Screenshot 2 - Playing Game */}
+                <div className="bg-white rounded-xl overflow-hidden shadow-2xl">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 text-white text-sm font-bold">
+                    🧮 Solve Problems & Earn Stars
+                  </div>
+                  <div className="p-6 text-center">
+                    <div className="text-4xl font-bold text-purple-600 mb-3">5 + 3 = ?</div>
+                    <div className="grid grid-cols-2 gap-2 max-w-[200px] mx-auto">
+                      <button className="bg-purple-100 hover:bg-purple-200 p-3 rounded-lg font-bold text-purple-700">6</button>
+                      <button className="bg-green-500 text-white p-3 rounded-lg font-bold">8</button>
+                      <button className="bg-purple-100 hover:bg-purple-200 p-3 rounded-lg font-bold text-purple-700">7</button>
+                      <button className="bg-purple-100 hover:bg-purple-200 p-3 rounded-lg font-bold text-purple-700">9</button>
+                    </div>
+                    <div className="mt-4 text-sm text-gray-600">⏱️ 1:23 • ⭐ Score: 90%</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trust Badges */}
+              <div className="flex flex-wrap justify-center gap-4 text-white/90 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🔒</span>
+                  <span>Safe & Secure</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">👨‍👩‍👧</span>
+                  <span>Parent Controls</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">📱</span>
+                  <span>Works Everywhere</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

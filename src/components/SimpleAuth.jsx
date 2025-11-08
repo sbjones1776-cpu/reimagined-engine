@@ -3,6 +3,7 @@ import { auth } from '@/firebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Eye, EyeOff } from 'lucide-react';
 
 // Minimal, stateless (outside) auth component: no avatars, no strength meters—just essentials.
 export default function SimpleAuth() {
@@ -13,6 +14,8 @@ export default function SimpleAuth() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
   const [err, setErr] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const resetState = () => { setErr(''); setMsg(''); };
 
@@ -55,27 +58,47 @@ export default function SimpleAuth() {
       <div className="space-y-3">
         <Input
           type="email"
-            autoComplete="email"
+          autoComplete="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         {mode !== 'reset' && (
-          <Input
-            type="password"
+          <div className="relative">
+            <Input
+              type={showPassword ? "text" : "password"}
               autoComplete={mode === 'sign-up' ? 'new-password' : 'current-password'}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
         )}
         {mode === 'sign-up' && (
-          <Input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-          />
+          <div className="relative">
+            <Input
+              type={showConfirm ? "text" : "password"}
+              placeholder="Confirm Password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            >
+              {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
         )}
       </div>
       {(err || msg) && (
