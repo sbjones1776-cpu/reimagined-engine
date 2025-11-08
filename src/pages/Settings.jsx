@@ -413,7 +413,18 @@ export default function Settings() {
                 </select>
               </div>
               <div className="flex gap-2">
-                <TextToSpeech text="This is my speaking voice for Math Adventure." style="button" label="🔊 Preview Voice" />
+                <TextToSpeech
+                  text={`This is my speaking voice for Math Adventure. Rate ${ttsRate.toFixed(2)} pitch ${ttsPitch.toFixed(2)}.`}
+                  style="button"
+                  label="🔊 Preview Voice"
+                  useSavedPrefs={false}
+                  rate={ttsRate}
+                  pitch={ttsPitch}
+                  overrideLangPref={ttsLang}
+                  overrideGender={ttsGender}
+                  overrideVoiceURI={ttsVoiceURI}
+                  overrideVoiceName={ttsVoiceName}
+                />
               </div>
             </div>
 

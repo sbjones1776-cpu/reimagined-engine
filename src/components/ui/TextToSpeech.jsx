@@ -16,62 +16,102 @@ function detectGender(name = "") {
   return 'any';
 }
 
-function getVoice(lang = "en-US", preferChild = true) {
-  // Bust cache if preferences changed
+function getVoice(lang = "en-US", preferChild = true, options = {}) {
+  const {
+    useSavedPrefs = true,
+    langPrefOverride, // 'en' | 'es'
+    genderOverride,   // 'any' | 'female' | 'male'
+    voiceURIOverride,
+    voiceNameOverride,
+  } = options;
+
+  // Bust cache if preferences changed (only relevant when using saved preferences)
   try {
     const v = localStorage.getItem('tts.cacheBuster');
-    if (v && v !== cacheVersion) {
+    if (useSavedPrefs && v && v !== cacheVersion) {
       voicesCache = {};
       cacheVersion = v;
     }
   } catch {}
 
   const voices = window.speechSynthesis.getVoices();
-  // Try user-selected voice first
+
+  // Resolve effective preferences
+  let effectiveLangPref = 'en';
+  let effectiveGender = 'any';
+  let effectiveURI = '';
+  let effectiveName = '';
   try {
-    const savedURI = localStorage.getItem('tts.voiceURI');
-    const savedName = localStorage.getItem('tts.voiceName');
-    const savedLangPref = localStorage.getItem('tts.lang'); // 'en' | 'es'
-    const savedGenderPref = localStorage.getItem('tts.gender'); // 'any' | 'female' | 'male'
-    const langPrefix = (savedLangPref === 'es') ? 'es' : 'en';
-    const cacheKey = `${langPrefix}:${savedGenderPref || 'any'}:${savedURI || ''}:${savedName || ''}`;
-    if (voicesCache[cacheKey]) return voicesCache[cacheKey];
-    if (voices && voices.length) {
-      if (savedURI) {
-        const v = voices.find(v => v.voiceURI === savedURI);
-        if (v) {
-          voicesCache[cacheKey] = v;
-          return v;
-        }
-      }
-      if (savedName) {
-        const v = voices.find(v => v.name === savedName);
-        if (v) {
-          voicesCache[cacheKey] = v;
-          return v;
-        }
-      }
-      // If no specific voice saved or found, choose based on language and gender preference
-      let candidates = voices.filter(v => (v.lang || '').toLowerCase().startsWith(langPrefix));
-      if (savedGenderPref === 'female') {
-        candidates = candidates.filter(v => detectGender(v.name) === 'female');
-      } else if (savedGenderPref === 'male') {
-        candidates = candidates.filter(v => detectGender(v.name) === 'male');
-      }
-      const preferred = candidates.find(v => v.default) || candidates[0];
-      if (preferred) {
-        voicesCache[cacheKey] = preferred;
-        return preferred;
+    if (useSavedPrefs) {
+      effectiveLangPref = (localStorage.getItem('tts.lang') === 'es') ? 'es' : 'en';
+      effectiveGender = localStorage.getItem('tts.gender') || 'any';
+      effectiveURI = localStorage.getItem('tts.voiceURI') || '';
+      effectiveName = localStorage.getItem('tts.voiceName') || '';
+    } else {
+      effectiveLangPref = (langPrefOverride === 'es') ? 'es' : 'en';
+      effectiveGender = genderOverride || 'any';
+      effectiveURI = voiceURIOverride || '';
+      effectiveName = voiceNameOverride || '';
+    }
+  } catch {
+    // ignore and keep defaults
+  }
+
+  const cacheMode = useSavedPrefs ? 'saved' : 'override';
+  const cacheKey = `${cacheMode}:${effectiveLangPref}:${effectiveGender}:${effectiveURI}:${effectiveName}`;
+  if (voicesCache[cacheKey]) return voicesCache[cacheKey];
+
+  if (voices && voices.length) {
+    // 1) Exact voice by URI
+    if (effectiveURI) {
+      const v = voices.find(v => v.voiceURI === effectiveURI);
+      if (v) {
+        voicesCache[cacheKey] = v;
+        return v;
       }
     }
-  } catch {}
-  // Fallback to exact lang
+    // 2) Exact voice by name
+    if (effectiveName) {
+      const v = voices.find(v => v.name === effectiveName);
+      if (v) {
+        voicesCache[cacheKey] = v;
+        return v;
+      }
+    }
+    // 3) Filter by language and gender
+    let candidates = voices.filter(v => (v.lang || '').toLowerCase().startsWith(effectiveLangPref));
+    if (effectiveGender === 'female') {
+      candidates = candidates.filter(v => detectGender(v.name) === 'female');
+    } else if (effectiveGender === 'male') {
+      candidates = candidates.filter(v => detectGender(v.name) === 'male');
+    }
+    const preferred = candidates.find(v => v.default) || candidates[0];
+    if (preferred) {
+      voicesCache[cacheKey] = preferred;
+      return preferred;
+    }
+  }
+
+  // Fallback to original behavior using lang
   let voice = voices.find(v => v.lang === lang && (!preferChild || v.name.toLowerCase().includes("child")));
   if (!voice) voice = voices.find(v => v.lang === lang);
   return voice;
 }
 
-export default function TextToSpeech({ text, lang = "en-US", style = "button", label = "🔊 Listen", pitch = 1.1, rate = 0.9 }) {
+export default function TextToSpeech({
+  text,
+  lang = "en-US",
+  style = "button",
+  label = "🔊 Listen",
+  pitch = 1.1,
+  rate = 0.9,
+  // New: control whether to use saved prefs or on-the-fly overrides (useful for Settings preview)
+  useSavedPrefs = true,
+  overrideLangPref, // 'en' | 'es'
+  overrideGender,   // 'any' | 'female' | 'male'
+  overrideVoiceURI,
+  overrideVoiceName,
+}) {
   const utterRef = useRef(null);
 
   const speak = () => {
@@ -81,25 +121,38 @@ export default function TextToSpeech({ text, lang = "en-US", style = "button", l
     }
     window.speechSynthesis.cancel();
     const utter = new window.SpeechSynthesisUtterance(text);
-    // Apply saved language override (English default, Spanish optional)
+    // Resolve language preference (English default, Spanish optional)
     try {
-      const savedLangPref = localStorage.getItem('tts.lang'); // 'en' | 'es'
-      if (savedLangPref === 'es') utter.lang = 'es-ES';
-      else utter.lang = 'en-US';
+      const langPref = useSavedPrefs
+        ? ((localStorage.getItem('tts.lang') === 'es') ? 'es' : 'en')
+        : ((overrideLangPref === 'es') ? 'es' : 'en');
+      utter.lang = (langPref === 'es') ? 'es-ES' : 'en-US';
     } catch {
       utter.lang = lang;
     }
-    // Apply saved user preferences if available
+    // Apply pitch and rate
     try {
-      const savedPitch = parseFloat(localStorage.getItem('tts.pitch'));
-      const savedRate = parseFloat(localStorage.getItem('tts.rate'));
-      if (!Number.isNaN(savedPitch)) utter.pitch = savedPitch; else utter.pitch = pitch;
-      if (!Number.isNaN(savedRate)) utter.rate = savedRate; else utter.rate = rate;
+      if (useSavedPrefs) {
+        const savedPitch = parseFloat(localStorage.getItem('tts.pitch'));
+        const savedRate = parseFloat(localStorage.getItem('tts.rate'));
+        utter.pitch = Number.isNaN(savedPitch) ? pitch : Math.min(2, Math.max(0, savedPitch));
+        utter.rate = Number.isNaN(savedRate) ? rate : Math.min(2, Math.max(0.1, savedRate));
+      } else {
+        utter.pitch = Math.min(2, Math.max(0, pitch));
+        utter.rate = Math.min(2, Math.max(0.1, rate));
+      }
     } catch {
-      utter.pitch = pitch;
-      utter.rate = rate;
+      utter.pitch = Math.min(2, Math.max(0, pitch));
+      utter.rate = Math.min(2, Math.max(0.1, rate));
     }
-    utter.voice = getVoice(lang);
+    // Resolve voice selection with ability to override from the caller
+    utter.voice = getVoice(utter.lang, true, {
+      useSavedPrefs,
+      langPrefOverride: overrideLangPref,
+      genderOverride: overrideGender,
+      voiceURIOverride: overrideVoiceURI,
+      voiceNameOverride: overrideVoiceName,
+    });
     utterRef.current = utter;
     window.speechSynthesis.speak(utter);
   };
