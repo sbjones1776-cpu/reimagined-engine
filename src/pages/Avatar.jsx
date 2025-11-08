@@ -201,6 +201,31 @@ export default function Avatar() {
           Customize Your Avatar
         </h1>
         <p className="text-xl text-gray-600">Express yourself with tons of options!</p>
+        {/* Display name editor */}
+        <div className="mt-4 mx-auto max-w-sm">
+          <Label className="text-sm text-gray-600">Display name</Label>
+          <div className="flex gap-2 mt-1">
+            <Input
+              value={user?.full_name || ''}
+              onChange={async (e) => {
+                const newName = e.target.value;
+                const auth = getAuth(firebaseApp);
+                const uid = auth.currentUser?.uid || user.email;
+                const db = getFirestore(firebaseApp);
+                await setDoc(doc(db, 'users', uid), { full_name: newName }, { merge: true });
+                setUser(prev => ({ ...prev, full_name: newName }));
+              }}
+              placeholder="Your name"
+            />
+            <Button
+              variant="outline"
+              onClick={async () => {
+                // Force a small confirmation alert
+                alert('Name saved');
+              }}
+            >Save</Button>
+          </div>
+        </div>
       </div>
 
       {saveSuccess && (

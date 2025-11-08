@@ -163,7 +163,23 @@ export default function AuthForm({ showTitle = false, redirectTo = "Home" }) {
       </div>
 
       <div className="mt-4 text-xs text-gray-500">
-        By continuing you agree to our terms and privacy.
+        By continuing you agree to our
+        <button
+          type="button"
+          onClick={() => navigate(createPageUrl('PrivacyPolicy'))}
+          className="text-purple-600 hover:underline ml-1"
+        >
+          Privacy Policy
+        </button>
+        {/* Placeholder Terms link - create Terms page later */}
+        &nbsp;and
+        <button
+          type="button"
+          onClick={() => navigate(createPageUrl('PrivacyPolicy'))}
+          className="text-purple-600 hover:underline ml-1"
+        >
+          Terms
+        </button>.
       </div>
 
       <div className="mt-4">
