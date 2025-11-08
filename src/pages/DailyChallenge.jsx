@@ -15,6 +15,7 @@ import QuestionCard from "../components/game/QuestionCard";
 import CelebrationAnimation from "../components/game/CelebrationAnimation";
 import Leaderboard from "../components/daily/Leaderboard";
 import { generateDailyChallenge, calculateDailyChallengeRewards } from "../components/daily/DailyChallengeGenerator";
+import TextToSpeech from "@/components/ui/TextToSpeech";
 
 export default function DailyChallenge() {
   const navigate = useNavigate();
@@ -175,6 +176,89 @@ export default function DailyChallenge() {
     } else {
       finalizeChallenge(correct);
     }
+  };
+
+  // Build a kid-friendly, step-by-step solution and a single TTS string
+  const buildStepByStep = (qObj, correct) => {
+    const q = (qObj?.question || '').trim();
+    const steps = [];
+    let op = null;
+    let a = null;
+    let b = null;
+
+    // Parse basic "A op B" formats
+    const parse = (str) => {
+      const ops = [
+        { key: '+', name: 'addition' },
+        { key: '-', name: 'subtraction' },
+        { key: '×', name: 'multiplication' },
+        { key: 'x', name: 'multiplication' },
+        { key: '⋅', name: 'multiplication' },
+        { key: '·', name: 'multiplication' },
+        { key: '÷', name: 'division' },
+        { key: '/', name: 'division' },
+      ];
+      for (const o of ops) {
+        if (str.includes(` ${o.key} `)) {
+          const [left, right] = str.split(` ${o.key} `);
+          const A = parseFloat(left.replace(/[^0-9.\-]/g, ''));
+          const B = parseFloat(right.replace(/[^0-9.\-]/g, ''));
+          if (!Number.isNaN(A) && !Number.isNaN(B)) {
+            return { op: o.name, a: A, b: B };
+          }
+        }
+      }
+      return null;
+    };
+
+    const parsed = parse(q);
+    if (parsed) { op = parsed.op; a = parsed.a; b = parsed.b; }
+
+    // Generate steps for recognized patterns
+    if (op === 'addition') {
+      steps.push(`Set up the problem: ${a} + ${b}`);
+      const ones = (a % 10) + (b % 10);
+      if (a >= 10 && b >= 10) {
+        steps.push(`Add the ones place: ${(a % 10)} + ${(b % 10)} = ${ones}${ones >= 10 ? ' (carry 1)' : ''}`);
+        steps.push(`Add the tens (and carry if needed): ${Math.floor(a / 10)} + ${Math.floor(b / 10)}${ones >= 10 ? ' + 1' : ''}`);
+      } else {
+        steps.push(`Add the numbers: ${a} + ${b}`);
+      }
+      steps.push(`Final answer: ${correct}`);
+    } else if (op === 'subtraction') {
+      steps.push(`Set up the problem: ${a} - ${b}`);
+      if ((a % 10) < (b % 10) && a >= 10) {
+        steps.push('Borrow from the tens place so you can subtract the ones place.');
+      }
+      steps.push(`Subtract to find the difference: ${a} - ${b} = ${correct}`);
+    } else if (op === 'multiplication') {
+      steps.push(`Think of ${a} groups of ${b}.`);
+      if (a >= 10 || b >= 10) {
+        steps.push(`Break it apart to make it easier, then multiply and add.`);
+      }
+      steps.push(`Multiply: ${a} × ${b} = ${correct}`);
+    } else if (op === 'division') {
+      steps.push(`How many ${b}'s fit into ${a}?`);
+      steps.push(`Count groups or use facts until you reach ${a}.`);
+      steps.push(`So, ${a} ÷ ${b} = ${correct}`);
+    } else if (q.includes('.') || /\d+\.\d+/.test(q)) {
+      steps.push('Line up the decimal points.');
+      steps.push('Add or subtract carefully column by column.');
+      steps.push(`Final answer: ${correct}`);
+    } else {
+      // Fallback to provided explanation text
+      if (qObj?.explanation) {
+        steps.push(qObj.explanation);
+      } else {
+        steps.push('Solve step by step to find the answer.');
+      }
+    }
+
+    const tts = [
+      `Let's solve it step by step.`,
+      ...steps.map((s, i) => `Step ${i + 1}. ${s}`),
+    ].join(' ');
+    return { steps, tts };
   };
 
   // Helper to finalize the challenge (used after last question or after final explanation)
@@ -558,6 +642,15 @@ export default function DailyChallenge() {
             </div>
             <p className="text-lg font-semibold mb-2">Question:</p>
             <p className="text-3xl font-bold mb-4">{explanationData.questionObj.question}</p>
+            {/* TTS for the whole step-by-step */}
+            {(() => {
+              const built = buildStepByStep(explanationData.questionObj, explanationData.correctAnswer);
+              return (
+                <div className="mb-4">
+                  <TextToSpeech text={built.tts} style="button" label="🔊 Read the steps" />
+                </div>
+              );
+            })()}
             <div className="grid md:grid-cols-3 gap-4 mb-6 text-center">
               <div className="p-4 rounded-xl bg-red-50 border-2 border-red-200">
                 <p className="text-sm font-medium text-red-600 mb-1">Your Answer</p>
@@ -572,6 +665,20 @@ export default function DailyChallenge() {
                 <p className="text-2xl font-bold text-purple-600">{currentQuestion + 1}</p>
               </div>
             </div>
+            {/* Step-by-step list */}
+            {(() => {
+              const built = buildStepByStep(explanationData.questionObj, explanationData.correctAnswer);
+              return (
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 p-6 rounded-xl mb-6">
+                  <h3 className="text-lg font-bold mb-3 flex items-center gap-2">✨ Let's solve it step by step</h3>
+                  <ol className="list-decimal pl-5 space-y-1 text-gray-800">
+                    {built.steps.map((s, idx) => (
+                      <li key={idx}>{s}</li>
+                    ))}
+                  </ol>
+                </div>
+              );
+            })()}
             {explanationData.explanation && (
               <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 p-6 rounded-xl mb-6">
                 <h3 className="text-lg font-bold mb-2 flex items-center gap-2">🧠 Step-by-Step Explanation</h3>
