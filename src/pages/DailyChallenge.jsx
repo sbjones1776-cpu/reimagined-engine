@@ -29,6 +29,9 @@ export default function DailyChallenge() {
   const [showCelebration, setShowCelebration] = useState(false);
   const [timer, setTimer] = useState(0);
   const [hasStarted, setHasStarted] = useState(false);
+  // Explanation state for incorrect answers (pause before moving on)
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [explanationData, setExplanationData] = useState(null); // { questionObj, userAnswer, correctAnswer, explanation }
 
   const todayDate = format(startOfDay(new Date()), "yyyy-MM-dd");
 
@@ -151,39 +154,67 @@ export default function DailyChallenge() {
       setShowCelebration(true);
       setTimeout(() => setShowCelebration(false), 1000);
     }
+    // WRONG ANSWER FLOW: show explanation BEFORE advancing
+    if (!correct) {
+      const qObj = challengeData.questions[currentQuestion];
+      setExplanationData({
+        questionObj: qObj,
+        userAnswer: selectedAnswer,
+        correctAnswer: qObj.answer,
+        explanation: qObj.explanation || 'Review the steps to solve this problem.',
+      });
+      setShowExplanation(true);
+      return; // Do not advance yet
+    }
 
+    // CORRECT ANSWER FLOW: advance or finish
     if (currentQuestion < challengeData.totalQuestions - 1) {
       setTimeout(() => {
         setCurrentQuestion(currentQuestion + 1);
       }, 500);
     } else {
-      const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-      const correctAnswers = answers.filter(a => a.correct).length + (correct ? 1 : 0);
-      const finalScore = score + (correct ? 10 : 0);
-      const accuracy = (correctAnswers / challengeData.totalQuestions) * 100;
-      
-      // Calculate rewards
-      const rewards = calculateDailyChallengeRewards(challengeData, accuracy, timeTaken, streak);
+      finalizeChallenge(correct);
+    }
+  };
 
-      saveChallengeeMutation.mutate({
-        challenge_date: todayDate,
-        challenge_type: challengeType,
-        score: finalScore,
-        correct_answers: correctAnswers,
-        total_questions: challengeData.totalQuestions,
-        time_taken: timeTaken,
-        bonus_stars: rewards.bonusStars,
-        bonus_coins: rewards.bonusCoins,
-        streak_bonus: streak >= 3,
-        perfect_score_bonus: rewards.perfectScoreBonus,
-        speed_bonus: rewards.speedBonus,
-        challenge_objective: challengeData.objective,
-        concepts_covered: challengeData.concepts,
-      });
+  // Helper to finalize the challenge (used after last question or after final explanation)
+  const finalizeChallenge = (wasLastAnswerCorrect) => {
+    const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+    const correctAnswers = answers.filter(a => a.correct).length + (wasLastAnswerCorrect ? 1 : 0);
+    const finalScore = score + (wasLastAnswerCorrect ? 10 : 0);
+    const accuracy = (correctAnswers / challengeData.totalQuestions) * 100;
 
-      setTimeout(() => {
-        setIsFinished(true);
-      }, 500);
+    const rewards = calculateDailyChallengeRewards(challengeData, accuracy, timeTaken, streak);
+
+    saveChallengeeMutation.mutate({
+      challenge_date: todayDate,
+      challenge_type: challengeType,
+      score: finalScore,
+      correct_answers: correctAnswers,
+      total_questions: challengeData.totalQuestions,
+      time_taken: timeTaken,
+      bonus_stars: rewards.bonusStars,
+      bonus_coins: rewards.bonusCoins,
+      streak_bonus: streak >= 3,
+      perfect_score_bonus: rewards.perfectScoreBonus,
+      speed_bonus: rewards.speedBonus,
+      challenge_objective: challengeData.objective,
+      concepts_covered: challengeData.concepts,
+    });
+
+    setTimeout(() => setIsFinished(true), 500);
+  };
+
+  // Continue button after showing explanation for an incorrect answer
+  const handleContinueAfterExplanation = () => {
+    setShowExplanation(false);
+    setExplanationData(null);
+    if (currentQuestion < challengeData.totalQuestions - 1) {
+      // Move to next question
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      // Finished (last was incorrect)
+      finalizeChallenge(false);
     }
   };
 
@@ -517,13 +548,54 @@ export default function DailyChallenge() {
         </div>
       </div>
 
-      {/* Question */}
-      {challengeData && challengeData.questions.length > 0 && (
-        <QuestionCard
-          question={challengeData.questions[currentQuestion]}
-          onAnswer={handleAnswer}
-          questionNumber={currentQuestion + 1}
-        />
+      {/* Question OR Explanation */}
+      {showExplanation && explanationData ? (
+        <div className="space-y-6 animate-fade-in">
+          <div className="bg-white border-4 border-red-300 rounded-2xl shadow-2xl p-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-500 text-white flex items-center justify-center text-2xl">✖</div>
+              <h2 className="text-2xl font-bold text-red-600">Let's Learn From This One</h2>
+            </div>
+            <p className="text-lg font-semibold mb-2">Question:</p>
+            <p className="text-3xl font-bold mb-4">{explanationData.questionObj.question}</p>
+            <div className="grid md:grid-cols-3 gap-4 mb-6 text-center">
+              <div className="p-4 rounded-xl bg-red-50 border-2 border-red-200">
+                <p className="text-sm font-medium text-red-600 mb-1">Your Answer</p>
+                <p className="text-2xl font-bold text-red-600">{explanationData.userAnswer}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-green-50 border-2 border-green-200">
+                <p className="text-sm font-medium text-green-600 mb-1">Correct Answer</p>
+                <p className="text-2xl font-bold text-green-600">{explanationData.correctAnswer}</p>
+              </div>
+              <div className="p-4 rounded-xl bg-purple-50 border-2 border-purple-200">
+                <p className="text-sm font-medium text-purple-600 mb-1">Question #</p>
+                <p className="text-2xl font-bold text-purple-600">{currentQuestion + 1}</p>
+              </div>
+            </div>
+            {explanationData.explanation && (
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 p-6 rounded-xl mb-6">
+                <h3 className="text-lg font-bold mb-2 flex items-center gap-2">🧠 Step-by-Step Explanation</h3>
+                <p className="whitespace-pre-line leading-relaxed text-gray-700">{explanationData.explanation}</p>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button
+                onClick={handleContinueAfterExplanation}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 px-8 h-14 text-lg"
+              >
+                Continue
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        challengeData && challengeData.questions.length > 0 && (
+          <QuestionCard
+            question={challengeData.questions[currentQuestion]}
+            onAnswer={handleAnswer}
+            questionNumber={currentQuestion + 1}
+          />
+        )
       )}
     </div>
   );
