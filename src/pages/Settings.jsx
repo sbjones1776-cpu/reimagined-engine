@@ -99,9 +99,23 @@ export default function Settings() {
     setHasChanges(hasChanged);
   };
 
+  // Detect any changes across both general and TTS preference state so Save button enables correctly
   useEffect(() => {
     checkForChanges();
-  }, [theme, soundVolume, defaultOperation, defaultLevel, defaultDrawingTool, user]);
+  }, [
+    theme,
+    soundVolume,
+    defaultOperation,
+    defaultLevel,
+    defaultDrawingTool,
+    ttsVoiceURI,
+    ttsVoiceName,
+    ttsRate,
+    ttsPitch,
+    ttsLang,
+    ttsGender,
+    user
+  ]);
 
   const handleSave = () => {
     // Persist locally
@@ -650,7 +664,7 @@ export default function Settings() {
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-start gap-2">
               <span className="text-purple-500 font-bold">•</span>
-              <span>Your settings are saved automatically and sync across all your devices</span>
+              <span>After making changes, click "Save Settings" to store them on this device.</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-purple-500 font-bold">•</span>
