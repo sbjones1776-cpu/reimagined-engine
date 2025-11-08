@@ -52,7 +52,29 @@ export default function Layout({ children, currentPageName }) {
   }, []);
 
   // Get theme preference
-  const isDarkMode = user?.app_settings?.theme === "dark";
+  // Get theme preference from localStorage (Settings auto-saves there)
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('app.theme') === 'dark';
+  });
+
+  // Listen for theme changes from localStorage (when Settings page changes theme)
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDarkMode(localStorage.getItem('app.theme') === 'dark');
+    };
+    
+    // Check theme on mount and whenever storage changes
+    checkTheme();
+    window.addEventListener('storage', checkTheme);
+    
+    // Also check periodically in case Settings changes on same tab
+    const interval = setInterval(checkTheme, 500);
+    
+    return () => {
+      window.removeEventListener('storage', checkTheme);
+      clearInterval(interval);
+    };
+  }, []);
 
   // PWA meta tags (SW registration handled globally in main.jsx to avoid duplicates)
   useEffect(() => {
