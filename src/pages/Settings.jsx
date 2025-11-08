@@ -62,6 +62,8 @@ export default function Settings() {
     const p = parseFloat(localStorage.getItem('tts.pitch'));
     return Number.isNaN(p) ? 1.1 : p;
   });
+  const [ttsLang, setTtsLang] = useState(() => localStorage.getItem('tts.lang') || 'en'); // 'en' | 'es'
+  const [ttsGender, setTtsGender] = useState(() => localStorage.getItem('tts.gender') || 'any'); // 'any'|'female'|'male'
 
   // Load voices
   useEffect(() => {
@@ -91,7 +93,9 @@ export default function Settings() {
       ttsVoiceURI !== (localStorage.getItem('tts.voiceURI') || "") ||
       ttsVoiceName !== (localStorage.getItem('tts.voiceName') || "") ||
       ttsRate !== (parseFloat(localStorage.getItem('tts.rate')) || 0.9) ||
-      ttsPitch !== (parseFloat(localStorage.getItem('tts.pitch')) || 1.1);
+      ttsPitch !== (parseFloat(localStorage.getItem('tts.pitch')) || 1.1) ||
+      ttsLang !== (localStorage.getItem('tts.lang') || 'en') ||
+      ttsGender !== (localStorage.getItem('tts.gender') || 'any');
     setHasChanges(hasChanged);
   };
 
@@ -111,6 +115,8 @@ export default function Settings() {
     localStorage.setItem('tts.voiceName', ttsVoiceName || '');
     localStorage.setItem('tts.rate', String(ttsRate));
     localStorage.setItem('tts.pitch', String(ttsPitch));
+    localStorage.setItem('tts.lang', ttsLang);
+    localStorage.setItem('tts.gender', ttsGender);
     setSaveSuccess(true);
     setHasChanges(false);
     setTimeout(() => setSaveSuccess(false), 3000);
@@ -127,6 +133,8 @@ export default function Settings() {
     setTtsVoiceName("");
     setTtsRate(0.9);
     setTtsPitch(1.1);
+    setTtsLang('en');
+    setTtsGender('any');
   };
 
   const operations = [
@@ -324,6 +332,31 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="p-6 space-y-4">
             <p className="text-sm text-gray-600">Choose your preferred voice and speaking style for explanations.</p>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-semibold mb-1">Language</label>
+                <select
+                  className="w-full border-2 border-indigo-200 rounded-lg p-2"
+                  value={ttsLang}
+                  onChange={(e)=>setTtsLang(e.target.value)}
+                >
+                  <option value="en">English</option>
+                  <option value="es">Spanish</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1">Preferred Gender</label>
+                <select
+                  className="w-full border-2 border-indigo-200 rounded-lg p-2"
+                  value={ttsGender}
+                  onChange={(e)=>setTtsGender(e.target.value)}
+                >
+                  <option value="any">Any</option>
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                </select>
+              </div>
+            </div>
             <div className="grid md:grid-cols-2 gap-4 items-end">
               <div>
                 <label className="block text-sm font-semibold mb-1">Voice</label>
@@ -337,12 +370,30 @@ export default function Settings() {
                     setTtsVoiceName(v?.name || '');
                   }}
                 >
-                  <option value="">System Default ({voices.find(v=>v.default)?.name || 'Auto'})</option>
-                  {voices.map((v) => (
-                    <option key={v.voiceURI || v.name} value={v.voiceURI || ''}>
-                      {v.name} ({v.lang})
-                    </option>
-                  ))}
+                  {(() => {
+                    const langPref = ttsLang === 'es' ? 'es' : 'en';
+                    const femaleKeys = ['female','woman','girl','aria','zira','jenny','jessa','olivia','emma','sonia','ana','isabella','libby','mia','sara','sofia','francesca'];
+                    const maleKeys = ['male','man','boy','guy','david','mark','ryan','tony','diego','francisco','sebastian','pablo','miguel','matthew','mike','george'];
+                    const filtered = (voices || [])
+                      .filter(v => (v.lang || '').toLowerCase().startsWith(langPref))
+                      .filter(v => {
+                        if (ttsGender === 'any') return true;
+                        const n = (v.name || '').toLowerCase();
+                        if (ttsGender === 'female') return femaleKeys.some(k => n.includes(k));
+                        if (ttsGender === 'male') return maleKeys.some(k => n.includes(k));
+                        return true;
+                      });
+                    const opts = [];
+                    opts.push(<option key="system-default" value="">System Default ({(voices.find(v=>v.default)?.name) || 'Auto'})</option>);
+                    filtered.forEach((v) => {
+                      opts.push(<option key={v.voiceURI || v.name} value={v.voiceURI || ''}>{v.name} ({v.lang})</option>);
+                    });
+                    // If current selection is not in filtered list, ensure value resets visually
+                    if (ttsVoiceURI && !filtered.find(v => v.voiceURI === ttsVoiceURI)) {
+                      setTimeout(() => setTtsVoiceURI(''), 0);
+                    }
+                    return opts;
+                  })()}
                 </select>
               </div>
               <div className="flex gap-2">
