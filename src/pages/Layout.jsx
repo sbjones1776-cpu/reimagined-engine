@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 // Firebase migration
-import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Home, Trophy, Calendar, User as UserIcon, ShoppingBag, Menu, X, Crown, Coins, Award, Users, GraduationCap, Sparkles, LogOut, Settings, BarChart3, CreditCard, ChevronDown, XCircle, Mail, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import AuthForm from "@/components/AuthForm";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -141,28 +142,7 @@ export default function Layout({ children, currentPageName }) {
           <p className="text-xl text-white mb-8 drop-shadow-lg">
             Please sign in to continue your learning journey!
           </p>
-          <Button
-            onClick={async () => {
-              const auth = getAuth(firebaseApp);
-              try {
-                // Google provider requires being enabled in Firebase Console.
-                // If it's not enabled, this will throw auth/operation-not-allowed.
-                const provider = new GoogleAuthProvider();
-                await signInWithPopup(auth, provider);
-              } catch (err) {
-                // Graceful fallback with a helpful message instead of a console error.
-                if (err?.code === 'auth/operation-not-allowed') {
-                  alert('Google Sign-In is not enabled for this project yet. Please enable the Google provider in Firebase Authentication, or use the email/password option from the Settings page.');
-                } else if (err?.code !== 'auth/popup-closed-by-user') {
-                  alert('Sign-in failed. Please try again or contact support.');
-                }
-                console.error('Sign-in error:', err);
-              }
-            }}
-            className="h-16 px-10 text-xl font-black bg-white text-purple-600 hover:bg-yellow-300 hover:text-purple-700 shadow-2xl transform hover:scale-105 transition-all"
-          >
-            Sign In / Sign Up 🚀
-          </Button>
+          <AuthForm showTitle={false} />
         </div>
       </div>
     );
