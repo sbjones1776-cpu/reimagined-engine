@@ -1,46 +1,30 @@
+import React, { lazy, Suspense } from 'react';
 import Layout from "./Layout.jsx";
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
+// Eager load critical pages for initial render
 import Home from "./Home";
-
-import Game from "./Game";
-
-import Progress from "./Progress";
-
-import Avatar from "./Avatar";
-
-import DailyChallenge from "./DailyChallenge";
-
-import ParentPortal from "./ParentPortal";
-
-import Shop from "./Shop";
-
-import Leaderboards from "./Leaderboards";
-
-import TeamChallenges from "./TeamChallenges";
-
-import Subscription from "./Subscription";
-
-import GenerateIcons from "./GenerateIcons";
-
-import TestIconGeneration from "./TestIconGeneration";
-
 import Landing from "./Landing";
 
-import Messages from "./Messages";
-
-import ColorByNumbers from "./ColorByNumbers";
-
-import Settings from "./Settings";
-
-import PrivacyPolicy from "./PrivacyPolicy";
-
-import AITutor from "./AITutor";
-
-import AdminTestAccount from "./AdminTestAccount";
-
-import Subscribe from "./Subscribe";
-
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+// Lazy load all other pages for better code splitting
+const Game = lazy(() => import("./Game"));
+const Progress = lazy(() => import("./Progress"));
+const Avatar = lazy(() => import("./Avatar"));
+const DailyChallenge = lazy(() => import("./DailyChallenge"));
+const ParentPortal = lazy(() => import("./ParentPortal"));
+const Shop = lazy(() => import("./Shop"));
+const Leaderboards = lazy(() => import("./Leaderboards"));
+const TeamChallenges = lazy(() => import("./TeamChallenges"));
+const Subscription = lazy(() => import("./Subscription"));
+const GenerateIcons = lazy(() => import("./GenerateIcons"));
+const TestIconGeneration = lazy(() => import("./TestIconGeneration"));
+const Messages = lazy(() => import("./Messages"));
+const ColorByNumbers = lazy(() => import("./ColorByNumbers"));
+const Settings = lazy(() => import("./Settings"));
+const PrivacyPolicy = lazy(() => import("./PrivacyPolicy"));
+const AITutor = lazy(() => import("./AITutor"));
+const AdminTestAccount = lazy(() => import("./AdminTestAccount"));
+const Subscribe = lazy(() => import("./Subscribe"));
 
 const PAGES = {
     
@@ -99,6 +83,16 @@ function _getCurrentPage(url) {
     return pageName || Object.keys(PAGES)[0];
 }
 
+// Loading fallback component for lazy-loaded routes
+const PageLoader = () => (
+    <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+            <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-xl text-gray-600">Loading...</p>
+        </div>
+    </div>
+);
+
 // Create a wrapper component that uses useLocation inside the Router context
 function PagesContent() {
     const location = useLocation();
@@ -106,12 +100,13 @@ function PagesContent() {
     
     return (
         <Layout currentPageName={currentPage}>
-            <Routes>            
-                
-                    <Route path="/" element={<Home />} />
-                
-                
-                <Route path="/Home" element={<Home />} />
+            <Suspense fallback={<PageLoader />}>
+                <Routes>            
+                    
+                        <Route path="/" element={<Home />} />
+                    
+                    
+                    <Route path="/Home" element={<Home />} />
                 
                 <Route path="/Game" element={<Game />} />
                 
@@ -151,7 +146,8 @@ function PagesContent() {
                 
                 <Route path="/Subscribe" element={<Subscribe />} />
                 
-            </Routes>
+                </Routes>
+            </Suspense>
         </Layout>
     );
 }

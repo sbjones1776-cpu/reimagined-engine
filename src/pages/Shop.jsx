@@ -11,7 +11,7 @@ import { ShoppingBag, Star, Coins, Lock, Sparkles, Crown, Package, Palette, Zap 
 import PetDisplay from "../components/rewards/PetDisplay";
 import BadgeDisplay from "../components/rewards/BadgeDisplay";
 import DailyLoginRewards from "../components/rewards/DailyLoginRewards";
-import { useFirebaseUser } from '@/hooks/useFirebaseUser';
+import { useUser } from '@/hooks/UserProvider.jsx';
 import { getUserGameProgress, updateUserProfile } from '@/api/firebaseService';
 import { useToast } from '@/components/ui/use-toast';
 import { getAvailableStarsFromGame, getTotalGameStars, getUserCoins } from '@/lib/selectors';
@@ -145,7 +145,7 @@ export default function Shop() {
   const [selectedCategory, setSelectedCategory] = useState("pets");
   const { toast } = useToast();
 
-  const { user, loading: userLoading } = useFirebaseUser();
+  const { user, loading: authLoading } = useUser();
 
   const { data: progress = [] } = useQuery({
     queryKey: ['gameProgress', user?.email],
@@ -307,7 +307,7 @@ export default function Shop() {
 
   const getAvailableStars = () => getAvailableStarsFromGame(progress, user);
 
-  if (userLoading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">

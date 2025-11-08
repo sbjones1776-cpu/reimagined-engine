@@ -1,11 +1,11 @@
 import React from "react";
 import MessageInbox from "../components/MessageInbox";
-import { useFirebaseUser } from '@/hooks/useFirebaseUser';
+import { useUser } from '@/hooks/UserProvider.jsx';
 
 export default function Messages() {
-  const { user, loading } = useFirebaseUser();
+  const { user, loading: authLoading } = useUser();
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">

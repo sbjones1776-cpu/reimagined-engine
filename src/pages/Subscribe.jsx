@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useFirebaseUser } from '@/hooks/useFirebaseUser';
+import { useUser } from '@/hooks/UserProvider.jsx';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +12,7 @@ import { Crown, Check, Loader2, CheckCircle } from 'lucide-react';
  * Can also be included in the app for in-app checkout flow
  */
 export default function Subscribe() {
-  const { user, loading: userLoading } = useFirebaseUser();
+  const { user, loading: authLoading } = useUser();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -131,7 +131,7 @@ export default function Subscribe() {
     }
   };
 
-  if (userLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50">
         <Loader2 className="w-8 h-8 animate-spin text-purple-600" />

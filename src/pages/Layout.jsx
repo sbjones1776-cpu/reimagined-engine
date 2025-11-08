@@ -3,8 +3,8 @@
 
 import React, { useState, useEffect } from "react";
 import Logo from "@/components/Logo";
-// Firebase migration
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+// Firebase
+import { getAuth, signOut } from "firebase/auth";
 import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -14,6 +14,7 @@ import { Home, Trophy, Calendar, User as UserIcon, ShoppingBag, Menu, X, Crown, 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import SimpleAuth from "@/components/SimpleAuth";
+import { useUser } from '@/hooks/UserProvider.jsx';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,27 +31,8 @@ import { format, startOfDay } from "date-fns";
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Firebase user state
-  const [user, setUser] = useState(null);
-  useEffect(() => {
-    const auth = getAuth(firebaseApp);
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        // TODO: Map Firebase user to expected user object shape
-        setUser({
-          email: firebaseUser.email,
-          full_name: firebaseUser.displayName,
-          avatar_skin_tone: "medium", // TODO: fetch from Firestore
-          coins: 0, // TODO: fetch from Firestore
-          // ...other fields
-        });
-      } else {
-        setUser(null);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+  // Consolidated auth via global context
+  const { user, loading: authLoading } = useUser();
 
   // Get theme preference
   // Get theme preference from localStorage (Settings auto-saves there)
@@ -155,6 +137,16 @@ export default function Layout({ children, currentPageName }) {
 
   // Simple auth gate (always after hooks) keeps hook order stable for other pages.
   if (!user) {
+    if (authLoading) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 flex items-center justify-center p-4">
+          <div className="text-center">
+            <div className="animate-spin w-16 h-16 border-4 border-white border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-white text-lg">Loading...</p>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 flex items-center justify-center p-4">
         <div className="text-center max-w-md w-full">

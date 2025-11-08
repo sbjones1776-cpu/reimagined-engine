@@ -7,7 +7,7 @@ import {
   getUserGameProgress, 
   getUserTeamChallenges 
 } from "@/api/firebaseService";
-import { useFirebaseUser } from '@/hooks/useFirebaseUser';
+import { useUser } from '@/hooks/UserProvider.jsx';
 import { Plus, Minus, X, Divide, Star, Lock, Play, Trophy, Award, Brain, Sparkles, Users, AlertCircle, Crown, CreditCard, Calendar, Percent, DollarSign, Clock, Shapes, BookOpen, TrendingUp, Grid3x3, Zap, Target, Binary, Calculator, BarChart3, Palette } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1197,7 +1197,7 @@ const Label = ({ children, className = "" }) => (
 export default function Home() {
   const [selectedGrade, setSelectedGrade] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const { user, loading: authLoading } = useFirebaseUser();
+  const { user, loading: authLoading } = useUser();
 
   const { data: progress = [] } = useQuery({
     queryKey: ['gameProgress', user?.email],
@@ -1249,6 +1249,10 @@ export default function Home() {
   const subscriptionExpires = user?.subscription?.chargedThroughDate 
     ? new Date(user.subscription.chargedThroughDate) 
     : null;
+  // Unify naming used later in the JSX (older code referenced isSubscribed/currentTier without defining them)
+  const subscriptionTier = user?.subscription_tier || (isPremium ? 'premium_player' : 'free');
+  const isSubscribed = subscriptionTier !== 'free';
+  const currentTier = subscriptionTier;
   const daysUntilRenewal = subscriptionExpires 
     ? Math.ceil((subscriptionExpires - new Date()) / (1000 * 60 * 60 * 24)) 
     : 0;
@@ -1442,7 +1446,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Subscription Status Widget */}
+      {/* Subscription Status / Upgrade Widget */}
       {isSubscribed ? (
         <Card className="mb-8 border-4 border-green-400 shadow-xl bg-gradient-to-r from-green-50 to-emerald-50">
           <CardContent className="p-6">
@@ -1499,13 +1503,10 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <Button 
-                onClick={() => window.open(process.env.VITE_CHECKOUT_URL || '/subscribe', '_blank')}
-                className="h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg"
-              >
-                <Crown className="w-5 h-5 mr-2" />
-                Upgrade Now
-              </Button>
+              {/* Use unified UpgradeButton component which handles Play Billing vs fallback */}
+              <div className="h-12">
+                <UpgradeButton />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -1785,10 +1786,10 @@ export default function Home() {
                         Focus
                       </Badge>
                     )}
-                    {!conceptAllowed && (
+                        {!conceptAllowed && (
                       <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2">
                         <Lock className="w-12 h-12 text-white" />
-                        {!isSubscribed && (
+                            {!isSubscribed && (
                           <Badge className="bg-yellow-500 text-white">
                             <Crown className="w-3 h-3 mr-1" />
                             Premium
