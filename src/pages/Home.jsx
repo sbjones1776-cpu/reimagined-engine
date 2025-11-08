@@ -1261,20 +1261,32 @@ export default function Home() {
     return false;
   };
 
-  // Check parental controls
-  const parentalControls = user?.parental_controls || {};
-  const allowedOperations = parentalControls.allowed_operations || mathConcepts.map(c => c.id);
-  const allowedLevels = parentalControls.allowed_levels || ["easy", "medium", "hard", "expert"];
-  const focusOperations = parentalControls.focus_operations || [];
-
-  const isConceptAllowed = (conceptId) => allowedOperations.includes(conceptId);
-  const isLevelAllowed = (levelId) => allowedLevels.includes(levelId);
-
   // Subscription info
   const currentTier = user?.subscription_tier || "free";
   const isSubscribed = currentTier !== "free";
   const subscriptionExpires = user?.subscription_expires_at ? new Date(user.subscription_expires_at) : null;
   const daysUntilRenewal = subscriptionExpires ? Math.ceil((subscriptionExpires - new Date()) / (1000 * 60 * 60 * 24)) : 0;
+
+  // Free tier limitations: only basic concepts and Easy level
+  const freeTierConcepts = [
+    "addition", "subtraction", "multiplication", "division",
+    "addition_single_digit", "subtraction_single_digit",
+    "counting", "number_comparison"
+  ];
+  const freeTierLevels = ["easy"];
+
+  // Check parental controls (or apply free tier limits)
+  const parentalControls = user?.parental_controls || {};
+  const allowedOperations = isSubscribed 
+    ? (parentalControls.allowed_operations || mathConcepts.map(c => c.id))
+    : freeTierConcepts;
+  const allowedLevels = isSubscribed
+    ? (parentalControls.allowed_levels || ["easy", "medium", "hard", "expert"])
+    : freeTierLevels;
+  const focusOperations = parentalControls.focus_operations || [];
+
+  const isConceptAllowed = (conceptId) => allowedOperations.includes(conceptId);
+  const isLevelAllowed = (levelId) => allowedLevels.includes(levelId);
 
   // Filter concepts
   const filteredConcepts = mathConcepts.filter(concept => {
@@ -1369,25 +1381,34 @@ export default function Home() {
           </CardContent>
         </Card>
       ) : (
-        <Card className="mb-8 border-4 border-purple-300 shadow-xl bg-gradient-to-r from-purple-50 to-pink-50">
+        <Card className="mb-8 border-4 border-yellow-400 shadow-xl bg-gradient-to-r from-yellow-50 to-orange-50">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Sparkles className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                  <Crown className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">Unlock Premium Features!</h3>
-                  <p className="text-gray-600">Get unlimited access, exclusive content, and advanced controls</p>
+                  <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <Lock className="w-5 h-5" />
+                    Free Tier - Limited Access
+                  </h3>
+                  <p className="text-gray-700 font-medium">
+                    📚 Only 8 basic math concepts • 🎯 Easy level only
+                  </p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Upgrade to unlock 80+ concepts, all difficulty levels, and premium features!
+                  </p>
                 </div>
               </div>
-              <Button 
-                onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
-                className="h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 animate-pulse"
-              >
-                <Crown className="w-5 h-5 mr-2" />
-                Upgrade Now
-              </Button>
+              <Link to={createPageUrl("Subscription")}>
+                <Button 
+                  className="h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg"
+                >
+                  <Crown className="w-5 h-5 mr-2" />
+                  Upgrade Now
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -1668,8 +1689,14 @@ export default function Home() {
                       </Badge>
                     )}
                     {!conceptAllowed && (
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2">
                         <Lock className="w-12 h-12 text-white" />
+                        {!isSubscribed && (
+                          <Badge className="bg-yellow-500 text-white">
+                            <Crown className="w-3 h-3 mr-1" />
+                            Premium
+                          </Badge>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1677,9 +1704,15 @@ export default function Home() {
                     <CardTitle className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <span className="text-lg">{concept.name}</span>
-                        {!conceptAllowed && (
+                        {!conceptAllowed && !isSubscribed && (
+                          <Badge variant="outline" className="bg-yellow-50 border-yellow-400 text-yellow-700 text-xs">
+                            <Crown className="w-3 h-3 mr-1" />
+                            Premium
+                          </Badge>
+                        )}
+                        {!conceptAllowed && isSubscribed && (
                           <Badge variant="outline" className="bg-red-50 border-red-300 text-red-700 text-xs">
-                            Locked
+                            Restricted
                           </Badge>
                         )}
                       </div>
@@ -1716,7 +1749,13 @@ export default function Home() {
                               <span className="flex items-center gap-2">
                                 <Badge className={`${level.color} text-xs`}>{level.name}</Badge>
                                 {!unlocked && <Lock className="w-3 h-3" />}
-                                {!levelAllowed && conceptAllowed && (
+                                {!levelAllowed && conceptAllowed && !isSubscribed && (
+                                  <Badge variant="outline" className="text-xs bg-yellow-50 border-yellow-400 text-yellow-700">
+                                    <Crown className="w-3 h-3 mr-1" />
+                                    Premium
+                                  </Badge>
+                                )}
+                                {!levelAllowed && conceptAllowed && isSubscribed && (
                                   <Badge variant="outline" className="text-xs">Restricted</Badge>
                                 )}
                               </span>
