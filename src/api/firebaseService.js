@@ -15,10 +15,10 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { firebaseApp } from '../firebaseConfig';
+import { app } from '../firebaseConfig';
 
-const db = getFirestore(firebaseApp);
-const auth = getAuth(firebaseApp);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 // ========================================
 // USER OPERATIONS

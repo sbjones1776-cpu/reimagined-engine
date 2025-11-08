@@ -2,15 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { getAuth } from "firebase/auth";
-import { app as firebaseApp } from "@/firebaseConfig";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { 
   saveGameProgress, 
-  getUserProfile, 
   updateUserProfile,
   getUserGameProgress 
 } from "@/api/firebaseService";
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card"; // Added CardContent
 import { Progress } from "@/components/ui/progress";
@@ -53,16 +51,7 @@ export default function Game() {
 
   const totalQuestions = 10;
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      const auth = getAuth(firebaseApp);
-      const currentUser = auth.currentUser;
-      if (!currentUser) return null;
-      return await getUserProfile(currentUser.email);
-    },
-    initialData: null,
-  });
+  const { user } = useFirebaseUser();
 
   const { data: recentProgress = [] } = useQuery({
     queryKey: ['recentProgress', user?.email],

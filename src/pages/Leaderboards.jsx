@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 // // import { base44 } from "@/api/base44Client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,77 +12,66 @@ import {
   UserPlus, Award, Crown, Star, TrendingUp, Calendar
 } from "lucide-react";
 import { format, startOfWeek, startOfMonth, getWeek } from "date-fns";
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
+import { 
+  getAllGameProgress,
+  getAllDailyChallenges,
+  getAllUsers,
+  getUserFriendConnections,
+  getPendingFriendRequests,
+  sendFriendRequest,
+  updateFriendRequestStatus
+} from '@/api/firebaseService';
 
 export default function Leaderboards() {
   const queryClient = useQueryClient();
   const [friendEmail, setFriendEmail] = useState("");
   const [inviteSuccess, setInviteSuccess] = useState(false);
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return { email: 'user@example.com' };
-    },
-    initialData: { email: 'user@example.com' },
-  });
+  const { user } = useFirebaseUser();
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['allUsers'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return [];
-    },
-    initialData: [],
+    queryFn: () => getAllUsers(),
+    staleTime: 300000,
+    gcTime: 600000,
   });
 
   const { data: allProgress = [] } = useQuery({
     queryKey: ['allProgress'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return [];
-    },
-    initialData: [],
+    queryFn: () => getAllGameProgress(),
+    staleTime: 300000,
+    gcTime: 600000,
   });
 
   const { data: allDailyChallenges = [] } = useQuery({
     queryKey: ['allDailyChallenges'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return [];
-    },
-    initialData: [],
+    queryFn: () => getAllDailyChallenges(),
+    staleTime: 300000,
+    gcTime: 600000,
   });
 
   const { data: myFriends = [] } = useQuery({
-    queryKey: ['myFriends'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return [];
-    },
-    initialData: [],
-    enabled: !!user,
+    queryKey: ['myFriends', user?.email],
+    queryFn: () => getUserFriendConnections(user.email),
+    enabled: !!user?.email,
+    staleTime: 60000,
   });
 
   const { data: pendingRequests = [] } = useQuery({
-    queryKey: ['pendingRequests'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return [];
-    },
-    initialData: [],
-    enabled: !!user,
+    queryKey: ['pendingRequests', user?.email],
+    queryFn: () => getPendingFriendRequests(user.email),
+    enabled: !!user?.email,
+    staleTime: 60000,
   });
 
   const sendFriendRequestMutation = useMutation({
-    mutationFn: async (data) => {
-      // TODO: Implement Firebase friend request
-      console.log('Friend request:', data);
-      alert('Friend requests are currently being migrated to Firebase. This feature will be available soon!');
-      throw new Error('Friend request pending implementation');
+    mutationFn: async ({ user_email, friend_email }) => {
+      return await sendFriendRequest(user_email, friend_email);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myFriends'] });
+      queryClient.invalidateQueries({ queryKey: ['myFriends', user?.email] });
+      queryClient.invalidateQueries({ queryKey: ['pendingRequests', user?.email] });
       setInviteSuccess(true);
       setFriendEmail("");
       setTimeout(() => setInviteSuccess(false), 3000);
@@ -91,14 +80,11 @@ export default function Leaderboards() {
 
   const updateFriendRequestMutation = useMutation({
     mutationFn: async ({ id, status }) => {
-      // TODO: Implement Firebase friend request update
-      console.log('Friend request update:', id, status);
-      alert('Friend request updates are currently being migrated to Firebase. This feature will be available soon!');
-      throw new Error('Friend request update pending implementation');
+      return await updateFriendRequestStatus(id, status);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myFriends'] });
-      queryClient.invalidateQueries({ queryKey: ['pendingRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['myFriends', user?.email] });
+      queryClient.invalidateQueries({ queryKey: ['pendingRequests', user?.email] });
     },
   });
 
@@ -117,19 +103,20 @@ export default function Leaderboards() {
 
     const userStats = {};
     filtered.forEach(game => {
-      if (!userStats[game.created_by]) {
-        userStats[game.created_by] = {
-          email: game.created_by,
+      const email = game.user_email;
+      if (!userStats[email]) {
+        userStats[email] = {
+          email,
           totalScore: 0,
           bestScore: 0,
           gamesPlayed: 0,
           totalAccuracy: 0,
         };
       }
-      userStats[game.created_by].totalScore += game.score;
-      userStats[game.created_by].bestScore = Math.max(userStats[game.created_by].bestScore, game.score);
-      userStats[game.created_by].gamesPlayed++;
-      userStats[game.created_by].totalAccuracy += (game.correct_answers / game.total_questions) * 100;
+      userStats[email].totalScore += game.score;
+      userStats[email].bestScore = Math.max(userStats[email].bestScore, game.score);
+      userStats[email].gamesPlayed++;
+      userStats[email].totalAccuracy += (game.correct_answers / game.total_questions) * 100;
     });
 
     return Object.values(userStats)
@@ -145,9 +132,10 @@ export default function Leaderboards() {
   const getSpeedLeaderboard = () => {
     const userBestTimes = {};
     allProgress.forEach(game => {
-      if (!userBestTimes[game.created_by] || game.time_taken < userBestTimes[game.created_by].time) {
-        userBestTimes[game.created_by] = {
-          email: game.created_by,
+      const email = game.user_email;
+      if (!userBestTimes[email] || game.time_taken < userBestTimes[email].time) {
+        userBestTimes[email] = {
+          email,
           time: game.time_taken,
           score: game.score,
           accuracy: Math.round((game.correct_answers / game.total_questions) * 100),
@@ -169,18 +157,19 @@ export default function Leaderboards() {
 
     const friendStats = {};
     allProgress.forEach(game => {
-      if (friendEmails.includes(game.created_by)) {
-        if (!friendStats[game.created_by]) {
-          friendStats[game.created_by] = {
-            email: game.created_by,
+      const email = game.user_email;
+      if (friendEmails.includes(email)) {
+        if (!friendStats[email]) {
+          friendStats[email] = {
+            email,
             totalScore: 0,
             gamesPlayed: 0,
             totalStars: 0,
           };
         }
-        friendStats[game.created_by].totalScore += game.score;
-        friendStats[game.created_by].gamesPlayed++;
-        friendStats[game.created_by].totalStars += game.stars_earned || 0;
+        friendStats[email].totalScore += game.score;
+        friendStats[email].gamesPlayed++;
+        friendStats[email].totalStars += game.stars_earned || 0;
       }
     });
 
@@ -195,19 +184,20 @@ export default function Leaderboards() {
     
     const tournamentStats = {};
     allProgress.forEach(game => {
-      const gameDate = new Date(game.created_date);
+      const gameDate = game.completed_at?.toDate ? game.completed_at.toDate() : new Date();
+      const email = game.user_email;
       if (gameDate >= periodStart) {
-        if (!tournamentStats[game.created_by]) {
-          tournamentStats[game.created_by] = {
-            email: game.created_by,
+        if (!tournamentStats[email]) {
+          tournamentStats[email] = {
+            email,
             totalScore: 0,
             gamesPlayed: 0,
             totalStars: 0,
           };
         }
-        tournamentStats[game.created_by].totalScore += game.score;
-        tournamentStats[game.created_by].gamesPlayed++;
-        tournamentStats[game.created_by].totalStars += game.stars_earned || 0;
+        tournamentStats[email].totalScore += game.score;
+        tournamentStats[email].gamesPlayed++;
+        tournamentStats[email].totalStars += game.stars_earned || 0;
       }
     });
 
@@ -309,6 +299,20 @@ export default function Leaderboards() {
           Leaderboards
         </h1>
         <p className="text-xl text-gray-600">Compete with friends and players worldwide!</p>
+        <div className="mt-4 flex flex-wrap gap-4 justify-center text-sm text-gray-700">
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow">
+            <Trophy className="w-4 h-4 text-yellow-600" />
+            <span>{allUsers.length} Players</span>
+          </div>
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow">
+            <Star className="w-4 h-4 text-purple-600" />
+            <span>{allProgress.length} Game Entries</span>
+          </div>
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow">
+            <Calendar className="w-4 h-4 text-blue-600" />
+            <span>{allDailyChallenges.length} Daily Challenges</span>
+          </div>
+        </div>
       </div>
 
       {inviteSuccess && (

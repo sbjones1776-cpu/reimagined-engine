@@ -3,13 +3,11 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { app as firebaseApp } from "@/firebaseConfig";
 import { 
-  getUserProfile, 
   getUserGameProgress, 
   getUserTeamChallenges 
 } from "@/api/firebaseService";
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { Plus, Minus, X, Divide, Star, Lock, Play, Trophy, Award, Brain, Sparkles, Users, AlertCircle, Crown, CreditCard, Calendar, Percent, DollarSign, Clock, Shapes, BookOpen, TrendingUp, Grid3x3, Zap, Target, Binary, Calculator, BarChart3, Palette } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1198,34 +1196,7 @@ const Label = ({ children, className = "" }) => (
 export default function Home() {
   const [selectedGrade, setSelectedGrade] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [user, setUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
-
-  // Firebase auth listener
-  useEffect(() => {
-    const auth = getAuth(firebaseApp);
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // Fetch full user profile from Firestore
-        try {
-          const userProfile = await getUserProfile(firebaseUser.email);
-          setUser(userProfile);
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
-          // Fallback to basic profile
-          setUser({
-            email: firebaseUser.email,
-            subscription_tier: "free",
-            parental_controls: {},
-          });
-        }
-      } else {
-        setUser(null);
-      }
-      setAuthLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+  const { user, loading: authLoading } = useFirebaseUser();
 
   const { data: progress = [] } = useQuery({
     queryKey: ['gameProgress', user?.email],

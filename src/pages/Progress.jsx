@@ -3,14 +3,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
-import { getAuth } from "firebase/auth";
-import { app as firebaseApp } from "@/firebaseConfig";
 import { 
-  getUserProfile, 
   getUserGameProgress, 
   getUserDailyChallenges,
   getUserTutorSessions 
 } from "@/api/firebaseService";
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Star, Target, Clock, Award, TrendingUp, ShoppingBag, Gift, Brain } from "lucide-react";
@@ -21,16 +19,7 @@ import RecentGames from "../components/progress/RecentGames";
 import Logo from "@/components/Logo";
 
 export default function Progress() {
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      const auth = getAuth(firebaseApp);
-      const currentUser = auth.currentUser;
-      if (!currentUser) return null;
-      return await getUserProfile(currentUser.email);
-    },
-    initialData: null,
-  });
+  const { user } = useFirebaseUser();
 
   const { data: progress = [], isLoading } = useQuery({
     queryKey: ['gameProgress', user?.email],

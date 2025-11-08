@@ -22,7 +22,17 @@
         'fonts.gstatic.com',
         'fonts.googleapis.com',
         'cdn.jsdelivr.net'
-    ]
+    ];
+
+    const STATIC_ASSETS = [
+      '/',
+      '/index.html',
+      '/manifest.json',
+      '/icons/icon-192.png',
+      '/icons/icon-512.png'
+    ];
+
+    const APP_SHELL_CACHE = 'app-shell-v1';
 
     // The Util Function to hack URLs of intercepted requests
     const getFixedUrl = (req) => {
@@ -52,9 +62,23 @@
      *
      *  waitUntil(): activating ====> activated
      */
-    self.addEventListener('activate', event => {
-      event.waitUntil(self.clients.claim())
-    })
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(APP_SHELL_CACHE).then(cache => cache.addAll(STATIC_ASSETS))
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            event.waitUntil(
+                (async () => {
+                    const keys = await caches.keys();
+                    await Promise.all(
+                        keys.filter(k => k !== APP_SHELL_CACHE && k !== 'pwa-cache').map(k => caches.delete(k))
+                    );
+                    await self.clients.claim();
+                })()
+            );
+        });
 
     /**
      *  @Functional Fetch
@@ -64,7 +88,27 @@
      */
     self.addEventListener('fetch', event => {
     // Skip some of cross-origin requests, like those for Google Analytics.
-    if (HOSTNAME_WHITELIST.indexOf(new URL(event.request.url).hostname) > -1) {
+        if (event.request.method !== 'GET') return;
+
+        // Return app shell for navigation requests (SPA offline support)
+        if (event.request.mode === 'navigate') {
+            event.respondWith(
+                (async () => {
+                    try {
+                        const preloadResp = await event.preloadResponse;
+                        if (preloadResp) return preloadResp;
+                        const networkResp = await fetch(event.request);
+                        return networkResp;
+                    } catch (e) {
+                        const cache = await caches.open(APP_SHELL_CACHE);
+                        return await cache.match('/index.html');
+                    }
+                })()
+            );
+            return;
+        }
+
+        if (HOSTNAME_WHITELIST.indexOf(new URL(event.request.url).hostname) > -1) {
         // Stale-while-revalidate
         // similar to HTTP's stale-while-revalidate: https://www.mnot.net/blog/2007/12/12/stale
         // Upgrade from Jake's to Surma's: https://gist.github.com/surma/eb441223daaedf880801ad80006389f1
@@ -85,9 +129,16 @@
 
         // Update the cache with the version we fetched (only for ok status)
         event.waitUntil(
-        Promise.all([fetchedCopy, caches.open("pwa-cache")])
+                Promise.all([fetchedCopy, caches.open("pwa-cache")])
             .then(([response, cache]) => response.ok && cache.put(event.request, response))
             .catch(_ => { /* eat any errors */ })
         )
     }
     })
+
+        // Message listener for future extensibility (e.g., skipWaiting)
+        self.addEventListener('message', event => {
+            if (event.data && event.data.type === 'SKIP_WAITING') {
+                self.skipWaiting();
+            }
+        });

@@ -7,86 +7,63 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Users, Trophy, Target, Star, Coins, Clock, CheckCircle, Calendar, TrendingUp, Award } from "lucide-react";
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
+import { 
+  getAllUsers,
+  getUserTeamChallenges,
+  getUserGameProgress,
+  getUserDailyChallenges,
+  updateTeamChallenge,
+  updateUserProfile
+} from '@/api/firebaseService';
 import { format } from "date-fns";
 
 export default function TeamChallenges() {
   const queryClient = useQueryClient();
   const [claimSuccess, setClaimSuccess] = useState(null);
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return { 
-        email: 'user@example.com',
-        total_stars_earned: 0,
-        coins: 0
-      };
-    },
-    initialData: { 
-      email: 'user@example.com',
-      total_stars_earned: 0,
-      coins: 0
-    },
-  });
+  const { user } = useFirebaseUser();
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['allUsers'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return [];
-    },
-    initialData: [],
+    queryFn: () => getAllUsers(),
+    staleTime: 300000,
   });
 
   const { data: myTeamChallenges = [] } = useQuery({
-    queryKey: ['myTeamChallenges'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return [];
-    },
-    initialData: [],
-    enabled: !!user,
+    queryKey: ['myTeamChallenges', user?.email],
+    queryFn: () => getUserTeamChallenges(user.email),
+    enabled: !!user?.email,
   });
 
   const { data: myProgress = [] } = useQuery({
-    queryKey: ['myProgress'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return [];
-    },
-    initialData: [],
-    enabled: !!user,
+    queryKey: ['myProgress', user?.email],
+    queryFn: () => getUserGameProgress(user.email),
+    enabled: !!user?.email,
   });
 
   const { data: myDailyChallenges = [] } = useQuery({
-    queryKey: ['myDailyChallenges'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return [];
-    },
-    initialData: [],
-    enabled: !!user,
+    queryKey: ['myDailyChallenges', user?.email],
+    queryFn: () => getUserDailyChallenges(user.email),
+    enabled: !!user?.email,
   });
 
   const updateChallengeMutation = useMutation({
     mutationFn: async ({ challengeId, data }) => {
-      // TODO: Implement Firebase challenge update
-      console.log('Challenge update:', challengeId, data);
-      alert('Team challenge updates are currently being migrated to Firebase. This feature will be available soon!');
-      throw new Error('Challenge update pending implementation');
+      return await updateTeamChallenge(challengeId, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myTeamChallenges'] });
+      queryClient.invalidateQueries({ queryKey: ['myTeamChallenges', user?.email] });
     },
   });
 
   const claimRewardMutation = useMutation({
     mutationFn: async ({ stars, coins }) => {
-      // TODO: Implement Firebase reward claim
-      console.log('Reward claim:', stars, coins);
-      alert('Reward claiming is currently being migrated to Firebase. This feature will be available soon!');
-      throw new Error('Reward claim pending implementation');
+      if (!user?.email) throw new Error('Not signed in');
+      await updateUserProfile(user.email, {
+        coins: (user?.coins || 0) + (coins || 0),
+        total_stars_earned: (user?.total_stars_earned || 0) + (stars || 0),
+      });
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
@@ -105,7 +82,7 @@ export default function TeamChallenges() {
     const endDate = challenge.end_date ? new Date(challenge.end_date) : new Date();
 
     const relevantProgress = myProgress.filter(p => {
-      const gameDate = new Date(p.created_date);
+      const gameDate = p.completed_at?.toDate ? p.completed_at.toDate() : new Date();
       const matchesDate = gameDate >= startDate && gameDate <= endDate;
       const matchesOperation = challenge.specific_operation === "any" || p.operation === challenge.specific_operation;
       const matchesLevel = challenge.specific_level === "any" || p.level === challenge.specific_level;
@@ -113,7 +90,7 @@ export default function TeamChallenges() {
     });
 
     const relevantDailies = myDailyChallenges.filter(dc => {
-      const dcDate = new Date(dc.created_date);
+      const dcDate = new Date(dc.challenge_date);
       return dcDate >= startDate && dcDate <= endDate;
     });
 
@@ -229,7 +206,7 @@ export default function TeamChallenges() {
     return icons[type] || Trophy;
   };
 
-  const activeGhallenges = myTeamChallenges.filter(c => !c.is_completed);
+  const activeChallenges = myTeamChallenges.filter(c => !c.is_completed);
   const completedChallenges = myTeamChallenges.filter(c => c.is_completed);
 
   return (

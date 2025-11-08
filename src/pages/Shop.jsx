@@ -11,6 +11,10 @@ import { ShoppingBag, Star, Coins, Lock, Sparkles, Crown, Package, Palette, Zap 
 import PetDisplay from "../components/rewards/PetDisplay";
 import BadgeDisplay from "../components/rewards/BadgeDisplay";
 import DailyLoginRewards from "../components/rewards/DailyLoginRewards";
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
+import { getUserGameProgress, updateUserProfile } from '@/api/firebaseService';
+import { useToast } from '@/components/ui/use-toast';
+import { getAvailableStarsFromGame, getTotalGameStars, getUserCoins } from '@/lib/selectors';
 
 const shopItems = {
   pets: [
@@ -139,62 +143,143 @@ export default function Shop() {
   const queryClient = useQueryClient();
   const [purchaseSuccess, setPurchaseSuccess] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("pets");
+  const { toast } = useToast();
 
-  const { data: user, isLoading: userLoading } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return { 
-        email: 'user@example.com', 
-        coins: 0,
-        stars_spent: 0,
-        owned_pets: [],
-        active_pet: null,
-        purchased_items: [],
-        unlocked_items: [],
-        power_ups: {}
-      };
-    },
-    initialData: { 
-      email: 'user@example.com', 
-      coins: 0,
-      stars_spent: 0,
-      owned_pets: [],
-      active_pet: null,
-      purchased_items: [],
-      unlocked_items: [],
-      power_ups: {}
-    },
-  });
+  const { user, loading: userLoading } = useFirebaseUser();
 
   const { data: progress = [] } = useQuery({
-    queryKey: ['gameProgress'],
-    queryFn: async () => {
-      // TODO: Replace with Firebase query
-      return [];
-    },
-    initialData: [],
+    queryKey: ['gameProgress', user?.email],
+    queryFn: () => getUserGameProgress(user.email),
+    enabled: !!user?.email,
   });
 
   const purchaseMutation = useMutation({
-    mutationFn: async ({ item, type }) => {
-      // TODO: Implement Firebase purchase logic
-      alert('Purchase system is currently being migrated to Firebase. This feature will be available soon!');
-      throw new Error('Purchase system pending implementation');
+    mutationFn: async ({ itemId, price, type, coins }) => {
+      if (!user?.email) throw new Error('Not signed in');
+
+      // Recompute funds on client
+      const totalStars = progress.reduce((sum, p) => sum + (p.stars_earned || 0), 0);
+      const spentStars = user?.stars_spent || 0;
+      const availableStars = totalStars - spentStars;
+      const currentCoins = user?.coins || 0;
+
+      if (coins) {
+        if (currentCoins < price) throw new Error('Not enough coins');
+        const nextPowerUps = { ...(user.power_ups || {}) };
+        nextPowerUps[itemId] = (nextPowerUps[itemId] || 0) + 1;
+        await updateUserProfile(user.email, {
+          coins: currentCoins - price,
+          power_ups: nextPowerUps,
+        });
+        return;
+      }
+
+      // Star-based purchase
+      if (availableStars < price) throw new Error('Not enough stars');
+
+      if (type === 'pet') {
+        const owned = new Set(user?.owned_pets || []);
+        if (!owned.has(itemId)) owned.add(itemId);
+        await updateUserProfile(user.email, {
+          stars_spent: spentStars + price,
+          owned_pets: Array.from(owned),
+        });
+        return;
+      }
+
+      // avatar item (default)
+      const unlocked = new Set(user?.unlocked_items || []);
+      if (!unlocked.has(itemId)) unlocked.add(itemId);
+      await updateUserProfile(user.email, {
+        stars_spent: spentStars + price,
+        unlocked_items: Array.from(unlocked),
+      });
+    },
+    onMutate: async (vars) => {
+      // Cancel outgoing queries so we don't overwrite optimistic data
+      await queryClient.cancelQueries({ queryKey: ['currentUser'] });
+      await queryClient.cancelQueries({ queryKey: ['gameProgress', user?.email] });
+
+      const prevUser = queryClient.getQueryData(['currentUser']);
+      const prevProgress = queryClient.getQueryData(['gameProgress', user?.email]);
+
+      if (!prevUser) return { prevUser, prevProgress };
+
+      const { itemId, price, type, coins } = vars;
+      const draftUser = { ...prevUser };
+
+      if (coins) {
+        // Coin purchase: decrement coins, increment power ups count
+        draftUser.coins = (draftUser.coins || 0) - price;
+        if (draftUser.coins < 0) draftUser.coins = 0; // guard
+        const pu = { ...(draftUser.power_ups || {}) };
+        pu[itemId] = (pu[itemId] || 0) + 1;
+        draftUser.power_ups = pu;
+      } else if (type === 'pet') {
+        draftUser.stars_spent = (draftUser.stars_spent || 0) + price;
+        const owned = new Set(draftUser.owned_pets || []);
+        owned.add(itemId);
+        draftUser.owned_pets = Array.from(owned);
+      } else {
+        // avatar item
+        draftUser.stars_spent = (draftUser.stars_spent || 0) + price;
+        const unlocked = new Set(draftUser.unlocked_items || []);
+        unlocked.add(itemId);
+        draftUser.unlocked_items = Array.from(unlocked);
+      }
+
+      // Optimistically update user cache
+      queryClient.setQueryData(['currentUser'], draftUser);
+
+      return { prevUser, prevProgress };
+    },
+    onError: (err, _vars, context) => {
+      // Rollback on error
+      if (context?.prevUser) {
+        queryClient.setQueryData(['currentUser'], context.prevUser);
+      }
+      toast({
+        title: 'Purchase Failed',
+        description: err.message.includes('Not enough') ? err.message : 'Could not complete purchase.',
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      setPurchaseSuccess(true);
+      setTimeout(() => setPurchaseSuccess(false), 2500);
     },
+    onSettled: () => {
+      // Revalidate to ensure server truth wins
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      queryClient.invalidateQueries({ queryKey: ['gameProgress', user?.email] });
+    }
   });
 
   const activatePetMutation = useMutation({
     mutationFn: async (petId) => {
-      // TODO: Implement Firebase pet activation
-      console.log('Pet activation:', petId);
-      alert('Pet activation is currently being migrated to Firebase. This feature will be available soon!');
-      throw new Error('Pet activation pending implementation');
+      if (!user?.email) throw new Error('Not signed in');
+      const owned = new Set(user?.owned_pets || []);
+      if (!owned.has(petId)) throw new Error('Pet not owned');
+      await updateUserProfile(user.email, { active_pet: petId });
     },
-    onSuccess: () => {
+    onMutate: async (petId) => {
+      await queryClient.cancelQueries({ queryKey: ['currentUser'] });
+      const prevUser = queryClient.getQueryData(['currentUser']);
+      if (!prevUser) return { prevUser };
+      const draft = { ...prevUser };
+      // Optimistically set active pet if owned
+      const owned = new Set(draft.owned_pets || []);
+      if (owned.has(petId)) {
+        draft.active_pet = petId;
+        queryClient.setQueryData(['currentUser'], draft);
+      }
+      return { prevUser };
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.prevUser) {
+        queryClient.setQueryData(['currentUser'], context.prevUser);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     },
   });
@@ -220,17 +305,7 @@ export default function Shop() {
            (user?.purchased_items || []).includes(itemId);
   };
 
-  const getTotalStars = () => {
-    return progress.reduce((sum, p) => sum + (p.stars_earned || 0), 0);
-  };
-
-  const getAvailableStars = () => {
-    const total = getTotalStars();
-    const spent = user?.stars_spent || 0;
-    return total - spent;
-  };
-
-  const getUserCoins = () => user?.coins || 0;
+  const getAvailableStars = () => getAvailableStarsFromGame(progress, user);
 
   if (userLoading) {
     return (
@@ -266,7 +341,7 @@ export default function Shop() {
             <div className="text-4xl font-bold text-yellow-600 mb-1">{getAvailableStars()}</div>
             <p className="text-gray-600">Available Stars</p>
             <p className="text-xs text-gray-500 mt-1">
-              Total: {getTotalStars()} | Spent: {user?.stars_spent || 0}
+              Total: {getTotalGameStars(progress)} | Spent: {user?.stars_spent || 0}
             </p>
           </CardContent>
         </Card>
@@ -274,7 +349,7 @@ export default function Shop() {
         <Card className="border-4 border-blue-300 bg-gradient-to-r from-blue-50 to-cyan-50">
           <CardContent className="p-6 text-center">
             <Coins className="w-12 h-12 mx-auto mb-2 text-blue-500" />
-            <div className="text-4xl font-bold text-blue-600 mb-1">{getUserCoins()}</div>
+            <div className="text-4xl font-bold text-blue-600 mb-1">{getUserCoins(user)}</div>
             <p className="text-gray-600">Coins</p>
             <p className="text-xs text-gray-500 mt-1">For power-ups and boosts</p>
           </CardContent>
@@ -477,7 +552,7 @@ export default function Shop() {
 
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {shopItems.powerUps.map((powerUp) => {
-                  const canAfford = getUserCoins() >= powerUp.price;
+                  const canAfford = getUserCoins(user) >= powerUp.price;
                   const owned = (user?.power_ups || {})[powerUp.id] || 0;
 
                   return (
@@ -507,7 +582,7 @@ export default function Shop() {
                           ) : (
                             <>
                               <Lock className="w-4 h-4 mr-2" />
-                              Need {powerUp.price - getUserCoins()} coins
+                              Need {powerUp.price - getUserCoins(user)} coins
                             </>
                           )}
                         </Button>

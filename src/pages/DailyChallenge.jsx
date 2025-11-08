@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { getAuth } from "firebase/auth";
-import { app as firebaseApp } from "@/firebaseConfig";
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
-  getUserProfile, 
   updateUserProfile,
   saveDailyChallenge 
 } from "@/api/firebaseService";
@@ -57,16 +55,7 @@ export default function DailyChallenge() {
 
   const challengeType = getChallengeType();
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: async () => {
-      const auth = getAuth(firebaseApp);
-      const currentUser = auth.currentUser;
-      if (!currentUser) return null;
-      return await getUserProfile(currentUser.email);
-    },
-    initialData: null,
-  });
+  const { user } = useFirebaseUser();
 
   const { data: todaysChallenges = [] } = useQuery({
     queryKey: ['dailyChallenges', todayDate],
