@@ -70,13 +70,32 @@ export default function Game() {
     },
   });
 
-  // Check parental controls
+  // Subscription info
+  const currentTier = user?.subscription_tier || "free";
+  const isSubscribed = currentTier !== "free";
+
+  // Free tier limitations: only basic concepts and Easy level
+  const freeTierConcepts = [
+    "addition", "subtraction", "multiplication", "division",
+    "addition_single_digit", "subtraction_single_digit",
+    "counting", "number_comparison"
+  ];
+  const freeTierLevels = ["easy"];
+
+  // Check parental controls (or apply free tier limits)
   const parentalControls = user?.parental_controls || {};
   const focusOperations = parentalControls.focus_operations || [];
   const focusPriority = parentalControls.focus_priority || "suggest";
   const focusReminderFreq = parentalControls.focus_reminder_frequency || "never";
-  const allowedOperations = parentalControls.allowed_operations || ["addition", "subtraction", "multiplication", "division"];
-  const allowedLevels = parentalControls.allowed_levels || ["easy", "medium", "hard", "expert"];
+  
+  // Apply free tier limits if not subscribed, otherwise use parental controls
+  const allConcepts = ["addition", "subtraction", "multiplication", "division", "fractions", "decimals", "percentages", "word_problems", "money_math", "time", "geometry", "mixed", "counting", "number_comparison", "skip_counting_2s", "skip_counting_5s", "skip_counting_10s", "even_odd", "ordering_numbers", "place_value", "addition_single_digit", "subtraction_single_digit"];
+  const allowedOperations = isSubscribed 
+    ? (parentalControls.allowed_operations || allConcepts)
+    : freeTierConcepts;
+  const allowedLevels = isSubscribed
+    ? (parentalControls.allowed_levels || ["easy", "medium", "hard", "expert"])
+    : freeTierLevels;
   
   // Check time limits
   const todayKey = format(new Date(), 'yyyy-MM-dd');
@@ -308,20 +327,57 @@ export default function Game() {
   }
 
   if (!isOperationAllowed || !isLevelAllowed) {
+    const isPremiumLocked = !isSubscribed && (!freeTierConcepts.includes(operation) || !freeTierLevels.includes(level));
+    
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <Card className="border-4 border-red-300 shadow-xl">
+        <Card className={`border-4 ${isPremiumLocked ? 'border-yellow-400 bg-gradient-to-r from-yellow-50 to-orange-50' : 'border-red-300'} shadow-xl`}>
           <CardContent className="p-12 text-center">
-            <Lock className="w-16 h-16 mx-auto mb-4 text-red-500" />
-            <h2 className="text-2xl font-bold mb-4 text-red-700">Content Restricted</h2>
-            <p className="text-gray-600 mb-6">
-              {!isOperationAllowed && "This math concept is currently restricted by your parent."}
-              {!isLevelAllowed && isOperationAllowed && "This difficulty level is currently restricted by your parent."}
-            </p>
-            <Button onClick={() => navigate(createPageUrl("Home"))}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
+            {isPremiumLocked ? (
+              <>
+                <Lock className="w-16 h-16 mx-auto mb-4 text-yellow-600" />
+                <div className="inline-flex items-center gap-2 mb-2">
+                  <Trophy className="w-6 h-6 text-yellow-600" />
+                  <h2 className="text-2xl font-bold text-yellow-700">Premium Content</h2>
+                </div>
+                <p className="text-gray-700 mb-4 font-medium">
+                  {!freeTierConcepts.includes(operation) && "This math concept is available in Premium."}
+                  {!freeTierLevels.includes(level) && freeTierConcepts.includes(operation) && "This difficulty level is available in Premium."}
+                </p>
+                <p className="text-sm text-gray-600 mb-6">
+                  Upgrade to unlock 80+ math concepts and all difficulty levels!
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button 
+                    onClick={() => navigate(createPageUrl("Subscription"))}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                  >
+                    <Trophy className="w-4 h-4 mr-2" />
+                    Upgrade Now
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => navigate(createPageUrl("Home"))}
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Home
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Lock className="w-16 h-16 mx-auto mb-4 text-red-500" />
+                <h2 className="text-2xl font-bold mb-4 text-red-700">Content Restricted</h2>
+                <p className="text-gray-600 mb-6">
+                  {!isOperationAllowed && "This math concept is currently restricted by your parent."}
+                  {!isLevelAllowed && isOperationAllowed && "This difficulty level is currently restricted by your parent."}
+                </p>
+                <Button onClick={() => navigate(createPageUrl("Home"))}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Home
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
