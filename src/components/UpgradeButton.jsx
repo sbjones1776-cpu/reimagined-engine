@@ -5,19 +5,58 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Crown, ExternalLink, Check, Sparkles, Zap, Shield, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { startUnifiedSubscription, isPlayBillingAvailable, initBilling, fallbackToExternalCheckout } from '@/api/billingService';
+import { toast } from 'sonner';
 
 /**
  * UpgradeButton - Compliant button for external payment link
  * Shows Google-required disclosure before opening external checkout
  */
-export default function UpgradeButton({ variant = 'default', size = 'default', className = '', fullWidth = false }) {
+export default function UpgradeButton({ variant = 'default', size = 'default', className = '', fullWidth = false, plan = 'monthly', userEmail }) {
   const [showDisclosure, setShowDisclosure] = useState(false);
+  const [playReady, setPlayReady] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleUpgrade = () => {
-    // Open external checkout page
-    // Replace with your actual domain after deployment
-    const checkoutUrl = process.env.VITE_CHECKOUT_URL || 'https://yourdomain.com/subscribe';
-    window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+  // Prepare billing detection on mount
+  React.useEffect(() => {
+    (async () => {
+      try {
+        await initBilling();
+        setPlayReady(isPlayBillingAvailable());
+      } catch {
+        setPlayReady(false);
+      }
+    })();
+  }, []);
+
+  const handleUpgrade = async () => {
+    if (playReady) {
+      setLoading(true);
+      try {
+        const result = await startUnifiedSubscription(plan, userEmail);
+        if (result?.success) {
+          toast.success('Subscription activated! 🎉');
+        } else if (result?.canceled) {
+          toast('Purchase canceled');
+        } else if (result?.routedExternal) {
+          toast('Opening external checkout...');
+        } else if (result?.error) {
+          toast.error(result.error || 'Purchase failed');
+        }
+        if (result?.routedExternal || result?.success || result?.canceled || result?.error) {
+          setShowDisclosure(false);
+        }
+      } catch (e) {
+        console.error('Upgrade failed', e);
+        toast.error(e.message || 'Purchase failed');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+    // Fallback to external checkout
+    fallbackToExternalCheckout();
+    toast('Redirecting to secure checkout...');
     setShowDisclosure(false);
   };
 
@@ -84,14 +123,16 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
             </Badge>
           </div>
 
-          {/* Google-Required Disclosure */}
-          <Alert className="bg-blue-50 border-blue-200">
-            <ExternalLink className="w-4 h-4 text-blue-600" />
-            <AlertDescription className="text-xs text-blue-800">
-              <strong>Important:</strong> You will be redirected to an external website to complete your purchase. 
-              This purchase is not affiliated with or managed by Google Play.
-            </AlertDescription>
-          </Alert>
+          {/* Google-Required Disclosure (shown only when using external checkout) */}
+          {!playReady && (
+            <Alert className="bg-blue-50 border-blue-200">
+              <ExternalLink className="w-4 h-4 text-blue-600" />
+              <AlertDescription className="text-xs text-blue-800">
+                <strong>Important:</strong> You will be redirected to an external website to complete your purchase. 
+                This purchase is not affiliated with or managed by Google Play.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Benefits Summary */}
           <div className="text-center text-xs text-gray-500">
@@ -104,9 +145,10 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
             onClick={handleUpgrade}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
             size="lg"
+            disabled={loading}
           >
-            Continue to Checkout
-            <ExternalLink className="w-4 h-4 ml-2" />
+            {playReady ? 'Continue to Purchase' : 'Continue to Checkout'}
+            {loading ? null : <ExternalLink className="w-4 h-4 ml-2" />}
           </Button>
           <Button
             variant="ghost"

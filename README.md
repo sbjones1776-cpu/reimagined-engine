@@ -146,15 +146,26 @@ Pages check `user?.entitlements?.premium` via the `useFirebaseUser` hook:
 - **Game.jsx**: Blocks premium content
 - **ParentPortal.jsx**: Premium-only feature
 
-## 💳 Payment Flow
+## 💳 Payment Flow (Hybrid)
 
-1. User clicks "Upgrade to Premium" → shows disclosure modal
-2. User confirms → opens external checkout (Square)
-3. Square processes payment → creates subscription
-4. Square webhook calls Cloud Function
-5. Function writes `entitlements.premium = true` to Firestore
-6. App updates instantly via live Firestore subscription
-7. Premium features unlock immediately
+Math Adventure supports a hybrid subscription purchase model:
+
+### A. Google Play Billing (Android via TWA)
+1. User taps "Upgrade to Premium" inside the Trusted Web Activity.
+2. `UpgradeButton` detects Digital Goods API availability.
+3. Play purchase dialog launches (in-app experience).
+4. Purchase token → sent to `verifyPlayPurchase` Cloud Function.
+5. Function validates token (Android Publisher API) & grants entitlement.
+6. Firestore snapshot updates → premium unlocks instantly.
+
+### B. External Checkout (Web / Non-Play)
+1. Digital Goods API not available → disclosure modal shown.
+2. User proceeds to external Square checkout.
+3. Square processes subscription.
+4. Webhook (`handleSquareWebhook`) updates Firestore.
+5. Entitlement unlocks when status ACTIVE.
+
+The flow automatically chooses Play Billing when available and falls back gracefully.
 
 ## 🧪 Testing
 
@@ -172,22 +183,22 @@ Use test cards in Square sandbox mode:
 - CVV: 111
 - Exp: 12/25
 
-## 📱 Google Play Store
+## 📱 Google Play Store (Hybrid)
 
 ### Compliance
-- App uses **external payments** (Square, not Google Play Billing)
-- Must declare in Play Console → Monetization
-- UpgradeButton shows Google-required disclosure
-- External checkout opens in browser
+- Play Billing inside TWA; external payments for non-Play browsers.
+- Disclosure shown only for external (Square) path.
+- Ensure product IDs match `.env` (VITE_PLAY_MONTHLY_ID / VITE_PLAY_YEARLY_ID).
 
-### Submission Steps
-1. Declare external payments in Play Console
-2. Submit for Google review (1-3 days)
-3. Upload APK/AAB
-4. Fill in store listing with provided description
-5. Submit for app review
+### Submission Steps (Hybrid)
+1. Create subscription products in Play Console.
+2. Package web app as TWA (see `TWA_SETUP.md`).
+3. Upload AAB (internal test → closed → production).
+4. Provide privacy policy + hybrid billing explanation.
+5. Test Play purchase & external fallback.
+6. Submit for review.
 
-See `DEPLOYMENT.md` for detailed deployment instructions.
+See `DEPLOYMENT.md` and `TWA_SETUP.md` for detailed instructions.
 
 ## 🛠️ Development
 
@@ -212,36 +223,17 @@ const stars = getAvailableStars(progress, dailyChallenges, user);
 ```
 
 ### Cloud Functions
-- `createSubscription`: Process Square payment → grant premium
-- `handleSquareWebhook`: Sync subscription status
+- `createSubscription`: Process Square payment → grant premium (external)
+- `handleSquareWebhook`: Sync subscription status (Square)
+- `verifyPlayPurchase`: Validate Google Play Billing token → grant premium
 - `grantPremiumAccess`: Manual premium access (testing/support)
 
 ## 📚 Documentation
 
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deployment guide
-- [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) - Firebase configuration
-- `.env.example` - Environment variables reference
-
-## 🐛 Troubleshooting
-
-### Premium not unlocking
-1. Check Firestore: `users/{email}.entitlements.premium` should be `true`
-2. Check Cloud Functions logs: `firebase functions:log`
-3. Verify Square webhook is configured correctly
-4. Check user is signed in with correct email
-
-### Build errors
-```bash
-npm install
-npm run build
-```
-
-### Firebase errors
-- Verify Firestore rules allow writes to `users/{uid}`
-- Check Firebase credentials in `.env`
-- Ensure Firestore indexes are deployed
-
-## 📄 License
+- [DEPLOYMENT.md](./DEPLOYMENT.md)
+- [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
+- [TWA_SETUP.md](./TWA_SETUP.md)
+- `.env.example`
 
 Proprietary - All rights reserved
 

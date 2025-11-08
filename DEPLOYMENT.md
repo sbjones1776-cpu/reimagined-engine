@@ -8,10 +8,9 @@
    - Enable Firestore Database
    - Enable Cloud Functions
 
-2. **Square Account Setup**
-   - Create a Square developer account at https://developer.squareup.com
-   - Create subscription plans in Square Dashboard
-   - Get Application ID, Location ID, and Access Token
+2. **Payments Setup (Hybrid)**
+   - Square (External Fallback): Create subscription plans & obtain Application ID, Location ID, Access Token.
+   - Google Play Billing: In Play Console create subscription products (monthly/yearly). Note their product IDs and place them in `.env` as `VITE_PLAY_MONTHLY_ID` / `VITE_PLAY_YEARLY_ID`.
 
 ## Environment Configuration
 
@@ -95,22 +94,28 @@ Deploy the indexes:
 firebase deploy --only firestore:indexes
 ```
 
-## Google Play Store Setup
+## Google Play Store Setup (Hybrid)
 
-1. **Declare External Payments**:
-   - Go to Play Console → Monetization
-   - Select "User purchases through external website"
-   - Submit for review (1-3 days)
+### Trusted Web Activity (TWA) Packaging
+1. Create a minimal Android wrapper using Bubblewrap or your preferred TWA tooling.
+2. Set the start URL to your production web app.
+3. Include Digital Goods API origin trial if still required (check current Play policy) or verify automatic availability.
+4. Ensure the web origin matches Play Console verified domain.
 
-2. **Update App Description**:
-   - Use the provided app description
-   - Upload screenshots showing the app features
-   - Add "Premium subscription available" in short description
+### Play Billing Subscription Products
+1. In Play Console → Monetization → Products → Subscriptions, create monthly & yearly offerings.
+2. Copy product IDs → set in `.env` as `VITE_PLAY_MONTHLY_ID`, `VITE_PLAY_YEARLY_ID`.
+3. (Optional) Configure base plans and offers for introductory pricing.
 
-3. **Compliance**:
-   - Ensure UpgradeButton shows Google's required disclosure
-   - Test external checkout flow thoroughly
-   - Submit app for review
+### External Payment Disclosure
+The `UpgradeButton` automatically shows the external payment disclosure only if Digital Goods API is not available (web browser scenario). No disclosure is shown for Play Billing purchases.
+
+### Review Checklist
+1. Test Play Billing flow inside TWA build (purchase sandbox test account).
+2. Confirm `verifyPlayPurchase` Cloud Function grants Firestore entitlement.
+3. Test external fallback on a regular Chrome desktop browser (should open Square checkout with disclosure).
+4. Provide accurate privacy policy & hybrid billing explanation in store listing.
+5. Submit AAB for review.
 
 ## Testing
 
@@ -130,19 +135,21 @@ curl -X POST https://your-project.cloudfunctions.net/grantPremiumAccess \
 3. Complete checkout and verify Firestore updates
 4. Check that premium features unlock immediately
 
-## Production Checklist
+## Production Checklist (Hybrid Billing)
 
 - [ ] Firebase project configured
-- [ ] Square production credentials added
-- [ ] Cloud Functions deployed
-- [ ] Square webhooks configured
-- [ ] Firestore rules deployed
-- [ ] Web app deployed to Firebase Hosting
-- [ ] .env updated with production URLs
-- [ ] Google Play external payment declaration approved
-- [ ] App submitted to Play Store
-- [ ] Test subscription flow end-to-end
-- [ ] Monitor Cloud Functions logs for errors
+- [ ] Cloud Functions deployed (including `verifyPlayPurchase`)
+- [ ] Square production credentials added & webhooks configured
+- [ ] Play subscription product IDs set in `.env` & working
+- [ ] TWA wrapper built & signed (AAB)
+- [ ] Firestore rules & indexes deployed
+- [ ] Web app deployed (Hosting) & origin verified in Play Console
+- [ ] Play Billing purchase test succeeds (sandbox)
+- [ ] External Square fallback test succeeds (non-TWA browser)
+- [ ] README & DEPLOYMENT docs updated
+- [ ] App listing updated with hybrid billing disclosure
+- [ ] Submit for Play review
+- [ ] Monitor Cloud Functions logs for Square + Play verification
 
 ## Support
 
@@ -152,12 +159,14 @@ For issues:
 3. Verify Square webhook is receiving events
 4. Test with Square sandbox mode first
 
-## Subscription Plans
+## Subscription Plans & IDs
 
-Create these in Square Dashboard:
-- **Monthly Plan**: $9.99/month
-- **Annual Plan**: $79.99/year (33% savings)
+Square:
+- Monthly Plan: $9.99/month → use variation ID in `Subscribe.jsx`.
+- Annual Plan: $79.99/year → variation ID in `Subscribe.jsx`.
 
-Note the Plan Variation IDs and update them in:
-- `src/pages/Subscribe.jsx` (plans object)
-- Square Dashboard subscription settings
+Google Play:
+- Monthly Subscription Product ID: `VITE_PLAY_MONTHLY_ID`
+- Yearly Subscription Product ID: `VITE_PLAY_YEARLY_ID`
+
+Ensure product IDs remain consistent across environments. Use sandbox test accounts for Play Billing validation.

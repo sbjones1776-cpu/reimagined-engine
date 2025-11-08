@@ -14,6 +14,96 @@ const squareClient = new Client({
 });
 
 /**
+ * verifyPlayPurchase
+ * Verifies a Google Play Billing purchase token using the Android Publisher API.
+ * Expects functions config for service account credentials via GOOGLE_APPLICATION_CREDENTIALS
+ * or embedded config. For security, prefer Workload Identity or env var on deploy.
+ *
+ * POST body: { token, productId, email }
+ * Response: { success: true }
+ */
+exports.verifyPlayPurchase = functions.https.onRequest(async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(204).send('');
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { token, productId, email } = req.body || {};
+  if (!token || !productId || !email) {
+    return res.status(400).json({ error: 'Missing token, productId, or email' });
+  }
+
+  try {
+    // Lazy import to avoid cold start cost when unused
+    const { google } = require('googleapis');
+
+    // Configure auth
+    const auth = new google.auth.GoogleAuth({
+      scopes: ['https://www.googleapis.com/auth/androidpublisher']
+    });
+    const authClient = await auth.getClient();
+    const publisher = google.androidpublisher({ version: 'v3', auth: authClient });
+
+    const packageName = functions.config().play?.package || process.env.PLAY_PACKAGE_NAME;
+    if (!packageName) {
+      throw new Error('Missing Play package name (functions.config().play.package or PLAY_PACKAGE_NAME)');
+    }
+
+    // For subscriptions, validate via purchases.subscriptionsv2 or purchases.subscriptions
+    // Here we try Subscriptions v2 first; fallback to classic if needed.
+    let valid = false;
+    try {
+      const { data } = await publisher.purchases.subscriptionsv2.get({
+        packageName,
+        token
+      });
+      const lineItems = data?.lineItems || [];
+      const active = lineItems.some(li => (li?.expiryTime || 0) > Date.now());
+      valid = active;
+    } catch (e) {
+      // Fallback to classic endpoint if v2 not enabled
+      try {
+        const { data } = await publisher.purchases.subscriptions.get({
+          packageName,
+          subscriptionId: productId,
+          token
+        });
+        // Consider purchased if not canceled and expiry in future
+        const expiry = Number(data?.expiryTimeMillis || 0);
+        valid = expiry > Date.now();
+      } catch (e2) {
+        console.error('Play verification failed (classic):', e2?.message || e2);
+        valid = false;
+      }
+    }
+
+    if (!valid) {
+      return res.status(400).json({ error: 'Invalid or expired purchase token' });
+    }
+
+    // Grant entitlement
+    await db.collection('users').doc(email).set({
+      entitlements: { premium: true },
+      subscription: {
+        platform: 'googleplay',
+        productId,
+        status: 'ACTIVE',
+        verifiedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }
+    }, { merge: true });
+
+    return res.json({ success: true });
+
+  } catch (error) {
+    console.error('verifyPlayPurchase error:', error);
+    return res.status(500).json({ error: 'Verification error', message: error.message });
+  }
+});
+
+/**
  * Create a subscription via Square and grant premium access
  * POST body: { email, planId, sourceId, customerId? }
  */

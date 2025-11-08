@@ -8,6 +8,11 @@ export default defineConfig({
   server: {
     allowedHosts: true
   },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: [],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
