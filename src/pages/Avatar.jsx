@@ -32,13 +32,16 @@ export default function Avatar() {
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Fetch user profile from Firestore
         const db = getFirestore(firebaseApp);
-        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+        // Always use uid as the canonical document id
+        const userRef = doc(db, "users", firebaseUser.uid);
+        const userSnap = await getDoc(userRef);
+        const data = userSnap.exists() ? userSnap.data() : {};
         setUser({
+          uid: firebaseUser.uid,
           email: firebaseUser.email,
-          full_name: firebaseUser.displayName,
-          ...userDoc.exists() ? userDoc.data() : {},
+            full_name: data.full_name || firebaseUser.displayName || firebaseUser.email?.split('@')[0],
+          ...data,
         });
       } else {
         setUser(null);
@@ -106,19 +109,53 @@ export default function Avatar() {
   const handleSave = async () => {
     if (!user) return;
     const db = getFirestore(firebaseApp);
-    await setDoc(doc(db, "users", user.email), {
-      ...user,
+    await setDoc(doc(db, "users", user.uid), {
       ...avatarData,
+      full_name: user.full_name,
+      email: user.email,
+      updatedAt: Date.now(),
     }, { merge: true });
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
   };
 
+  // React Query mutations (previously referenced but not defined)
+  const updateAvatarMutation = useMutation({
+    mutationFn: async (partial) => {
+      if (!user) return;
+      const db = getFirestore(firebaseApp);
+      await setDoc(doc(db, 'users', user.uid), { ...partial }, { merge: true });
+      return partial;
+    },
+    onSuccess: (partial) => {
+      // Optimistically update local state
+      setAvatarData(prev => ({ ...prev, ...partial }));
+      // Invalidate any queries that depend on user
+      queryClient.invalidateQueries({ queryKey: ['user', user.uid] });
+    }
+  });
+
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+      const db = getFirestore(firebaseApp);
+      await setDoc(doc(db, 'users', user.uid), {
+        subscription_cancels_at: user.subscription_expires_at,
+        subscription_auto_renew: false
+      }, { merge: true });
+      return true;
+    },
+    onSuccess: () => {
+      setShowCancelConfirm(false);
+      queryClient.invalidateQueries({ queryKey: ['user', user.uid] });
+    }
+  });
+
   // Firebase cancel subscription (stub)
   const cancelSubscription = async () => {
     if (!user) return;
     const db = getFirestore(firebaseApp);
-    await setDoc(doc(db, "users", user.email), {
+    await setDoc(doc(db, "users", user.uid), {
       subscription_cancels_at: user.subscription_expires_at,
       subscription_auto_renew: false
     }, { merge: true });
@@ -210,7 +247,7 @@ export default function Avatar() {
               onChange={async (e) => {
                 const newName = e.target.value;
                 const auth = getAuth(firebaseApp);
-                const uid = auth.currentUser?.uid || user.email;
+                const uid = auth.currentUser?.uid || user?.uid;
                 const db = getFirestore(firebaseApp);
                 await setDoc(doc(db, 'users', uid), { full_name: newName }, { merge: true });
                 setUser(prev => ({ ...prev, full_name: newName }));
