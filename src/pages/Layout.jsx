@@ -148,8 +148,8 @@ export default function Layout({ children, currentPageName }) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 flex items-center justify-center p-4">
         <div className="text-center max-w-md w-full">
-          <div className="w-28 h-28 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full flex items-center justify-center shadow-2xl mx-auto mb-6">
-            <span className="text-6xl">🎮</span>
+          <div className="w-28 h-28 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full flex items-center justify-center shadow-2xl mx-auto mb-6 overflow-hidden">
+            <img src="/icons/a585dbbf4_image.png" alt="App icon" className="w-20 h-20 object-contain" />
           </div>
           <h1 className="text-4xl font-extrabold text-white mb-3 drop-shadow-2xl">Math Adventure</h1>
           <p className="text-lg text-white mb-6 drop-shadow-lg">Sign in or create an account to start.</p>
