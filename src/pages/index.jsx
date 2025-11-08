@@ -38,6 +38,8 @@ import AITutor from "./AITutor";
 
 import AdminTestAccount from "./AdminTestAccount";
 
+import Subscribe from "./Subscribe";
+
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
 const PAGES = {
@@ -79,6 +81,8 @@ const PAGES = {
     AITutor: AITutor,
     
     AdminTestAccount: AdminTestAccount,
+    
+    Subscribe: Subscribe,
     
 }
 
@@ -144,6 +148,8 @@ function PagesContent() {
                 <Route path="/AITutor" element={<AITutor />} />
                 
                 <Route path="/AdminTestAccount" element={<AdminTestAccount />} />
+                
+                <Route path="/Subscribe" element={<Subscribe />} />
                 
             </Routes>
         </Layout>

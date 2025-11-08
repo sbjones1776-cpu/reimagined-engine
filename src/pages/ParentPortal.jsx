@@ -103,8 +103,8 @@ export default function ParentPortal() {
   const selectedChild = myChildren.find(c => c.email === selectedChildEmail);
   const childData = allUsers.find(u => u.email === selectedChildEmail);
 
-  // Check if user has premium parent access
-  const hasPremiumParent = currentUser?.is_premium_parent || currentUser?.is_family_teacher;
+  // Check if user has premium access (parent portal is premium-only)
+  const hasPremiumParent = currentUser?.entitlements?.premium || false;
 
   if (!currentUser?.is_parent_mode) {
     return (

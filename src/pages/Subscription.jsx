@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Crown, Check, Sparkles, Users, GraduationCap, Star, Shield, Target, MessageSquare, BarChart3, Clock, Lock, CreditCard, XCircle, AlertTriangle, CheckCircle, ExternalLink, Globe } from "lucide-react";
 import { format } from "date-fns";
+import UpgradeButton from "@/components/UpgradeButton";
 
 export default function Subscription() {
   const queryClient = useQueryClient();

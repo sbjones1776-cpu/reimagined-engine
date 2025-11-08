@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import DailyChallengeWidget from "../components/daily/DailyChallengeWidget";
 import SimpleAuth from "../components/SimpleAuth";
 import Logo from "@/components/Logo";
+import UpgradeButton from "@/components/UpgradeButton";
 import { format } from "date-fns";
 
 const mathConcepts = [
@@ -1242,11 +1243,15 @@ export default function Home() {
     return false;
   };
 
-  // Subscription info
-  const currentTier = user?.subscription_tier || "free";
-  const isSubscribed = currentTier !== "free";
-  const subscriptionExpires = user?.subscription_expires_at ? new Date(user.subscription_expires_at) : null;
-  const daysUntilRenewal = subscriptionExpires ? Math.ceil((subscriptionExpires - new Date()) / (1000 * 60 * 60 * 24)) : 0;
+  // Check premium status from entitlements
+  const isPremium = user?.entitlements?.premium || false;
+  const subscriptionStatus = user?.subscription?.status;
+  const subscriptionExpires = user?.subscription?.chargedThroughDate 
+    ? new Date(user.subscription.chargedThroughDate) 
+    : null;
+  const daysUntilRenewal = subscriptionExpires 
+    ? Math.ceil((subscriptionExpires - new Date()) / (1000 * 60 * 60 * 24)) 
+    : 0;
 
   // Free tier limitations: only basic concepts and Easy level
   const freeTierConcepts = [
@@ -1258,10 +1263,10 @@ export default function Home() {
 
   // Check parental controls (or apply free tier limits)
   const parentalControls = user?.parental_controls || {};
-  const allowedOperations = isSubscribed 
+  const allowedOperations = isPremium 
     ? (parentalControls.allowed_operations || mathConcepts.map(c => c.id))
     : freeTierConcepts;
-  const allowedLevels = isSubscribed
+  const allowedLevels = isPremium
     ? (parentalControls.allowed_levels || ["easy", "medium", "hard", "expert"])
     : freeTierLevels;
   const focusOperations = parentalControls.focus_operations || [];
@@ -1494,14 +1499,13 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <Link to={createPageUrl("Subscription")}>
-                <Button 
-                  className="h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg"
-                >
-                  <Crown className="w-5 h-5 mr-2" />
-                  Upgrade Now
-                </Button>
-              </Link>
+              <Button 
+                onClick={() => window.open(process.env.VITE_CHECKOUT_URL || '/subscribe', '_blank')}
+                className="h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg"
+              >
+                <Crown className="w-5 h-5 mr-2" />
+                Upgrade Now
+              </Button>
             </div>
           </CardContent>
         </Card>
