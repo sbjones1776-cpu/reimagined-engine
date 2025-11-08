@@ -27,7 +27,21 @@ export default function Subscription() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return { 
+        email: 'user@example.com',
+        subscription_tier: 'free',
+        subscription_expires_at: null,
+        subscription_auto_renew: false
+      };
+    },
+    initialData: { 
+      email: 'user@example.com',
+      subscription_tier: 'free',
+      subscription_expires_at: null,
+      subscription_auto_renew: false
+    },
   });
 
   // Check for success redirect
@@ -81,10 +95,10 @@ export default function Subscription() {
 
   const cancelSubscriptionMutation = useMutation({
     mutationFn: async () => {
-      return base44.auth.updateMe({
-        subscription_cancels_at: user.subscription_expires_at,
-        subscription_auto_renew: false
-      });
+      // TODO: Implement Firebase subscription cancellation
+      console.log('Subscription cancel request');
+      alert('Subscription cancellation is currently being migrated to Firebase. This feature will be available soon!');
+      throw new Error('Subscription cancel pending implementation');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });

@@ -84,7 +84,10 @@ export default function MessageInbox({ user }) {
 
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId) => {
-      return base44.entities.Message.delete(messageId);
+      // TODO: Implement Firebase message deletion
+      console.log('Message deletion (placeholder):', messageId);
+      alert('Message deletion is currently being migrated to Firebase. This feature will be available soon!');
+      throw new Error('Message deletion pending implementation');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['childMessages'] });

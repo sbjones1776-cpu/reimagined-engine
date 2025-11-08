@@ -1,18 +1,29 @@
-import React from "react";
-// import { useQuery } from "@tanstack/react-query";
-// // import { base44 } from "@/api/base44Client";
+import React, { useState, useEffect } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app as firebaseApp } from "@/firebaseConfig";
 import MessageInbox from "../components/MessageInbox";
 
 export default function Messages() {
-  // Placeholder until backend is connected
-  const user = null;
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  /* const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
-  }); */
+  useEffect(() => {
+    const auth = getAuth(firebaseApp);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          email: firebaseUser.email,
+          uid: firebaseUser.uid,
+        });
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  if (!user) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">

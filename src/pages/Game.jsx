@@ -2,10 +2,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-// Firebase migration
-import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
-import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
+import { getAuth } from "firebase/auth";
+import { app as firebaseApp } from "@/firebaseConfig";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { 
+  saveGameProgress, 
+  getUserProfile, 
+  updateUserProfile,
+  getUserGameProgress 
+} from "@/api/firebaseService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card"; // Added CardContent
 import { Progress } from "@/components/ui/progress";
@@ -48,26 +53,26 @@ export default function Game() {
 
   const totalQuestions = 10;
 
-  const { data: recentProgress = [] } = useQuery({
-    queryKey: ['recentProgress'],
-    queryFn: async () => {
-      const db = getFirestore(firebaseApp);
-      // TODO: Replace with actual user email
-      const q = query(collection(db, "gameProgress"), where("created_by", "==", "USER_EMAIL"));
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => doc.data()).slice(0, 5);
-    },
-    initialData: [],
-  });
-
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: async () => {
-      const db = getFirestore(firebaseApp);
-      // TODO: Replace with actual user ID
-      // Example: getDoc(doc(db, "users", "USER_ID"))
-      return null;
+      const auth = getAuth(firebaseApp);
+      const currentUser = auth.currentUser;
+      if (!currentUser) return null;
+      return await getUserProfile(currentUser.email);
     },
+    initialData: null,
+  });
+
+  const { data: recentProgress = [] } = useQuery({
+    queryKey: ['recentProgress', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return [];
+      const progress = await getUserGameProgress(user.email);
+      return progress.slice(0, 5);
+    },
+    initialData: [],
+    enabled: !!user?.email,
   });
 
   // Subscription info
@@ -184,31 +189,42 @@ export default function Game() {
   };
 
   const saveProgressMutation = useMutation({
-    mutationFn: (progressData) => base44.entities.GameProgress.create(progressData),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['gameProgress'] });
-      queryClient.invalidateQueries({ queryKey: ['recentProgress'] });
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+    mutationFn: async (progressData) => {
+      if (!user?.email) {
+        throw new Error('User not authenticated');
+      }
       
-      const coins = variables.coins_earned || 0;
+      // Save game progress to Firestore
+      const savedProgress = await saveGameProgress(user.email, progressData);
+      
+      // Update user coins and pet experience
+      const coins = progressData.coins_earned || 0;
       const newTotalCoins = (user?.coins || 0) + coins;
       
+      const updates = {
+        coins: newTotalCoins,
+        total_stars_earned: (user?.total_stars_earned || 0) + (progressData.stars_earned || 0)
+      };
+      
+      // Update pet experience if user has an active pet
       const activePet = user?.active_pet;
       if (activePet) {
         const currentExp = user?.pet_experience?.[activePet] || 0;
-        const xpGained = variables.correct_answers * 10;
-        const newPetExp = {
+        const xpGained = progressData.correct_answers * 10;
+        updates.pet_experience = {
           ...(user?.pet_experience || {}),
           [activePet]: currentExp + xpGained,
         };
-        
-        base44.auth.updateMe({
-          coins: newTotalCoins,
-          pet_experience: newPetExp,
-        });
-      } else {
-        base44.auth.updateMe({ coins: newTotalCoins });
       }
+      
+      await updateUserProfile(user.email, updates);
+      
+      return savedProgress;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gameProgress'] });
+      queryClient.invalidateQueries({ queryKey: ['recentProgress'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     },
   });
 

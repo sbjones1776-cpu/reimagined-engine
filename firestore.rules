@@ -1,0 +1,140 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the document
+    function isOwner(email) {
+      return isSignedIn() && request.auth.token.email == email;
+    }
+    
+    // USER PROFILES
+    match /users/{email} {
+      // Anyone can read user profiles (for leaderboards, team challenges)
+      allow read: if isSignedIn();
+      
+      // Users can only create/update their own profile
+      allow create: if isOwner(email);
+      allow update: if isOwner(email);
+      
+      // No one can delete user profiles
+      allow delete: if false;
+    }
+    
+    // GAME PROGRESS
+    match /gameProgress/{progressId} {
+      // Users can read their own progress
+      allow read: if isSignedIn() && 
+        (resource.data.user_email == request.auth.token.email ||
+         request.auth.token.email in resource.data.shared_with);
+      
+      // Users can create their own progress entries
+      allow create: if isSignedIn() && 
+        request.resource.data.user_email == request.auth.token.email;
+      
+      // Users can update their own progress
+      allow update: if isSignedIn() && 
+        resource.data.user_email == request.auth.token.email;
+      
+      // No one can delete progress
+      allow delete: if false;
+    }
+    
+    // DAILY CHALLENGES
+    match /dailyChallenges/{challengeId} {
+      // Anyone can read daily challenges (for leaderboards)
+      allow read: if isSignedIn();
+      
+      // Users can create their own challenge entries
+      allow create: if isSignedIn() && 
+        request.resource.data.user_email == request.auth.token.email;
+      
+      // Users can update their own challenges
+      allow update: if isSignedIn() && 
+        resource.data.user_email == request.auth.token.email;
+      
+      // No one can delete challenges
+      allow delete: if false;
+    }
+    
+    // MESSAGES
+    match /messages/{messageId} {
+      // Users can read messages sent to them or by them
+      allow read: if isSignedIn() && 
+        (resource.data.child_email == request.auth.token.email ||
+         resource.data.parent_email == request.auth.token.email);
+      
+      // Parents can send messages to their children
+      allow create: if isSignedIn() && 
+        request.resource.data.parent_email == request.auth.token.email;
+      
+      // Recipients can mark as read
+      allow update: if isSignedIn() && 
+        resource.data.child_email == request.auth.token.email;
+      
+      // Senders and recipients can delete
+      allow delete: if isSignedIn() && 
+        (resource.data.child_email == request.auth.token.email ||
+         resource.data.parent_email == request.auth.token.email);
+    }
+    
+    // TEAM CHALLENGES
+    match /teamChallenges/{challengeId} {
+      // Team members can read their challenges
+      allow read: if isSignedIn() && 
+        (resource.data.creator_email == request.auth.token.email ||
+         request.auth.token.email in resource.data.team_members);
+      
+      // Users can create team challenges
+      allow create: if isSignedIn() && 
+        request.resource.data.creator_email == request.auth.token.email;
+      
+      // Creators can update their challenges
+      allow update: if isSignedIn() && 
+        resource.data.creator_email == request.auth.token.email;
+      
+      // Creators can delete their challenges
+      allow delete: if isSignedIn() && 
+        resource.data.creator_email == request.auth.token.email;
+    }
+    
+    // TUTOR SESSIONS
+    match /tutorSessions/{sessionId} {
+      // Users can read their own tutor sessions
+      allow read: if isSignedIn() && 
+        resource.data.user_email == request.auth.token.email;
+      
+      // Users can create their own sessions
+      allow create: if isSignedIn() && 
+        request.resource.data.user_email == request.auth.token.email;
+      
+      // No updates or deletes
+      allow update, delete: if false;
+    }
+    
+    // FRIEND CONNECTIONS
+    match /friendConnections/{connectionId} {
+      // Users can read connections involving them
+      allow read: if isSignedIn() && 
+        (resource.data.user_email == request.auth.token.email ||
+         resource.data.friend_email == request.auth.token.email);
+      
+      // Users can create friend requests
+      allow create: if isSignedIn() && 
+        request.resource.data.user_email == request.auth.token.email;
+      
+      // Recipients can accept/reject friend requests
+      allow update: if isSignedIn() && 
+        resource.data.friend_email == request.auth.token.email;
+      
+      // Either party can delete the connection
+      allow delete: if isSignedIn() && 
+        (resource.data.user_email == request.auth.token.email ||
+         resource.data.friend_email == request.auth.token.email);
+    }
+  }
+}

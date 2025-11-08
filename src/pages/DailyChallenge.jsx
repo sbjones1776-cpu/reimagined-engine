@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-// Firebase migration
-import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
-import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
+import { getAuth } from "firebase/auth";
+import { app as firebaseApp } from "@/firebaseConfig";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { 
+  getUserProfile, 
+  updateUserProfile,
+  saveDailyChallenge 
+} from "@/api/firebaseService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -56,20 +60,19 @@ export default function DailyChallenge() {
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: async () => {
-      const db = getFirestore(firebaseApp);
-      // TODO: Replace with actual user ID
-      // Example: getDoc(doc(db, "users", "USER_ID"))
-      return null;
+      const auth = getAuth(firebaseApp);
+      const currentUser = auth.currentUser;
+      if (!currentUser) return null;
+      return await getUserProfile(currentUser.email);
     },
+    initialData: null,
   });
 
   const { data: todaysChallenges = [] } = useQuery({
     queryKey: ['dailyChallenges', todayDate],
     queryFn: async () => {
-      const db = getFirestore(firebaseApp);
-      const q = query(collection(db, "dailyChallenges"), where("challenge_date", "==", todayDate));
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => doc.data());
+      // For now, return empty - could fetch all users' challenges for leaderboard
+      return [];
     },
     initialData: [],
   });
@@ -126,16 +129,29 @@ export default function DailyChallenge() {
   }, [startTime, isFinished, hasStarted]);
 
   const saveChallengeeMutation = useMutation({
-    mutationFn: (challengeData) => base44.entities.DailyChallenge.create(challengeData),
-    onSuccess: (_, variables) => {
+    mutationFn: async (challengeData) => {
+      if (!user?.email) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Save daily challenge to Firestore
+      const savedChallenge = await saveDailyChallenge(user.email, challengeData);
+      
+      // Update user coins
+      const coins = challengeData.bonus_coins || 0;
+      const newTotalCoins = (user?.coins || 0) + coins;
+      
+      await updateUserProfile(user.email, {
+        coins: newTotalCoins,
+        last_login_date: todayDate
+      });
+      
+      return savedChallenge;
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dailyChallenges'] });
       queryClient.invalidateQueries({ queryKey: ['userDailyChallenges'] });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      
-      // Award coins
-      const coins = variables.bonus_coins || 0;
-      const newTotalCoins = (user?.coins || 0) + coins;
-      base44.auth.updateMe({ coins: newTotalCoins });
     },
   });
 

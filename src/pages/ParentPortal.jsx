@@ -28,12 +28,29 @@ export default function ParentPortal() {
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return { 
+        email: 'parent@example.com', 
+        is_parent_mode: true,
+        is_premium_parent: false,
+        is_family_teacher: false
+      };
+    },
+    initialData: { 
+      email: 'parent@example.com', 
+      is_parent_mode: true,
+      is_premium_parent: false,
+      is_family_teacher: false
+    },
   });
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['allUsers'],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query to get linked children
+      return [];
+    },
     initialData: [],
   });
 
@@ -43,27 +60,41 @@ export default function ParentPortal() {
   // Get progress data for selected child
   const { data: childProgress = [] } = useQuery({
     queryKey: ['childProgress', selectedChildEmail],
-    queryFn: () => base44.entities.GameProgress.filter({ created_by: selectedChildEmail }),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return [];
+    },
     initialData: [],
     enabled: !!selectedChildEmail,
   });
 
   const { data: childDailyChallenges = [] } = useQuery({
     queryKey: ['childDailyChallenges', selectedChildEmail],
-    queryFn: () => base44.entities.DailyChallenge.filter({ created_by: selectedChildEmail }),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return [];
+    },
     initialData: [],
     enabled: !!selectedChildEmail,
   });
 
   const { data: childGoals = [] } = useQuery({
     queryKey: ['childGoals', selectedChildEmail],
-    queryFn: () => base44.entities.CustomGoal.filter({ child_email: selectedChildEmail }),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return [];
+    },
     initialData: [],
     enabled: !!selectedChildEmail,
   });
 
   const enableParentModeMutation = useMutation({
-    mutationFn: (isEnabled) => base44.auth.updateMe({ is_parent_mode: isEnabled }),
+    mutationFn: async (isEnabled) => {
+      // TODO: Implement Firebase user update
+      console.log('Parent mode toggle:', isEnabled);
+      alert('Parent mode settings are currently being migrated to Firebase. This feature will be available soon!');
+      throw new Error('Parent mode pending implementation');
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     },

@@ -30,58 +30,30 @@ export default function AITutor({
     try {
       console.log('🤖 Generating hint for:', question);
       
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert elementary school math tutor who loves making math fun and easy to understand!
-
-A student is working on: ${question}
-- Their answer: ${userAnswer}
-- Correct answer: ${correctAnswer}
-- Math operation: ${operation}
-- Difficulty level: ${level}
-
-Create a friendly, encouraging hint (2-3 sentences) that:
-- Guides them toward the RIGHT way to think about the problem
-- Does NOT give away the answer directly
-- Uses simple, clear language for kids
-- Includes one emoji to make it friendly
-- Focuses on the strategy or method, not the solution
-
-Be encouraging and make them feel confident they can solve it!`,
-      });
+      // TODO: Implement Firebase LLM integration
+      console.log('🤖 AI hints are currently being migrated to Firebase.');
       
-      console.log('📥 Hint result received:', result);
-      console.log('📥 Result type:', typeof result);
+      // Use fallback hint immediately
+      const fallbackHint = `Let's think about ${question} together! Try breaking it down into smaller steps. ${
+        operation === 'addition' ? 'Add the ones first, then the tens.' :
+        operation === 'subtraction' ? 'Remember to borrow if you need to!' :
+        operation === 'multiplication' ? 'Think about groups of the same number.' :
+        'Think about dividing into equal groups!'
+      } You can do this! 💪`;
       
-      let hintText = '';
-      
-      if (typeof result === 'string') {
-        hintText = result;
-      } else if (result && typeof result === 'object') {
-        hintText = result.output || result.response || result.text || result.content || JSON.stringify(result);
-      }
-      
-      console.log('✅ Extracted hint text:', hintText);
-      
-      if (!hintText || hintText.trim() === '') {
-        throw new Error('No hint text received from AI');
-      }
-      
-      setHint(hintText);
+      setHint(fallbackHint);
       setShowHint(true);
       
-      try {
-        await base44.entities.TutorSession.create({
-          question,
-          correct_answer: correctAnswer,
-          user_answer: userAnswer,
-          operation,
-          level,
-          hint_requested: true,
-          hint_text: hintText,
-        });
-      } catch (saveError) {
-        console.error('Error saving tutor session:', saveError);
-      }
+      // TODO: Save tutor session to Firebase
+      console.log('Tutor session (placeholder):', {
+        question,
+        correct_answer: correctAnswer,
+        user_answer: userAnswer,
+        operation,
+        level,
+        hint_requested: true,
+        hint_text: fallbackHint,
+      });
       
     } catch (error) {
       console.error('❌ Error generating hint:', error);
@@ -108,92 +80,24 @@ Be encouraging and make them feel confident they can solve it!`,
     try {
       console.log('🤖 Generating explanation for:', question);
       
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are an expert elementary school math tutor creating a detailed, step-by-step explanation!
-
-PROBLEM: ${question}
-STUDENT'S ANSWER: ${userAnswer}
-CORRECT ANSWER: ${correctAnswer}
-OPERATION: ${operation}
-LEVEL: ${level}
-
-Create a comprehensive, engaging explanation with these sections:
-
-**📍 WHERE DID I GO WRONG?**
-Explain in 1-2 sentences what mistake they likely made and why they got ${userAnswer} instead of ${correctAnswer}. Be kind and understanding - everyone makes mistakes!
-
-**✨ LET'S SOLVE IT STEP-BY-STEP!**
-Break down the solution into clear, numbered steps:
-${operation === 'addition' ? `
-1. Write the numbers one above the other, lining up the place values
-2. Add the ones place first
-3. If the sum is 10 or more, carry the 1 to the tens place
-4. Add the tens place (including any carried number)
-5. Write your final answer` : 
-  operation === 'subtraction' ? `
-1. Write the larger number on top, smaller on bottom
-2. Start with the ones place
-3. If the top number is smaller, borrow from the tens place
-4. Subtract the ones place
-5. Move to the tens place and subtract
-6. Write your final answer` :
-  operation === 'multiplication' ? `
-1. Understand what ${question} means (groups of numbers)
-2. Break down the problem if needed (like 12 = 10 + 2)
-3. Multiply each part
-4. Add the results together
-5. Double-check your answer` :
-  `1. Set up the division: ${question}
-2. How many times does the divisor go into the dividend?
-3. Multiply to check
-4. Subtract to find remainder
-5. Write your answer`}
-
-**🎯 THE RIGHT ANSWER**
-Show clearly that ${question} = ${correctAnswer}
-
-**💡 QUICK TIP TO REMEMBER**
-One practical tip or trick to help solve similar problems in the future.
-
-**🏃 PRACTICE HELPS!**
-One encouraging sentence about practicing this type of problem.
-
-Use emojis throughout to make it fun and engaging! Keep language simple and encouraging for kids ages 7-12.`,
-      });
+      // TODO: Implement Firebase LLM integration
+      console.log('🤖 AI explanations are currently being migrated to Firebase.');
       
-      console.log('📥 Explanation result received:', result);
-      console.log('📥 Result type:', typeof result);
-      
-      let explanationText = '';
-      
-      if (typeof result === 'string') {
-        explanationText = result;
-      } else if (result && typeof result === 'object') {
-        explanationText = result.output || result.response || result.text || result.content || JSON.stringify(result);
-      }
-      
-      console.log('✅ Extracted explanation text:', explanationText);
-      
-      if (!explanationText || explanationText.trim() === '') {
-        throw new Error('No explanation text received from AI');
-      }
-      
-      setExplanation(explanationText);
+      // Use fallback explanation immediately
+      const fallbackExplanation = generateFallbackExplanation(question, correctAnswer, userAnswer, operation);
+      setExplanation(fallbackExplanation);
       setShowExplanation(true);
       
-      try {
-        await base44.entities.TutorSession.create({
-          question,
-          correct_answer: correctAnswer,
-          user_answer: userAnswer,
-          operation,
-          level,
-          explanation_viewed: true,
-          explanation_text: explanationText,
-        });
-      } catch (saveError) {
-        console.error('Error saving tutor session:', saveError);
-      }
+      // TODO: Save tutor session to Firebase
+      console.log('Tutor session (placeholder):', {
+        question,
+        correct_answer: correctAnswer,
+        user_answer: userAnswer,
+        operation,
+        level,
+        explanation_viewed: true,
+        explanation_text: fallbackExplanation,
+      });
       
     } catch (error) {
       console.error('❌ Error generating explanation:', error);

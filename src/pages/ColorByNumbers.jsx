@@ -660,7 +660,11 @@ export default function ColorByNumbers() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return { email: 'user@example.com', coins: 0 };
+    },
+    initialData: { email: 'user@example.com', coins: 0 },
   });
 
   const getOrganizedTemplates = () => {
@@ -752,13 +756,15 @@ export default function ColorByNumbers() {
   const template = selectedTemplate ? templates[selectedTemplate] : null;
 
   const saveProgressMutation = useMutation({
-    mutationFn: (progressData) => base44.entities.GameProgress.create(progressData),
+    mutationFn: async (progressData) => {
+      // TODO: Implement Firebase progress tracking
+      console.log('Color by Numbers progress saved (placeholder):', progressData);
+      return progressData;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gameProgress'] });
-
-      const coins = 25;
-      const newTotalCoins = (user?.coins || 0) + coins;
-      base44.auth.updateMe({ coins: newTotalCoins });
+      // TODO: Implement Firebase coins update
+      console.log('Coins earned: 25');
     },
   });
 

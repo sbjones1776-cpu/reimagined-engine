@@ -3,7 +3,14 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
-// import { base44 } from "@/api/base44Client";
+import { getAuth } from "firebase/auth";
+import { app as firebaseApp } from "@/firebaseConfig";
+import { 
+  getUserProfile, 
+  getUserGameProgress, 
+  getUserDailyChallenges,
+  getUserTutorSessions 
+} from "@/api/firebaseService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trophy, Star, Target, Clock, Award, TrendingUp, ShoppingBag, Gift, Brain } from "lucide-react";
@@ -14,33 +21,45 @@ import RecentGames from "../components/progress/RecentGames";
 import Logo from "@/components/Logo";
 
 export default function Progress() {
+  const { data: user } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const auth = getAuth(firebaseApp);
+      const currentUser = auth.currentUser;
+      if (!currentUser) return null;
+      return await getUserProfile(currentUser.email);
+    },
+    initialData: null,
+  });
+
   const { data: progress = [], isLoading } = useQuery({
-    queryKey: ['gameProgress'],
-    queryFn: () => base44.entities.GameProgress.list('-created_date'),
+    queryKey: ['gameProgress', user?.email],
+    queryFn: async () => {
+      if (!user?.email) return [];
+      return await getUserGameProgress(user.email);
+    },
     initialData: [],
+    enabled: !!user?.email,
   });
 
   const { data: dailyChallenges = [] } = useQuery({
-    queryKey: ['userDailyChallenges'],
+    queryKey: ['userDailyChallenges', user?.email],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      return base44.entities.DailyChallenge.filter({ created_by: user.email });
+      if (!user?.email) return [];
+      return await getUserDailyChallenges(user.email);
     },
     initialData: [],
-  });
-
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    enabled: !!user?.email,
   });
 
   const { data: tutorSessions = [] } = useQuery({
-    queryKey: ['tutorSessions'],
+    queryKey: ['tutorSessions', user?.email],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      return base44.entities.TutorSession.filter({ created_by: user.email });
+      if (!user?.email) return [];
+      return await getUserTutorSessions(user.email);
     },
     initialData: [],
+    enabled: !!user?.email,
   });
 
   const getTotalStars = () => {

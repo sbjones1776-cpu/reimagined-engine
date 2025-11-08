@@ -15,21 +15,35 @@ export default function TeamChallenges() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return { 
+        email: 'user@example.com',
+        total_stars_earned: 0,
+        coins: 0
+      };
+    },
+    initialData: { 
+      email: 'user@example.com',
+      total_stars_earned: 0,
+      coins: 0
+    },
   });
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['allUsers'],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return [];
+    },
     initialData: [],
   });
 
   const { data: myTeamChallenges = [] } = useQuery({
     queryKey: ['myTeamChallenges'],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      const all = await base44.entities.TeamChallenge.list();
-      return all.filter(tc => tc.team_members?.includes(user.email) || tc.creator_email === user.email);
+      // TODO: Replace with Firebase query
+      return [];
     },
     initialData: [],
     enabled: !!user,
@@ -38,8 +52,8 @@ export default function TeamChallenges() {
   const { data: myProgress = [] } = useQuery({
     queryKey: ['myProgress'],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      return base44.entities.GameProgress.filter({ created_by: user.email });
+      // TODO: Replace with Firebase query
+      return [];
     },
     initialData: [],
     enabled: !!user,
@@ -48,28 +62,31 @@ export default function TeamChallenges() {
   const { data: myDailyChallenges = [] } = useQuery({
     queryKey: ['myDailyChallenges'],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      return base44.entities.DailyChallenge.filter({ created_by: user.email });
+      // TODO: Replace with Firebase query
+      return [];
     },
     initialData: [],
     enabled: !!user,
   });
 
   const updateChallengeMutation = useMutation({
-    mutationFn: ({ challengeId, data }) => base44.entities.TeamChallenge.update(challengeId, data),
+    mutationFn: async ({ challengeId, data }) => {
+      // TODO: Implement Firebase challenge update
+      console.log('Challenge update:', challengeId, data);
+      alert('Team challenge updates are currently being migrated to Firebase. This feature will be available soon!');
+      throw new Error('Challenge update pending implementation');
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myTeamChallenges'] });
     },
   });
 
   const claimRewardMutation = useMutation({
-    mutationFn: ({ stars, coins }) => {
-      const currentStars = user.total_stars_earned || 0;
-      const currentCoins = user.coins || 0;
-      return base44.auth.updateMe({
-        total_stars_earned: currentStars + stars,
-        coins: currentCoins + coins,
-      });
+    mutationFn: async ({ stars, coins }) => {
+      // TODO: Implement Firebase reward claim
+      console.log('Reward claim:', stars, coins);
+      alert('Reward claiming is currently being migrated to Firebase. This feature will be available soon!');
+      throw new Error('Reward claim pending implementation');
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });

@@ -142,58 +142,58 @@ export default function Shop() {
 
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return { 
+        email: 'user@example.com', 
+        coins: 0,
+        stars_spent: 0,
+        owned_pets: [],
+        active_pet: null,
+        purchased_items: [],
+        unlocked_items: [],
+        power_ups: {}
+      };
+    },
+    initialData: { 
+      email: 'user@example.com', 
+      coins: 0,
+      stars_spent: 0,
+      owned_pets: [],
+      active_pet: null,
+      purchased_items: [],
+      unlocked_items: [],
+      power_ups: {}
+    },
   });
 
   const { data: progress = [] } = useQuery({
     queryKey: ['gameProgress'],
-    queryFn: () => base44.entities.GameProgress.list(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return [];
+    },
     initialData: [],
   });
 
   const purchaseMutation = useMutation({
-    mutationFn: async ({ itemId, price, type, coins = false }) => {
-      const updates = {};
-      
-      if (coins) {
-        updates.coins = (user?.coins || 0) - price;
-        updates.power_ups = {
-          ...(user?.power_ups || {}),
-          [itemId]: ((user?.power_ups || {})[itemId] || 0) + 1,
-        };
-      } else {
-        // Stars purchase
-        const totalStars = progress.reduce((sum, p) => sum + (p.stars_earned || 0), 0);
-        const starsSpent = user?.stars_spent || 0;
-        const availableStars = totalStars - starsSpent;
-        
-        if (availableStars < price) {
-          throw new Error("Not enough stars!");
-        }
-
-        updates.stars_spent = starsSpent + price;
-        
-        if (type === "pet") {
-          updates.owned_pets = [...(user?.owned_pets || []), itemId];
-          if (!user?.active_pet) {
-            updates.active_pet = itemId;
-          }
-        } else {
-          updates.purchased_items = [...(user?.purchased_items || []), itemId];
-        }
-      }
-      
-      return base44.auth.updateMe(updates);
+    mutationFn: async ({ item, type }) => {
+      // TODO: Implement Firebase purchase logic
+      alert('Purchase system is currently being migrated to Firebase. This feature will be available soon!');
+      throw new Error('Purchase system pending implementation');
     },
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      setPurchaseSuccess(variables.itemId);
-      setTimeout(() => setPurchaseSuccess(null), 3000);
     },
   });
 
   const activatePetMutation = useMutation({
-    mutationFn: (petId) => base44.auth.updateMe({ active_pet: petId }),
+    mutationFn: async (petId) => {
+      // TODO: Implement Firebase pet activation
+      console.log('Pet activation:', petId);
+      alert('Pet activation is currently being migrated to Firebase. This feature will be available soon!');
+      throw new Error('Pet activation pending implementation');
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     },

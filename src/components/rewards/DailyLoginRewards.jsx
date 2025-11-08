@@ -25,7 +25,27 @@ export default function DailyLoginRewards() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return { 
+        email: 'user@example.com',
+        coins: 0,
+        daily_login_streak: 0,
+        total_login_days: 0,
+        last_login_date: null,
+        active_pet: null,
+        pet_experience: {}
+      };
+    },
+    initialData: { 
+      email: 'user@example.com',
+      coins: 0,
+      daily_login_streak: 0,
+      total_login_days: 0,
+      last_login_date: null,
+      active_pet: null,
+      pet_experience: {}
+    },
   });
 
   const claimRewardMutation = useMutation({

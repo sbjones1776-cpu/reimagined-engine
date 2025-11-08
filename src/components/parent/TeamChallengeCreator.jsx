@@ -32,12 +32,19 @@ export default function TeamChallengeCreator() {
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return { email: 'parent@example.com' };
+    },
+    initialData: { email: 'parent@example.com' },
   });
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['allUsers'],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return [];
+    },
     initialData: [],
   });
 
@@ -45,7 +52,12 @@ export default function TeamChallengeCreator() {
   const myChildren = allUsers.filter(u => u.parent_email === currentUser?.email);
 
   const createChallengeMutation = useMutation({
-    mutationFn: (challengeData) => base44.entities.TeamChallenge.create(challengeData),
+    mutationFn: async (challengeData) => {
+      // TODO: Implement Firebase challenge creation
+      console.log('Team challenge created (placeholder):', challengeData);
+      alert('Team challenge creation is currently being migrated to Firebase. This feature will be available soon!');
+      throw new Error('Challenge creation pending implementation');
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teamChallenges'] });
       queryClient.invalidateQueries({ queryKey: ['myTeamChallenges'] });

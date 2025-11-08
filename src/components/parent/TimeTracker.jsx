@@ -13,7 +13,19 @@ export default function TimeTracker({ operation = null }) {
 
   const { data: user, refetch: refetchUser } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return { 
+        email: 'user@example.com',
+        parental_controls: {},
+        daily_usage_tracking: {}
+      };
+    },
+    initialData: { 
+      email: 'user@example.com',
+      parental_controls: {},
+      daily_usage_tracking: {}
+    },
   });
 
   const todayKey = format(new Date(), 'yyyy-MM-dd');
@@ -73,9 +85,8 @@ export default function TimeTracker({ operation = null }) {
       };
 
       try {
-        await base44.auth.updateMe({
-          daily_usage_tracking: updatedTracking
-        });
+        // TODO: Implement Firebase time tracking update
+        console.log('Time tracking update (placeholder):', updatedTracking);
         await refetchUser();
       } catch (error) {
         console.error('Error updating time tracking:', error);

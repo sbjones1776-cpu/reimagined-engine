@@ -20,34 +20,45 @@ export default function Leaderboards() {
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return { email: 'user@example.com' };
+    },
+    initialData: { email: 'user@example.com' },
   });
 
   const { data: allUsers = [] } = useQuery({
     queryKey: ['allUsers'],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return [];
+    },
     initialData: [],
   });
 
   const { data: allProgress = [] } = useQuery({
     queryKey: ['allProgress'],
-    queryFn: () => base44.entities.GameProgress.list('-score'),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return [];
+    },
     initialData: [],
   });
 
   const { data: allDailyChallenges = [] } = useQuery({
     queryKey: ['allDailyChallenges'],
-    queryFn: () => base44.entities.DailyChallenge.list('-score'),
+    queryFn: async () => {
+      // TODO: Replace with Firebase query
+      return [];
+    },
     initialData: [],
   });
 
   const { data: myFriends = [] } = useQuery({
     queryKey: ['myFriends'],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      const sent = await base44.entities.FriendConnection.filter({ user_email: user.email, status: "accepted" });
-      const received = await base44.entities.FriendConnection.filter({ friend_email: user.email, status: "accepted" });
-      return [...sent, ...received];
+      // TODO: Replace with Firebase query
+      return [];
     },
     initialData: [],
     enabled: !!user,
@@ -56,15 +67,20 @@ export default function Leaderboards() {
   const { data: pendingRequests = [] } = useQuery({
     queryKey: ['pendingRequests'],
     queryFn: async () => {
-      const user = await base44.auth.me();
-      return base44.entities.FriendConnection.filter({ friend_email: user.email, status: "pending" });
+      // TODO: Replace with Firebase query
+      return [];
     },
     initialData: [],
     enabled: !!user,
   });
 
   const sendFriendRequestMutation = useMutation({
-    mutationFn: (data) => base44.entities.FriendConnection.create(data),
+    mutationFn: async (data) => {
+      // TODO: Implement Firebase friend request
+      console.log('Friend request:', data);
+      alert('Friend requests are currently being migrated to Firebase. This feature will be available soon!');
+      throw new Error('Friend request pending implementation');
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myFriends'] });
       setInviteSuccess(true);
@@ -74,7 +90,12 @@ export default function Leaderboards() {
   });
 
   const updateFriendRequestMutation = useMutation({
-    mutationFn: ({ id, status }) => base44.entities.FriendConnection.update(id, { status }),
+    mutationFn: async ({ id, status }) => {
+      // TODO: Implement Firebase friend request update
+      console.log('Friend request update:', id, status);
+      alert('Friend request updates are currently being migrated to Firebase. This feature will be available soon!');
+      throw new Error('Friend request update pending implementation');
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myFriends'] });
       queryClient.invalidateQueries({ queryKey: ['pendingRequests'] });
