@@ -57,7 +57,7 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
-        .register('/sw.js')
+        .register('/service-worker.js')
         .then((registration) => {
           console.log('Service Worker registered:', registration);
         })
@@ -142,10 +142,22 @@ export default function Layout({ children, currentPageName }) {
             Please sign in to continue your learning journey!
           </p>
           <Button
-            onClick={() => {
+            onClick={async () => {
               const auth = getAuth(firebaseApp);
-              const provider = new GoogleAuthProvider();
-              signInWithPopup(auth, provider);
+              try {
+                // Google provider requires being enabled in Firebase Console.
+                // If it's not enabled, this will throw auth/operation-not-allowed.
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+              } catch (err) {
+                // Graceful fallback with a helpful message instead of a console error.
+                if (err?.code === 'auth/operation-not-allowed') {
+                  alert('Google Sign-In is not enabled for this project yet. Please enable the Google provider in Firebase Authentication, or use the email/password option from the Settings page.');
+                } else if (err?.code !== 'auth/popup-closed-by-user') {
+                  alert('Sign-in failed. Please try again or contact support.');
+                }
+                console.error('Sign-in error:', err);
+              }
             }}
             className="h-16 px-10 text-xl font-black bg-white text-purple-600 hover:bg-yellow-300 hover:text-purple-700 shadow-2xl transform hover:scale-105 transition-all"
           >
