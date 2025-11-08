@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Home, Trophy, Calendar, User as UserIcon, ShoppingBag, Menu, X, Crown, Coins, Award, Users, GraduationCap, Sparkles, LogOut, Settings, BarChart3, CreditCard, ChevronDown, XCircle, Mail, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import AuthForm from "@/components/AuthForm";
+import SimpleAuth from "@/components/SimpleAuth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,44 +108,34 @@ export default function Layout({ children, currentPageName }) {
     setUnreadMessageCount(0); // Replace with actual count
   }, [user?.email]);
 
-  // If on Landing page, render without layout
+  // Compute data needed for hooks BEFORE any early return (to preserve hook order).
+  const todayDate = format(startOfDay(new Date()), "yyyy-MM-dd");
+  const { data: todaysChallenges = [] } = useQuery({
+    queryKey: ['dailyChallenges', todayDate],
+    initialData: [],
+    enabled: !!user,
+  });
+
+  // Landing page just shows children; still we invoked hooks above.
   if (currentPageName === "Landing") {
-    return <>{children}</>;
+    return <>{children}</>;  
   }
 
-  // If no user and not on Landing, show login prompt instead of redirecting
-  if (user === null && currentPageName !== "Landing") {
+  // Simple auth gate (always after hooks) keeps hook order stable.
+  if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <div className="w-32 h-32 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full flex items-center justify-center shadow-2xl mx-auto mb-8 animate-bounce">
-            <span className="text-7xl">🎮</span>
+        <div className="text-center max-w-md w-full">
+          <div className="w-28 h-28 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full flex items-center justify-center shadow-2xl mx-auto mb-6">
+            <span className="text-6xl">🎮</span>
           </div>
-          <h1 className="text-5xl font-black text-white mb-4 drop-shadow-2xl">
-            Math Adventure! 🎉
-          </h1>
-          <p className="text-xl text-white mb-8 drop-shadow-lg">
-            Please sign in to continue your learning journey!
-          </p>
-          <AuthForm showTitle={false} />
+          <h1 className="text-4xl font-extrabold text-white mb-3 drop-shadow-2xl">Math Adventure</h1>
+          <p className="text-lg text-white mb-6 drop-shadow-lg">Sign in or create an account to start.</p>
+          <SimpleAuth />
         </div>
       </div>
     );
   }
-
-  const todayDate = format(startOfDay(new Date()), "yyyy-MM-dd");
-
-  const { data: todaysChallenges = [] } = useQuery({
-    queryKey: ['dailyChallenges', todayDate],
-  // TODO: Refactor to use Firebase or new backend
-  // queryFn: async () => {
-  //   const q = query(collection(db, "dailyChallenges"), where("challenge_date", "==", todayDate));
-  //   const snapshot = await getDocs(q);
-  //   return snapshot.docs.map(doc => doc.data());
-  // },
-    initialData: [],
-    enabled: !!user,
-  });
 
   const hasCompletedToday = todaysChallenges.some(c => c.created_by === user?.email);
 
