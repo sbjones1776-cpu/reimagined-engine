@@ -315,6 +315,15 @@ export default function Layout({ children, currentPageName }) {
                   <span className="font-bold text-sm">{user.coins || 0}</span>
                 </div>
               )}
+              {user && (
+                <Button
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="hidden md:inline-flex"
+                >
+                  Sign out
+                </Button>
+              )}
 
               {subscriptionTier !== "free" ? (
                 <button

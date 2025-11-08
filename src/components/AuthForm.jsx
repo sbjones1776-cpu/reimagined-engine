@@ -1,22 +1,36 @@
 import React, { useState } from "react";
-import { auth } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
 } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export default function AuthForm({ showTitle = false }) {
+export default function AuthForm({ showTitle = false, redirectTo = "Home" }) {
+  const navigate = useNavigate();
   const [mode, setMode] = useState("sign-in"); // 'sign-in' | 'sign-up'
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  const passwordStrength = (() => {
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    return score; // 0-4
+  })();
 
   const handleSubmit = async () => {
     setError("");
@@ -25,19 +39,42 @@ export default function AuthForm({ showTitle = false }) {
       setError("Please enter email and password.");
       return;
     }
-    if (mode === "sign-up" && password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
+    if (mode === "sign-up") {
+      if (password.length < 6) {
+        setError("Password must be at least 6 characters.");
+        return;
+      }
+      if (password !== confirm) {
+        setError("Passwords do not match.");
+        return;
+      }
     }
     setSubmitting(true);
     try {
       if (mode === "sign-up") {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        // Create user profile document
+        const userRef = doc(db, "users", cred.user.uid);
+        await setDoc(userRef, {
+          email,
+          displayName: cred.user.displayName || email.split("@")[0],
+          createdAt: serverTimestamp(),
+          onboarding: {
+            completed: false,
+            lastStep: 0,
+          },
+          coins: 0,
+          avatar: {
+            skinTone: "medium",
+          },
+        }, { merge: true });
         setMessage("Account created! You're signed in.");
       } else {
         await signInWithEmailAndPassword(auth, email, password);
         setMessage("Signed in successfully.");
       }
+      // Redirect after success
+      try { navigate(createPageUrl(redirectTo)); } catch { /* safe no-op */ }
     } catch (err) {
       setError(err?.message || "Authentication failed.");
     } finally {
@@ -81,6 +118,19 @@ export default function AuthForm({ showTitle = false }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        {mode === "sign-up" && (
+          <>
+            <Input
+              placeholder="Confirm password"
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+            />
+            <div className="text-xs text-gray-600">
+              Strength: {['very weak','weak','fair','good','strong'][passwordStrength]}
+            </div>
+          </>
+        )}
 
         <div className="flex items-center justify-between">
           <Button onClick={handleSubmit} disabled={submitting} className="bg-purple-600 hover:bg-purple-700">
