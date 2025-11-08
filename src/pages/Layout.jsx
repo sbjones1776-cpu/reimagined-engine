@@ -2,6 +2,7 @@
 
 
 import React, { useState, useEffect } from "react";
+import Logo from "@/components/Logo";
 // Firebase migration
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
@@ -138,19 +139,17 @@ export default function Layout({ children, currentPageName }) {
     enabled: !!user,
   });
 
-  // Landing page just shows children; still we invoked hooks above.
-  if (currentPageName === "Landing") {
+  // Landing and Home pages handle their own auth; skip wrapper auth gate for them
+  if (currentPageName === "Landing" || currentPageName === "Home") {
     return <>{children}</>;  
   }
 
-  // Simple auth gate (always after hooks) keeps hook order stable.
+  // Simple auth gate (always after hooks) keeps hook order stable for other pages.
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 flex items-center justify-center p-4">
         <div className="text-center max-w-md w-full">
-          <div className="w-28 h-28 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full flex items-center justify-center shadow-2xl mx-auto mb-6 overflow-hidden">
-            <img src="/icons/a585dbbf4_image.png" alt="App icon" className="w-20 h-20 object-contain" />
-          </div>
+          <Logo size="xl" variant="circle" className="mx-auto mb-6" />
           <h1 className="text-4xl font-extrabold text-white mb-3 drop-shadow-2xl">Math Adventure</h1>
           <p className="text-lg text-white mb-6 drop-shadow-lg">Sign in or create an account to start.</p>
           <SimpleAuth />
@@ -260,9 +259,8 @@ export default function Layout({ children, currentPageName }) {
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link to={createPageUrl("Home")} className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center transform rotate-12 shadow-lg">
-                <span className="text-2xl transform -rotate-12">🎮</span>
-              </div>
+              {/* App logo replaced emoji */}
+              <Logo size="md" variant="circle" />
               <div>
                 <h1 className={`text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent ${isDarkMode && 'from-purple-400 to-pink-400'}`}>
                   Math Adventure

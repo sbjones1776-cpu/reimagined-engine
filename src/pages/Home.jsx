@@ -1,17 +1,20 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 // Firebase migration
 import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
 import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Plus, Minus, X, Divide, Star, Lock, Play, Trophy, Award, Brain, Sparkles, Users, AlertCircle, Crown, CreditCard, Calendar, Percent, DollarSign, Clock, Shapes, BookOpen, TrendingUp, Grid3x3, Zap, Target, Binary, Calculator, BarChart3, Palette } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import DailyChallengeWidget from "../components/daily/DailyChallengeWidget";
+import SimpleAuth from "../components/SimpleAuth";
+import Logo from "@/components/Logo";
 import { format } from "date-fns";
 
 const mathConcepts = [
@@ -1192,16 +1195,33 @@ const Label = ({ children, className = "" }) => (
 export default function Home() {
   const [selectedGrade, setSelectedGrade] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Firebase auth listener
+  useEffect(() => {
+    const auth = getAuth(firebaseApp);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({
+          email: firebaseUser.email,
+          // TODO: Fetch additional user data from Firestore
+          subscription_tier: "free",
+          parental_controls: {},
+        });
+      } else {
+        setUser(null);
+      }
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const { data: progress = [] } = useQuery({
     queryKey: ['gameProgress'],
     queryFn: () => base44.entities.GameProgress.list(),
     initialData: [],
-  });
-
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-  // TODO: Replace with new authentication check
+    enabled: !!user,
   });
 
   const { data: myTeamChallenges = [] } = useQuery({
@@ -1265,6 +1285,31 @@ export default function Home() {
 
   const grades = ["K", "1", "2", "3", "4", "5", "6", "7", "8"];
   
+  // Show auth gate if not logged in
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-xl text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 flex items-center justify-center p-4">
+        <div className="text-center max-w-md w-full">
+          <Logo size="xl" variant="circle" className="mx-auto mb-6" />
+          <h1 className="text-4xl font-extrabold text-white mb-3 drop-shadow-2xl">Math Adventure</h1>
+          <p className="text-lg text-white mb-6 drop-shadow-lg">Sign in or create an account to start learning!</p>
+          <SimpleAuth />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Hero Section */}

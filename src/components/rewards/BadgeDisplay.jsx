@@ -1,4 +1,5 @@
 import React from "react";
+import Logo from "@/components/Logo";
 import { Badge } from "@/components/ui/badge";
 import { Award } from "lucide-react";
 
@@ -13,10 +14,16 @@ export default function BadgeDisplay({ badge, size = "medium" }) {
 
   const sizeClass = sizes[size] || sizes.medium;
 
+  const isAppIcon = badge.emoji === "🎮";
+
   return (
     <div className="relative inline-block">
       <div className={`${sizeClass} rounded-full bg-gradient-to-br ${badge.gradient} flex items-center justify-center shadow-lg border-2 border-white`}>
-        <span>{badge.emoji}</span>
+        {isAppIcon ? (
+          <Logo size={size === "large" ? "md" : size === "small" ? "xs" : "sm"} variant="plain" />
+        ) : (
+          <span>{badge.emoji}</span>
+        )}
       </div>
       {size !== "small" && (
         <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 whitespace-nowrap">

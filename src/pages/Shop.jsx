@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Logo from "@/components/Logo";
 import { ShoppingBag, Star, Coins, Lock, Sparkles, Crown, Package, Palette, Zap } from "lucide-react";
 import PetDisplay from "../components/rewards/PetDisplay";
 import BadgeDisplay from "../components/rewards/BadgeDisplay";
@@ -120,7 +121,7 @@ const shopItems = {
     { id: "tongue_out", name: "Playful Face", emoji: "😛", price: 20, category: "facial", type: "avatar_face" },
   ],
   badges: [
-    { id: "first_game", name: "First Game", emoji: "🎮", gradient: "from-green-400 to-emerald-500", description: "Completed your first game!", requirement: "Play 1 game" },
+  { id: "first_game", name: "First Game", emoji: "🎮", gradient: "from-green-400 to-emerald-500", description: "Completed your first game!", requirement: "Play 1 game", isAppIcon: true },
     { id: "star_collector", name: "Star Collector", emoji: "⭐", gradient: "from-yellow-400 to-orange-500", description: "Earned 50 stars!", requirement: "Earn 50 stars" },
     { id: "speed_demon", name: "Speed Demon", emoji: "⚡", gradient: "from-blue-400 to-cyan-500", description: "Complete a game in under 60 seconds", requirement: "Complete game < 60s" },
     { id: "perfectionist", name: "Perfectionist", emoji: "💯", gradient: "from-pink-400 to-purple-500", description: "Get 100% accuracy", requirement: "100% accuracy" },
@@ -530,7 +531,7 @@ export default function Shop() {
         </CardHeader>
         <CardContent className="grid md:grid-cols-3 gap-4">
           <div className="text-center p-4">
-            <div className="text-4xl mb-2">🎮</div>
+            <div className="flex justify-center mb-2"><Logo size="sm" variant="circle" /></div>
             <h3 className="font-bold mb-1">Play Games</h3>
             <p className="text-sm text-gray-600">Earn up to 3 stars per game</p>
           </div>
