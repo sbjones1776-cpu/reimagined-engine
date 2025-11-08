@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 
-const voicesCache = {};
+let voicesCache = {};
+let cacheVersion = null;
 
 function detectGender(name = "") {
   const n = name.toLowerCase();
@@ -16,7 +17,15 @@ function detectGender(name = "") {
 }
 
 function getVoice(lang = "en-US", preferChild = true) {
-  if (voicesCache[lang]) return voicesCache[lang];
+  // Bust cache if preferences changed
+  try {
+    const v = localStorage.getItem('tts.cacheBuster');
+    if (v && v !== cacheVersion) {
+      voicesCache = {};
+      cacheVersion = v;
+    }
+  } catch {}
+
   const voices = window.speechSynthesis.getVoices();
   // Try user-selected voice first
   try {
@@ -24,23 +33,25 @@ function getVoice(lang = "en-US", preferChild = true) {
     const savedName = localStorage.getItem('tts.voiceName');
     const savedLangPref = localStorage.getItem('tts.lang'); // 'en' | 'es'
     const savedGenderPref = localStorage.getItem('tts.gender'); // 'any' | 'female' | 'male'
+    const langPrefix = (savedLangPref === 'es') ? 'es' : 'en';
+    const cacheKey = `${langPrefix}:${savedGenderPref || 'any'}:${savedURI || ''}:${savedName || ''}`;
+    if (voicesCache[cacheKey]) return voicesCache[cacheKey];
     if (voices && voices.length) {
       if (savedURI) {
         const v = voices.find(v => v.voiceURI === savedURI);
         if (v) {
-          voicesCache[lang] = v;
+          voicesCache[cacheKey] = v;
           return v;
         }
       }
       if (savedName) {
         const v = voices.find(v => v.name === savedName);
         if (v) {
-          voicesCache[lang] = v;
+          voicesCache[cacheKey] = v;
           return v;
         }
       }
       // If no specific voice saved or found, choose based on language and gender preference
-      const langPrefix = (savedLangPref === 'es') ? 'es' : 'en';
       let candidates = voices.filter(v => (v.lang || '').toLowerCase().startsWith(langPrefix));
       if (savedGenderPref === 'female') {
         candidates = candidates.filter(v => detectGender(v.name) === 'female');
@@ -49,14 +60,14 @@ function getVoice(lang = "en-US", preferChild = true) {
       }
       const preferred = candidates.find(v => v.default) || candidates[0];
       if (preferred) {
-        voicesCache[lang] = preferred;
+        voicesCache[cacheKey] = preferred;
         return preferred;
       }
     }
   } catch {}
+  // Fallback to exact lang
   let voice = voices.find(v => v.lang === lang && (!preferChild || v.name.toLowerCase().includes("child")));
   if (!voice) voice = voices.find(v => v.lang === lang);
-  voicesCache[lang] = voice;
   return voice;
 }
 

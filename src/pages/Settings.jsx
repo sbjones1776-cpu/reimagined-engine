@@ -117,6 +117,8 @@ export default function Settings() {
     localStorage.setItem('tts.pitch', String(ttsPitch));
     localStorage.setItem('tts.lang', ttsLang);
     localStorage.setItem('tts.gender', ttsGender);
+    // Bump cache buster so TextToSpeech re-evaluates selection immediately
+    localStorage.setItem('tts.cacheBuster', Date.now().toString());
     setSaveSuccess(true);
     setHasChanges(false);
     setTimeout(() => setSaveSuccess(false), 3000);
