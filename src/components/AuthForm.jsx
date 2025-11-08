@@ -12,6 +12,7 @@ import { createPageUrl } from "@/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import AvatarDisplay from "@/components/avatar/AvatarDisplay";
 
 export default function AuthForm({ showTitle = false, redirectTo = "Home" }) {
   const navigate = useNavigate();
@@ -22,6 +23,44 @@ export default function AuthForm({ showTitle = false, redirectTo = "Home" }) {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+
+  // Starter avatar that matches AvatarDisplay's expected keys
+  const starterAvatar = {
+    avatar_skin_tone: "medium",
+    avatar_hair_style: "short",
+    avatar_hair_color: "brown",
+    avatar_eyes: "happy",
+    avatar_face: "smile",
+    avatar_shirt: "t_shirt_basic",
+    avatar_pants: "jeans",
+    avatar_shoes: "sneakers",
+    avatar_hat: "none",
+    avatar_glasses: "none",
+    avatar_accessory: "none",
+    avatar_background: "stars",
+    pet_hat: "none",
+    pet_accessory: "none",
+    unlocked_items: [
+      "t_shirt_basic",
+      "jeans",
+      "sneakers",
+      "short",
+      "long",
+      "black",
+      "brown",
+      "blonde",
+      "normal",
+      "happy",
+      "light",
+      "medium",
+      "tan",
+      "dark",
+      "smile",
+      "big_smile",
+      "plain",
+    ],
+  };
 
   const passwordStrength = (() => {
     let score = 0;
@@ -55,26 +94,34 @@ export default function AuthForm({ showTitle = false, redirectTo = "Home" }) {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         // Create user profile document
         const userRef = doc(db, "users", cred.user.uid);
-        await setDoc(userRef, {
-          email,
-          displayName: cred.user.displayName || email.split("@")[0],
-          createdAt: serverTimestamp(),
-          onboarding: {
-            completed: false,
-            lastStep: 0,
+        await setDoc(
+          userRef,
+          {
+            email,
+            full_name: cred.user.displayName || email.split("@")[0],
+            createdAt: serverTimestamp(),
+            onboarding: {
+              completed: false,
+              lastStep: 0,
+            },
+            coins: 0,
+            // Seed top-level avatar fields to match Avatar page expectations
+            ...starterAvatar,
           },
-          coins: 0,
-          avatar: {
-            skinTone: "medium",
-          },
-        }, { merge: true });
-        setMessage("Account created! You're signed in.");
+          { merge: true }
+        );
+        setMessage("Account created! Meet your starter avatar.");
+        setShowPreview(true); // Pause redirect to show avatar preview
       } else {
         await signInWithEmailAndPassword(auth, email, password);
         setMessage("Signed in successfully.");
+        // Redirect after sign-in only (sign-up pauses for preview)
+        try {
+          navigate(createPageUrl(redirectTo));
+        } catch {
+          /* safe no-op */
+        }
       }
-      // Redirect after success
-      try { navigate(createPageUrl(redirectTo)); } catch { /* safe no-op */ }
     } catch (err) {
       setError(err?.message || "Authentication failed.");
     } finally {
@@ -161,6 +208,32 @@ export default function AuthForm({ showTitle = false, redirectTo = "Home" }) {
           </Alert>
         )}
       </div>
+
+      {showPreview && !error && (
+        <div className="mt-6 p-4 rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+          <h3 className="text-lg font-bold text-purple-700 mb-3">Welcome! Here's your starter look ✨</h3>
+          <div className="flex items-center gap-4">
+            <AvatarDisplay avatarData={starterAvatar} size="medium" />
+            <div className="flex-1">
+              <p className="text-sm text-gray-700 mb-3">You can customize your avatar now or do it later.</p>
+              <div className="flex gap-2">
+                <Button
+                  className="bg-purple-600 hover:bg-purple-700"
+                  onClick={() => navigate(createPageUrl("Avatar"))}
+                >
+                  Customize Avatar
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(createPageUrl(redirectTo))}
+                >
+                  Continue
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-4 text-xs text-gray-500">
         By continuing you agree to our
