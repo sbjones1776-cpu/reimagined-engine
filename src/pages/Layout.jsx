@@ -54,20 +54,9 @@ export default function Layout({ children, currentPageName }) {
   // Get theme preference
   const isDarkMode = user?.app_settings?.theme === "dark";
 
-  // Register service worker for PWA and add meta tags
+  // PWA meta tags (SW registration handled globally in main.jsx to avoid duplicates)
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/service-worker.js')
-        .then((registration) => {
-          console.log('Service Worker registered:', registration);
-        })
-        .catch((error) => {
-          console.log('Service Worker registration failed:', error);
-        });
-    }
-
-    // Add manifest link to head
+    // Add manifest link to head if not already present
     const manifestLink = document.createElement('link');
     manifestLink.rel = 'manifest';
     manifestLink.href = '/manifest.json';
@@ -104,12 +93,8 @@ export default function Layout({ children, currentPageName }) {
 
     // Cleanup function
     return () => {
-      if (manifestLink.parentNode) manifestLink.remove();
+      // Leave manifest and primary meta tags in place to avoid flicker if layout unmounts
       if (appleIcon.parentNode) appleIcon.remove();
-      if (themeColorMeta.parentNode) themeColorMeta.remove();
-      if (appleCapableMeta.parentNode) appleCapableMeta.remove();
-      if (appleStatusStyleMeta.parentNode) appleStatusStyleMeta.remove();
-      if (appleTitleMeta.parentNode) appleTitleMeta.remove();
     };
   }, [isDarkMode]); // Added isDarkMode as a dependency to ensure theme-color updates if user settings change
 
