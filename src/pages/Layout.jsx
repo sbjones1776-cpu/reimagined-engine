@@ -139,9 +139,18 @@ export default function Layout({ children, currentPageName }) {
     enabled: !!user,
   });
 
-  // Landing and Home pages handle their own auth; skip wrapper auth gate for them
-  if (currentPageName === "Landing" || currentPageName === "Home") {
+  // Landing page always shows just children (no wrapper)
+  if (currentPageName === "Landing") {
     return <>{children}</>;  
+  }
+
+  // Home page handles its own auth but needs Layout wrapper when authenticated
+  if (currentPageName === "Home") {
+    // If no user, Home will show its own auth gate, so just pass children
+    if (!user) {
+      return <>{children}</>;
+    }
+    // If user is authenticated, continue to render full layout with nav
   }
 
   // Simple auth gate (always after hooks) keeps hook order stable for other pages.
