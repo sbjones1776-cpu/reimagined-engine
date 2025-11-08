@@ -22,7 +22,7 @@ export default function Logo({ size = "md", variant = "circle", className = "" }
   return (
     <div className={`${variant === "circle" ? circleClasses : ""} ${s.wrapper} ${className}`.trim()}>
       <img
-        src="/icons/a585dbbf4_image.png"
+        src="/icons/New Logo.png"
         alt="App icon"
         className={`${s.img} object-contain ${variant === "circle" ? "transform -rotate-12" : ""}`}
         loading="lazy"

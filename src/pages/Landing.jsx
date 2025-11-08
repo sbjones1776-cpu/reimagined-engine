@@ -204,7 +204,7 @@ export default function Landing() {
           >
             <div className="relative">
               <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full flex items-center justify-center shadow-2xl transform rotate-12 animate-pulse overflow-hidden">
-                <img src="/icons/a585dbbf4_image.png" alt="App icon" className="w-24 h-24 object-contain transform -rotate-12" />
+                <img src="/icons/New Logo.png" alt="App icon" className="w-24 h-24 object-contain transform -rotate-12" />
               </div>
               <motion.div
                 animate={{ rotate: 360 }}
@@ -513,7 +513,7 @@ export default function Landing() {
       <div className="bg-gray-900 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <div className="mb-4 flex items-center justify-center">
-            <img src="/icons/a585dbbf4_image.png" alt="App icon" className="w-16 h-16 object-contain" />
+            <img src="/icons/New Logo.png" alt="App icon" className="w-16 h-16 object-contain" />
           </div>
           <h3 className="text-3xl font-black mb-2">Math Adventure</h3>
           <p className="text-gray-400 mb-4 text-lg">Making math fun, one game at a time! 🌟</p>
