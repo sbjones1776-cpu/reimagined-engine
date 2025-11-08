@@ -378,12 +378,28 @@ export default function Settings() {
                 <label className="block text-sm font-semibold mb-1">Voice</label>
                 <select
                   className="w-full border-2 border-indigo-200 rounded-lg p-2"
-                  value={ttsVoiceURI || ''}
+                  value={ttsVoiceURI ? `uri:${ttsVoiceURI}` : (ttsVoiceName ? `name:${ttsVoiceName}` : 'system')}
                   onChange={(e) => {
-                    const uri = e.target.value;
-                    setTtsVoiceURI(uri);
-                    const v = voices.find(v => v.voiceURI === uri);
-                    setTtsVoiceName(v?.name || '');
+                    const key = e.target.value;
+                    if (key === 'system') {
+                      setTtsVoiceURI('');
+                      setTtsVoiceName('');
+                      return;
+                    }
+                    if (key.startsWith('uri:')) {
+                      const uri = key.slice(4);
+                      setTtsVoiceURI(uri);
+                      const v = voices.find(v => v.voiceURI === uri);
+                      setTtsVoiceName(v?.name || '');
+                      return;
+                    }
+                    if (key.startsWith('name:')) {
+                      const name = key.slice(5);
+                      setTtsVoiceName(name);
+                      const v = voices.find(v => v.name === name);
+                      setTtsVoiceURI(v?.voiceURI || '');
+                      return;
+                    }
                   }}
                 >
                   {(() => {
@@ -400,13 +416,18 @@ export default function Settings() {
                         return true;
                       });
                     const opts = [];
-                    opts.push(<option key="system-default" value="">System Default ({(voices.find(v=>v.default)?.name) || 'Auto'})</option>);
+                    const systemDefaultName = (voices.find(v=>v.default)?.name) || 'Auto';
+                    opts.push(<option key="system-default" value="system">System Default ({systemDefaultName})</option>);
                     filtered.forEach((v) => {
-                      opts.push(<option key={v.voiceURI || v.name} value={v.voiceURI || ''}>{v.name} ({v.lang})</option>);
+                      const key = v.voiceURI ? `uri:${v.voiceURI}` : `name:${v.name}`;
+                      opts.push(<option key={key} value={key}>{v.name} ({v.lang})</option>);
                     });
-                    // If current selection is not in filtered list, ensure value resets visually
-                    if (ttsVoiceURI && !filtered.find(v => v.voiceURI === ttsVoiceURI)) {
-                      setTimeout(() => setTtsVoiceURI(''), 0);
+                    // If current selection doesn't exist in the filtered list, reset to system
+                    const hasMatch = filtered.some(v => (
+                      (ttsVoiceURI && v.voiceURI === ttsVoiceURI) || (!ttsVoiceURI && ttsVoiceName && v.name === ttsVoiceName)
+                    ));
+                    if (!hasMatch && (ttsVoiceURI || ttsVoiceName)) {
+                      setTimeout(() => { setTtsVoiceURI(''); setTtsVoiceName(''); }, 0);
                     }
                     return opts;
                   })()}
