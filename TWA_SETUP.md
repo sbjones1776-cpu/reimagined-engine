@@ -1,12 +1,12 @@
 # Trusted Web Activity (TWA) Setup Guide
 
-Use this guide to package your existing web app as an Android app that launches in a Trusted Web Activity, enabling Google Play Billing via the Digital Goods API.
+Use this guide to package your existing web app as an Android app that launches in a Trusted Web Activity, enabling Google Play Billing via the Digital Goods API. This variant assumes you use ONLY the Firebase Hosting default domain (https://math-adventure-app.web.app/) and no custom domain.
 
 ## Prerequisites
 - Android Studio installed
 - Java 17
 - Node.js & npm
-- Verified web origin (HTTPS) matching your production domain
+- Live Firebase Hosting deployment at https://math-adventure-app.web.app/
 
 ## 1) Install Bubblewrap CLI
 
@@ -17,13 +17,13 @@ npm install -g @bubblewrap/cli
 ## 2) Generate TWA Project
 
 ```powershell
-bubblewrap init --manifest=https://YOUR_DOMAIN/manifest.json
+bubblewrap init --manifest=https://math-adventure-app.web.app/manifest.json
 ```
 
 Answer prompts:
 - Package ID: com.yourcompany.mathadventure
 - Application name: Math Adventure
-- Start URL: https://YOUR_DOMAIN/
+- Start URL: https://math-adventure-app.web.app/
 - Launcher name, colors, etc. as preferred.
 
 This creates an Android project in `./android/`.
@@ -36,7 +36,7 @@ Optional: If an origin trial or specific Play policy applies, include the requir
 
 ## 4) Link App and Site
 
-In Play Console → Setup → Advanced settings → App signing, ensure your app’s signing key is used. Follow Bubblewrap prompts to set up Digital Asset Links so your TWA has verified relations with your site.
+In Play Console → Setup → Advanced settings → App signing, ensure your app’s signing key is used. Set up Digital Asset Links so the TWA verifies against https://math-adventure-app.web.app/.
 
 Bubblewrap can generate the assetlinks.json for you, or edit the template added to this repo at `public/.well-known/assetlinks.json`:
 ```
@@ -60,7 +60,7 @@ We also added a Bubblewrap manifest template at `twa/twa-manifest.template.json`
 bubblewrap update
 bubblewrap build
 ```
-Then host `/.well-known/assetlinks.json` at your domain with the provided content.
+Confirm `/.well-known/assetlinks.json` is accessible at https://math-adventure-app.web.app/.well-known/assetlinks.json after deploy.
 
 ## 5) Build AAB
 

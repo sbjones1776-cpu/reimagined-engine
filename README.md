@@ -189,10 +189,11 @@ Use test cards in Square sandbox mode:
 - Play Billing inside TWA; external payments for non-Play browsers.
 - Disclosure shown only for external (Square) path.
 - Ensure product IDs match `.env` (VITE_PLAY_MONTHLY_ID / VITE_PLAY_YEARLY_ID).
+- This project now assumes the app is hosted at https://math-adventure-app.web.app/ (no custom domain required).
 
 ### Submission Steps (Hybrid)
 1. Create subscription products in Play Console.
-2. Package web app as TWA (see `TWA_SETUP.md`).
+2. Package web app as TWA targeting https://math-adventure-app.web.app/ (see `TWA_SETUP.md`).
 3. Upload AAB (internal test → closed → production).
 4. Provide privacy policy + hybrid billing explanation.
 5. Test Play purchase & external fallback.
