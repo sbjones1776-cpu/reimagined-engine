@@ -5,6 +5,27 @@ const voicesCache = {};
 function getVoice(lang = "en-US", preferChild = true) {
   if (voicesCache[lang]) return voicesCache[lang];
   const voices = window.speechSynthesis.getVoices();
+  // Try user-selected voice first
+  try {
+    const savedURI = localStorage.getItem('tts.voiceURI');
+    const savedName = localStorage.getItem('tts.voiceName');
+    if (voices && voices.length) {
+      if (savedURI) {
+        const v = voices.find(v => v.voiceURI === savedURI);
+        if (v) {
+          voicesCache[lang] = v;
+          return v;
+        }
+      }
+      if (savedName) {
+        const v = voices.find(v => v.name === savedName);
+        if (v) {
+          voicesCache[lang] = v;
+          return v;
+        }
+      }
+    }
+  } catch {}
   let voice = voices.find(v => v.lang === lang && (!preferChild || v.name.toLowerCase().includes("child")));
   if (!voice) voice = voices.find(v => v.lang === lang);
   voicesCache[lang] = voice;
@@ -22,8 +43,16 @@ export default function TextToSpeech({ text, lang = "en-US", style = "button", l
     window.speechSynthesis.cancel();
     const utter = new window.SpeechSynthesisUtterance(text);
     utter.lang = lang;
-    utter.pitch = pitch;
-    utter.rate = rate;
+    // Apply saved user preferences if available
+    try {
+      const savedPitch = parseFloat(localStorage.getItem('tts.pitch'));
+      const savedRate = parseFloat(localStorage.getItem('tts.rate'));
+      if (!Number.isNaN(savedPitch)) utter.pitch = savedPitch; else utter.pitch = pitch;
+      if (!Number.isNaN(savedRate)) utter.rate = savedRate; else utter.rate = rate;
+    } catch {
+      utter.pitch = pitch;
+      utter.rate = rate;
+    }
     utter.voice = getVoice(lang);
     utterRef.current = utter;
     window.speechSynthesis.speak(utter);

@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-// import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,44 +31,67 @@ import {
   Shield
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import TextToSpeech from "@/components/ui/TextToSpeech";
 
 export default function Settings() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const user = null; // Firebase profile mapping not wired here; using local preferences instead
 
-  const { data: user } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
+  // Local state for settings (initialize from localStorage)
+  const [theme, setTheme] = useState(() => localStorage.getItem('app.theme') || "light");
+  const [soundVolume, setSoundVolume] = useState(() => {
+    const v = parseInt(localStorage.getItem('app.soundVolume'));
+    return Number.isNaN(v) ? 70 : v;
   });
-
-  // Local state for settings
-  const [theme, setTheme] = useState(user?.app_settings?.theme || "light");
-  const [soundVolume, setSoundVolume] = useState(user?.app_settings?.sound_volume ?? 70);
-  const [defaultOperation, setDefaultOperation] = useState(user?.app_settings?.default_operation || "addition");
-  const [defaultLevel, setDefaultLevel] = useState(user?.app_settings?.default_level || "easy");
-  const [defaultDrawingTool, setDefaultDrawingTool] = useState(user?.app_settings?.default_drawing_tool || "brush");
+  const [defaultOperation, setDefaultOperation] = useState(() => localStorage.getItem('app.defaultOperation') || "addition");
+  const [defaultLevel, setDefaultLevel] = useState(() => localStorage.getItem('app.defaultLevel') || "easy");
+  const [defaultDrawingTool, setDefaultDrawingTool] = useState(() => localStorage.getItem('app.defaultDrawingTool') || "brush");
   const [hasChanges, setHasChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // TTS preferences
+  const [voices, setVoices] = useState([]);
+  const [ttsVoiceURI, setTtsVoiceURI] = useState(() => localStorage.getItem('tts.voiceURI') || "");
+  const [ttsVoiceName, setTtsVoiceName] = useState(() => localStorage.getItem('tts.voiceName') || "");
+  const [ttsRate, setTtsRate] = useState(() => {
+    const r = parseFloat(localStorage.getItem('tts.rate'));
+    return Number.isNaN(r) ? 0.9 : r;
+  });
+  const [ttsPitch, setTtsPitch] = useState(() => {
+    const p = parseFloat(localStorage.getItem('tts.pitch'));
+    return Number.isNaN(p) ? 1.1 : p;
+  });
+
+  // Load voices
   useEffect(() => {
-    if (user?.app_settings) {
-      setTheme(user.app_settings.theme || "light");
-      setSoundVolume(user.app_settings.sound_volume ?? 70);
-      setDefaultOperation(user.app_settings.default_operation || "addition");
-      setDefaultLevel(user.app_settings.default_level || "easy");
-      setDefaultDrawingTool(user.app_settings.default_drawing_tool || "brush");
+    const load = () => {
+      if (!('speechSynthesis' in window)) return;
+      const v = window.speechSynthesis.getVoices();
+      setVoices(v || []);
+    };
+    load();
+    if (typeof window !== 'undefined') {
+      window.speechSynthesis.onvoiceschanged = load;
     }
-  }, [user]);
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+    };
+  }, []);
 
   const checkForChanges = () => {
-    const currentSettings = user?.app_settings || {};
-    const hasChanged = 
-      theme !== (currentSettings.theme || "light") ||
-      soundVolume !== (currentSettings.sound_volume ?? 70) ||
-      defaultOperation !== (currentSettings.default_operation || "addition") ||
-      defaultLevel !== (currentSettings.default_level || "easy") ||
-      defaultDrawingTool !== (currentSettings.default_drawing_tool || "brush");
-    
+    const hasChanged =
+      theme !== (localStorage.getItem('app.theme') || "light") ||
+      soundVolume !== (parseInt(localStorage.getItem('app.soundVolume')) || 70) ||
+      defaultOperation !== (localStorage.getItem('app.defaultOperation') || "addition") ||
+      defaultLevel !== (localStorage.getItem('app.defaultLevel') || "easy") ||
+      defaultDrawingTool !== (localStorage.getItem('app.defaultDrawingTool') || "brush") ||
+      ttsVoiceURI !== (localStorage.getItem('tts.voiceURI') || "") ||
+      ttsVoiceName !== (localStorage.getItem('tts.voiceName') || "") ||
+      ttsRate !== (parseFloat(localStorage.getItem('tts.rate')) || 0.9) ||
+      ttsPitch !== (parseFloat(localStorage.getItem('tts.pitch')) || 1.1);
     setHasChanges(hasChanged);
   };
 
@@ -77,30 +99,21 @@ export default function Settings() {
     checkForChanges();
   }, [theme, soundVolume, defaultOperation, defaultLevel, defaultDrawingTool, user]);
 
-  const saveSettingsMutation = useMutation({
-    mutationFn: async (settings) => {
-      return await base44.auth.updateMe({
-        app_settings: settings
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-      setSaveSuccess(true);
-      setHasChanges(false);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    },
-  });
-
   const handleSave = () => {
-    const settings = {
-      theme,
-      sound_volume: soundVolume,
-      default_operation: defaultOperation,
-      default_level: defaultLevel,
-      default_drawing_tool: defaultDrawingTool,
-    };
-    
-    saveSettingsMutation.mutate(settings);
+    // Persist locally
+    localStorage.setItem('app.theme', theme);
+    localStorage.setItem('app.soundVolume', String(soundVolume));
+    localStorage.setItem('app.defaultOperation', defaultOperation);
+    localStorage.setItem('app.defaultLevel', defaultLevel);
+    localStorage.setItem('app.defaultDrawingTool', defaultDrawingTool);
+    // TTS
+    localStorage.setItem('tts.voiceURI', ttsVoiceURI || '');
+    localStorage.setItem('tts.voiceName', ttsVoiceName || '');
+    localStorage.setItem('tts.rate', String(ttsRate));
+    localStorage.setItem('tts.pitch', String(ttsPitch));
+    setSaveSuccess(true);
+    setHasChanges(false);
+    setTimeout(() => setSaveSuccess(false), 3000);
   };
 
   const handleReset = () => {
@@ -109,6 +122,11 @@ export default function Settings() {
     setDefaultOperation("addition");
     setDefaultLevel("easy");
     setDefaultDrawingTool("brush");
+    // TTS defaults
+    setTtsVoiceURI("");
+    setTtsVoiceName("");
+    setTtsRate(0.9);
+    setTtsPitch(1.1);
   };
 
   const operations = [
@@ -296,6 +314,68 @@ export default function Settings() {
           </CardContent>
         </Card>
 
+        {/* Text-to-Speech Settings */}
+        <Card className="border-4 border-indigo-200 shadow-xl">
+          <CardHeader className="bg-gradient-to-r from-indigo-100 to-purple-100">
+            <CardTitle className="flex items-center gap-2">
+              <Volume2 className="w-6 h-6 text-indigo-600" />
+              Text to Speech
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <p className="text-sm text-gray-600">Choose your preferred voice and speaking style for explanations.</p>
+            <div className="grid md:grid-cols-2 gap-4 items-end">
+              <div>
+                <label className="block text-sm font-semibold mb-1">Voice</label>
+                <select
+                  className="w-full border-2 border-indigo-200 rounded-lg p-2"
+                  value={ttsVoiceURI || ''}
+                  onChange={(e) => {
+                    const uri = e.target.value;
+                    setTtsVoiceURI(uri);
+                    const v = voices.find(v => v.voiceURI === uri);
+                    setTtsVoiceName(v?.name || '');
+                  }}
+                >
+                  <option value="">System Default ({voices.find(v=>v.default)?.name || 'Auto'})</option>
+                  {voices.map((v) => (
+                    <option key={v.voiceURI || v.name} value={v.voiceURI || ''}>
+                      {v.name} ({v.lang})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <TextToSpeech text="This is my speaking voice for Math Adventure." style="button" label="🔊 Preview Voice" />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold mb-2">Speaking Rate</label>
+                <div className="flex items-center gap-3">
+                  <Slider value={[ttsRate]} onValueChange={(v)=>setTtsRate(parseFloat(v[0]))} min={0.5} max={1.5} step={0.05} className="flex-1" />
+                  <Badge className="bg-indigo-500 text-white">{ttsRate.toFixed(2)}x</Badge>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-2">Pitch</label>
+                <div className="flex items-center gap-3">
+                  <Slider value={[ttsPitch]} onValueChange={(v)=>setTtsPitch(parseFloat(v[0]))} min={0.5} max={2} step={0.05} className="flex-1" />
+                  <Badge className="bg-indigo-500 text-white">{ttsPitch.toFixed(2)}</Badge>
+                </div>
+              </div>
+            </div>
+
+            <Alert className="bg-indigo-50 border-indigo-200">
+              <Info className="w-4 h-4 text-indigo-600" />
+              <AlertDescription className="text-indigo-800 text-sm">
+                Voices vary by device and browser. If no voices appear, wait a second or try refreshing the page.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+
         {/* Default Math Settings */}
         <Card className="border-4 border-green-200 shadow-xl">
           <CardHeader className="bg-gradient-to-r from-green-100 to-emerald-100">
@@ -435,11 +515,11 @@ export default function Settings() {
             </Button>
             <Button
               onClick={handleSave}
-              disabled={!hasChanges || saveSettingsMutation.isPending}
+              disabled={!hasChanges}
               className="flex-1 sm:flex-initial gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
-              {saveSettingsMutation.isPending ? "Saving..." : "Save Settings"}
+              Save Settings
             </Button>
           </div>
         </div>
@@ -488,7 +568,7 @@ export default function Settings() {
                   </AlertDescription>
                 </Alert>
                 <a
-                  href={`mailto:support@math-adventure.com?subject=Account Deletion Request&body=Hello,%0D%0A%0D%0AI would like to request the deletion of my Math Adventure account.%0D%0A%0D%0AAccount Email: ${user?.email || ''}%0D%0AAccount Name: ${user?.full_name || ''}%0D%0A%0D%0APlease confirm that all my personal data and game progress will be permanently deleted.%0D%0A%0D%0AThank you.`}
+                  href={`mailto:support@math-adventure.com?subject=Account Deletion Request&body=Hello,%0D%0A%0D%0AI would like to request the deletion of my Math Adventure account.%0D%0A%0D%0AAccount Email: %0D%0AAccount Name: %0D%0A%0D%0APlease confirm that all my personal data and game progress will be permanently deleted.%0D%0A%0D%0AThank you.`}
                   className="inline-block"
                 >
                   <Button 
