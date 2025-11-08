@@ -7,15 +7,18 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { startUnifiedSubscription, isPlayBillingAvailable, initBilling, fallbackToExternalCheckout } from '@/api/billingService';
 import { toast } from 'sonner';
+import TierSelectionModal from './TierSelectionModal';
 
 /**
- * UpgradeButton - Compliant button for external payment link
- * Shows Google-required disclosure before opening external checkout
+ * UpgradeButton - Opens tier selection modal, then handles purchase
+ * Shows Google-required disclosure for external checkout when needed
  */
-export default function UpgradeButton({ variant = 'default', size = 'default', className = '', fullWidth = false, plan = 'monthly', userEmail }) {
+export default function UpgradeButton({ variant = 'default', size = 'default', className = '', fullWidth = false, userEmail }) {
+  const [showTierModal, setShowTierModal] = useState(false);
   const [showDisclosure, setShowDisclosure] = useState(false);
   const [playReady, setPlayReady] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedTier, setSelectedTier] = useState(null);
 
   // Prepare billing detection on mount
   React.useEffect(() => {
@@ -29,22 +32,37 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
     })();
   }, []);
 
-  const handleUpgrade = async () => {
+  const handleTierSelected = async (selection) => {
+    setSelectedTier(selection);
+    setShowTierModal(false);
+    
+    // Check if we need disclosure (external checkout)
+    if (!playReady) {
+      setShowDisclosure(true);
+      return;
+    }
+    
+    // Direct to Play Billing
+    await handlePurchase(selection);
+  };
+
+  const handlePurchase = async (selection) => {
+    const { tier, plan, userEmail: email } = selection || selectedTier;
+    const productKey = `${tier}_${plan}`;
+    
     if (playReady) {
       setLoading(true);
       try {
-        const result = await startUnifiedSubscription(plan, userEmail);
+        const result = await startUnifiedSubscription(productKey, email || userEmail);
         if (result?.success) {
           toast.success('Subscription activated! 🎉');
+          setShowDisclosure(false);
         } else if (result?.canceled) {
           toast('Purchase canceled');
         } else if (result?.routedExternal) {
           toast('Opening external checkout...');
         } else if (result?.error) {
           toast.error(result.error || 'Purchase failed');
-        }
-        if (result?.routedExternal || result?.success || result?.canceled || result?.error) {
-          setShowDisclosure(false);
         }
       } catch (e) {
         console.error('Upgrade failed', e);
@@ -54,6 +72,7 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
       }
       return;
     }
+    
     // Fallback to external checkout
     fallbackToExternalCheckout();
     toast('Redirecting to secure checkout...');
@@ -68,17 +87,25 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
   ];
 
   return (
-    <Dialog open={showDisclosure} onOpenChange={setShowDisclosure}>
-      <DialogTrigger asChild>
-        <Button
-          variant={variant}
-          size={size}
-          className={`${fullWidth ? 'w-full' : ''} ${className} bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700`}
-        >
-          <Crown className="w-4 h-4 mr-2" />
-          Upgrade to Premium
-        </Button>
-      </DialogTrigger>
+    <>
+      <Button
+        variant={variant}
+        size={size}
+        onClick={() => setShowTierModal(true)}
+        className={`${fullWidth ? 'w-full' : ''} ${className} bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700`}
+      >
+        <Crown className="w-4 h-4 mr-2" />
+        Upgrade to Premium
+      </Button>
+
+      <TierSelectionModal
+        open={showTierModal}
+        onOpenChange={setShowTierModal}
+        onSelectTier={handleTierSelected}
+        userEmail={userEmail}
+      />
+
+      <Dialog open={showDisclosure} onOpenChange={setShowDisclosure}>
 
       <DialogContent className="max-w-md">
         <DialogHeader>
@@ -114,12 +141,20 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
 
           {/* Pricing */}
           <div className="flex gap-2">
-            <Badge variant="outline" className="flex-1 justify-center py-2 border-purple-300">
+            <Badge
+              variant="outline"
+              onClick={() => (plan !== 'monthly' ? null : null)}
+              className={`flex-1 justify-center py-2 border-purple-300 ${plan === 'monthly' ? 'bg-purple-50' : ''}`}
+            >
               <span className="text-sm">$9.99/month</span>
             </Badge>
-            <Badge variant="outline" className="flex-1 justify-center py-2 border-purple-300 bg-purple-50">
+            <Badge
+              variant="outline"
+              onClick={() => (plan !== 'yearly' ? null : null)}
+              className={`flex-1 justify-center py-2 border-purple-300 ${plan === 'yearly' ? 'bg-purple-50' : ''}`}
+            >
               <span className="text-sm font-bold">$79.99/year</span>
-              <span className="text-xs ml-1 text-purple-600">(Save 33%)</span>
+              <span className="text-xs ml-1 text-purple-600">(Save 17%)</span>
             </Badge>
           </div>
 
@@ -142,7 +177,7 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
 
         <DialogFooter className="flex-col sm:flex-col gap-2">
           <Button
-            onClick={handleUpgrade}
+            onClick={() => handlePurchase()}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
             size="lg"
             disabled={loading}
@@ -160,5 +195,6 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    </>
   );
 }

@@ -32,19 +32,49 @@ let playProductsCache = null;
 let initializing = false;
 let initialized = false;
 
-// Product mapping: Replace with your real Play product IDs (managed products or subs)
-// These should correspond to subscription base plans or product IDs in Play Console.
+// Product mapping: three tiers × two billing periods
+// Note: These IDs must match subscription product/base-plan IDs in Play Console.
+// We model each tier-period as a distinct ID for simplicity with Digital Goods API.
 const PRODUCT_CONFIG = {
-  monthly: {
-    id: import.meta.env.VITE_PLAY_MONTHLY_ID || 'play_monthly_sub',
-    fallbackPlanId: 'MONTHLY_PLAN_ID', // Square plan variation ID
-    period: 'P1M'
+  // Premium Player
+  premium_player_monthly: {
+    id: import.meta.env.VITE_PLAY_PREMIUM_PLAYER_MONTHLY_ID || 'play_premium_player_monthly',
+    period: 'P1M',
+    tier: 'premium_player',
+    label: 'Premium Player (Monthly)'
   },
-  yearly: {
-    id: import.meta.env.VITE_PLAY_YEARLY_ID || 'play_yearly_sub',
-    fallbackPlanId: 'ANNUAL_PLAN_ID',
-    period: 'P1Y'
-  }
+  premium_player_yearly: {
+    id: import.meta.env.VITE_PLAY_PREMIUM_PLAYER_YEARLY_ID || 'play_premium_player_yearly',
+    period: 'P1Y',
+    tier: 'premium_player',
+    label: 'Premium Player (Yearly)'
+  },
+  // Premium Parent
+  premium_parent_monthly: {
+    id: import.meta.env.VITE_PLAY_PREMIUM_PARENT_MONTHLY_ID || 'play_premium_parent_monthly',
+    period: 'P1M',
+    tier: 'premium_parent',
+    label: 'Premium Parent (Monthly)'
+  },
+  premium_parent_yearly: {
+    id: import.meta.env.VITE_PLAY_PREMIUM_PARENT_YEARLY_ID || 'play_premium_parent_yearly',
+    period: 'P1Y',
+    tier: 'premium_parent',
+    label: 'Premium Parent (Yearly)'
+  },
+  // Family / Teacher
+  family_teacher_monthly: {
+    id: import.meta.env.VITE_PLAY_FAMILY_TEACHER_MONTHLY_ID || 'play_family_teacher_monthly',
+    period: 'P1M',
+    tier: 'family_teacher',
+    label: 'Family/Teacher (Monthly)'
+  },
+  family_teacher_yearly: {
+    id: import.meta.env.VITE_PLAY_FAMILY_TEACHER_YEARLY_ID || 'play_family_teacher_yearly',
+    period: 'P1Y',
+    tier: 'family_teacher',
+    label: 'Family/Teacher (Yearly)'
+  },
 };
 
 export function isPlayBillingAvailable() {
@@ -75,7 +105,7 @@ export async function initBilling() {
         title: d.title,
         description: d.description,
         price: d.pricing?.price || d.pricing?.formattedPrice || '—',
-        period: d.subscriptionPeriod || PRODUCT_CONFIG.monthly.period,
+        period: d.subscriptionPeriod,
         platform: 'googleplay'
       }));
     } catch (err) {
@@ -94,11 +124,11 @@ export async function initBilling() {
 export function listProducts() {
   // Return play products if available else synthesized fallback info
   if (playProductsCache && playProductsCache.length) return playProductsCache;
-  return Object.values(PRODUCT_CONFIG).map(cfg => ({
+  return Object.entries(PRODUCT_CONFIG).map(([key, cfg]) => ({
     id: cfg.id,
-    title: cfg.id.includes('year') ? 'Annual Subscription' : 'Monthly Subscription',
+    title: cfg.label || key,
     description: 'Access all premium learning features.',
-    price: cfg.id.includes('year') ? '$79.99' : '$9.99',
+    price: cfg.period === 'P1Y' ? '$79.99' : '$9.99',
     period: cfg.period,
     platform: playService ? 'googleplay' : 'external'
   }));
@@ -161,7 +191,12 @@ export function fallbackToExternalCheckout() {
 
 // Convenience combined flow
 export async function startUnifiedSubscription(productKey, userEmail) {
-  const cfg = PRODUCT_CONFIG[productKey];
+  // Backwards compatibility: allow 'monthly'/'yearly' to map to Premium Player tier
+  const normalizedKey =
+    productKey === 'monthly' ? 'premium_player_monthly' :
+    productKey === 'yearly' ? 'premium_player_yearly' :
+    productKey;
+  const cfg = PRODUCT_CONFIG[normalizedKey];
   if (!cfg) throw new Error('Unknown product key');
   const result = await purchaseSubscription(cfg.id);
   if (result.externalRequired) {

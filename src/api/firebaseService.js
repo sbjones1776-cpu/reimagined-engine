@@ -24,6 +24,17 @@ const auth = getAuth(app);
 // USER OPERATIONS
 // ========================================
 
+/**
+ * User Document Schema:
+ * - subscription_tier: Subscription tier level. One of:
+ *   - 'free' (default, no subscription)
+ *   - 'premium_player' (individual student subscription)
+ *   - 'premium_parent' (parent monitoring subscription)
+ *   - 'family_teacher' (multi-student/classroom subscription)
+ * - This field is populated automatically by the backend (functions/index.js)
+ *   when verifying Play Billing or Square purchases based on the productId.
+ */
+
 export const createUserProfile = async (email, additionalData = {}) => {
   const userRef = doc(db, 'users', email);
   const userData = {

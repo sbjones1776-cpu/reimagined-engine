@@ -83,8 +83,16 @@ exports.verifyPlayPurchase = functions.https.onRequest(async (req, res) => {
       return res.status(400).json({ error: 'Invalid or expired purchase token' });
     }
 
+    // Extract subscription tier from productId
+    // Expected format: play_premium_player_monthly, play_family_teacher_yearly, etc.
+    let subscriptionTier = null;
+    const tierMatch = productId.match(/play_(.+?)_(monthly|yearly)$/);
+    if (tierMatch) {
+      subscriptionTier = tierMatch[1]; // e.g., "premium_player", "premium_parent", "family_teacher"
+    }
+
     // Grant entitlement
-    await db.collection('users').doc(email).set({
+    const updateData = {
       entitlements: { premium: true },
       subscription: {
         platform: 'googleplay',
@@ -93,7 +101,14 @@ exports.verifyPlayPurchase = functions.https.onRequest(async (req, res) => {
         verifiedAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       }
-    }, { merge: true });
+    };
+
+    // Add subscription_tier if extracted successfully
+    if (subscriptionTier) {
+      updateData.subscription_tier = subscriptionTier;
+    }
+
+    await db.collection('users').doc(email).set(updateData, { merge: true });
 
     return res.json({ success: true });
 
