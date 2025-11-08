@@ -20,8 +20,6 @@ function getVoice(lang = "en-US", preferChild = true, options = {}) {
   const {
     useSavedPrefs = true,
     langPrefOverride, // 'en' | 'es'
-    genderOverride,   // 'any' | 'female' | 'male'
-    voiceURIOverride,
     voiceNameOverride,
   } = options;
 
@@ -38,64 +36,66 @@ function getVoice(lang = "en-US", preferChild = true, options = {}) {
 
   // Resolve effective preferences
   let effectiveLangPref = 'en';
-  let effectiveGender = 'any';
-  let effectiveURI = '';
-  let effectiveName = '';
+  let effectiveName = 'David';
   try {
     if (useSavedPrefs) {
       effectiveLangPref = (localStorage.getItem('tts.lang') === 'es') ? 'es' : 'en';
-      effectiveGender = localStorage.getItem('tts.gender') || 'any';
-      effectiveURI = localStorage.getItem('tts.voiceURI') || '';
-      effectiveName = localStorage.getItem('tts.voiceName') || '';
+      effectiveName = localStorage.getItem('tts.voiceName') || 'David';
     } else {
       effectiveLangPref = (langPrefOverride === 'es') ? 'es' : 'en';
-      effectiveGender = genderOverride || 'any';
-      effectiveURI = voiceURIOverride || '';
-      effectiveName = voiceNameOverride || '';
+      effectiveName = voiceNameOverride || 'David';
     }
   } catch {
     // ignore and keep defaults
   }
 
   const cacheMode = useSavedPrefs ? 'saved' : 'override';
-  const cacheKey = `${cacheMode}:${effectiveLangPref}:${effectiveGender}:${effectiveURI}:${effectiveName}`;
+  const cacheKey = `${cacheMode}:${effectiveLangPref}:${effectiveName}`;
   if (voicesCache[cacheKey]) return voicesCache[cacheKey];
 
   if (voices && voices.length) {
-    // 1) Exact voice by URI
-    if (effectiveURI) {
-      const v = voices.find(v => v.voiceURI === effectiveURI);
-      if (v) {
-        voicesCache[cacheKey] = v;
-        return v;
-      }
-    }
-    // 2) Exact voice by name
-    if (effectiveName) {
-      const v = voices.find(v => v.name === effectiveName);
-      if (v) {
-        voicesCache[cacheKey] = v;
-        return v;
-      }
-    }
-    // 3) Filter by language and gender
+    // Filter by language first
     let candidates = voices.filter(v => (v.lang || '').toLowerCase().startsWith(effectiveLangPref));
-    if (effectiveGender === 'female') {
-      candidates = candidates.filter(v => detectGender(v.name) === 'female');
-    } else if (effectiveGender === 'male') {
-      candidates = candidates.filter(v => detectGender(v.name) === 'male');
+    
+    // Look for the requested voice name (David or Emma)
+    // Search by partial name match (case-insensitive) to handle variants like "Microsoft David Desktop", "Google UK English Male", etc.
+    const nameLower = effectiveName.toLowerCase();
+    let voice = candidates.find(v => v.name.toLowerCase().includes(nameLower));
+    
+    if (voice) {
+      voicesCache[cacheKey] = voice;
+      return voice;
     }
-    const preferred = candidates.find(v => v.default) || candidates[0];
-    if (preferred) {
-      voicesCache[cacheKey] = preferred;
-      return preferred;
+
+    // If David not found, try common male voice names
+    if (nameLower === 'david') {
+      const maleNames = ['david', 'male', 'guy', 'man', 'diego', 'juan', 'george', 'mark'];
+      voice = candidates.find(v => maleNames.some(n => v.name.toLowerCase().includes(n)));
+      if (voice) {
+        voicesCache[cacheKey] = voice;
+        return voice;
+      }
+    }
+
+    // If Emma not found, try common female voice names
+    if (nameLower === 'emma') {
+      const femaleNames = ['emma', 'female', 'woman', 'girl', 'zira', 'jenny', 'olivia', 'sonia', 'ana', 'isabella', 'sara', 'sofia', 'monica', 'paulina'];
+      voice = candidates.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n)));
+      if (voice) {
+        voicesCache[cacheKey] = voice;
+        return voice;
+      }
+    }
+
+    // Fallback: pick first available voice in the language
+    if (candidates[0]) {
+      voicesCache[cacheKey] = candidates[0];
+      return candidates[0];
     }
   }
 
-  // Fallback to original behavior using lang
-  let voice = voices.find(v => v.lang === lang && (!preferChild || v.name.toLowerCase().includes("child")));
-  if (!voice) voice = voices.find(v => v.lang === lang);
-  return voice;
+  // Ultimate fallback: system default
+  return voices.find(v => v.default) || voices[0];
 }
 
 export default function TextToSpeech({
@@ -108,9 +108,7 @@ export default function TextToSpeech({
   // New: control whether to use saved prefs or on-the-fly overrides (useful for Settings preview)
   useSavedPrefs = true,
   overrideLangPref, // 'en' | 'es'
-  overrideGender,   // 'any' | 'female' | 'male'
-  overrideVoiceURI,
-  overrideVoiceName,
+  overrideVoiceName, // 'David' | 'Emma'
 }) {
   const utterRef = useRef(null);
 
@@ -149,8 +147,6 @@ export default function TextToSpeech({
     utter.voice = getVoice(utter.lang, true, {
       useSavedPrefs,
       langPrefOverride: overrideLangPref,
-      genderOverride: overrideGender,
-      voiceURIOverride: overrideVoiceURI,
       voiceNameOverride: overrideVoiceName,
     });
     utterRef.current = utter;

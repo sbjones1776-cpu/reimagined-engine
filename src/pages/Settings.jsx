@@ -47,13 +47,9 @@ export default function Settings() {
   const [defaultOperation, setDefaultOperation] = useState(() => localStorage.getItem('app.defaultOperation') || "addition");
   const [defaultLevel, setDefaultLevel] = useState(() => localStorage.getItem('app.defaultLevel') || "easy");
   const [defaultDrawingTool, setDefaultDrawingTool] = useState(() => localStorage.getItem('app.defaultDrawingTool') || "brush");
-  const [hasChanges, setHasChanges] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // TTS preferences
-  const [voices, setVoices] = useState([]);
-  const [ttsVoiceURI, setTtsVoiceURI] = useState(() => localStorage.getItem('tts.voiceURI') || "");
-  const [ttsVoiceName, setTtsVoiceName] = useState(() => localStorage.getItem('tts.voiceName') || "");
+  // TTS preferences - simplified to David (male) or Emma (female)
+  const [ttsVoiceName, setTtsVoiceName] = useState(() => localStorage.getItem('tts.voiceName') || "David");
   const [ttsRate, setTtsRate] = useState(() => {
     const r = parseFloat(localStorage.getItem('tts.rate'));
     return Number.isNaN(r) ? 0.9 : r;
@@ -63,80 +59,21 @@ export default function Settings() {
     return Number.isNaN(p) ? 1.1 : p;
   });
   const [ttsLang, setTtsLang] = useState(() => localStorage.getItem('tts.lang') || 'en'); // 'en' | 'es'
-  const [ttsGender, setTtsGender] = useState(() => localStorage.getItem('tts.gender') || 'any'); // 'any'|'female'|'male'
 
-  // Load voices
+  // Auto-save: persist immediately when any setting changes
   useEffect(() => {
-    const load = () => {
-      if (!('speechSynthesis' in window)) return;
-      const v = window.speechSynthesis.getVoices();
-      setVoices(v || []);
-    };
-    load();
-    if (typeof window !== 'undefined') {
-      window.speechSynthesis.onvoiceschanged = load;
-    }
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.speechSynthesis.onvoiceschanged = null;
-      }
-    };
-  }, []);
-
-  const checkForChanges = () => {
-    const hasChanged =
-      theme !== (localStorage.getItem('app.theme') || "light") ||
-      soundVolume !== (parseInt(localStorage.getItem('app.soundVolume')) || 70) ||
-      defaultOperation !== (localStorage.getItem('app.defaultOperation') || "addition") ||
-      defaultLevel !== (localStorage.getItem('app.defaultLevel') || "easy") ||
-      defaultDrawingTool !== (localStorage.getItem('app.defaultDrawingTool') || "brush") ||
-      ttsVoiceURI !== (localStorage.getItem('tts.voiceURI') || "") ||
-      ttsVoiceName !== (localStorage.getItem('tts.voiceName') || "") ||
-      ttsRate !== (parseFloat(localStorage.getItem('tts.rate')) || 0.9) ||
-      ttsPitch !== (parseFloat(localStorage.getItem('tts.pitch')) || 1.1) ||
-      ttsLang !== (localStorage.getItem('tts.lang') || 'en') ||
-      ttsGender !== (localStorage.getItem('tts.gender') || 'any');
-    setHasChanges(hasChanged);
-  };
-
-  // Detect any changes across both general and TTS preference state so Save button enables correctly
-  useEffect(() => {
-    checkForChanges();
-  }, [
-    theme,
-    soundVolume,
-    defaultOperation,
-    defaultLevel,
-    defaultDrawingTool,
-    ttsVoiceURI,
-    ttsVoiceName,
-    ttsRate,
-    ttsPitch,
-    ttsLang,
-    ttsGender,
-    user
-  ]);
-
-  const handleSave = () => {
-    // Persist locally
     localStorage.setItem('app.theme', theme);
     localStorage.setItem('app.soundVolume', String(soundVolume));
     localStorage.setItem('app.defaultOperation', defaultOperation);
     localStorage.setItem('app.defaultLevel', defaultLevel);
     localStorage.setItem('app.defaultDrawingTool', defaultDrawingTool);
-    // TTS
-    localStorage.setItem('tts.voiceURI', ttsVoiceURI || '');
-    localStorage.setItem('tts.voiceName', ttsVoiceName || '');
+    localStorage.setItem('tts.voiceName', ttsVoiceName || 'David');
     localStorage.setItem('tts.rate', String(ttsRate));
     localStorage.setItem('tts.pitch', String(ttsPitch));
     localStorage.setItem('tts.lang', ttsLang);
-    localStorage.setItem('tts.gender', ttsGender);
     // Bump cache buster so TextToSpeech re-evaluates selection immediately
     localStorage.setItem('tts.cacheBuster', Date.now().toString());
-    setSaveSuccess(true);
-    setHasChanges(false);
-    setTimeout(() => setSaveSuccess(false), 3000);
-  };
+  }, [theme, soundVolume, defaultOperation, defaultLevel, defaultDrawingTool, ttsVoiceName, ttsRate, ttsPitch, ttsLang]);
 
   const handleReset = () => {
     setTheme("light");
@@ -145,12 +82,10 @@ export default function Settings() {
     setDefaultLevel("easy");
     setDefaultDrawingTool("brush");
     // TTS defaults
-    setTtsVoiceURI("");
-    setTtsVoiceName("");
+    setTtsVoiceName("David");
     setTtsRate(0.9);
     setTtsPitch(1.1);
     setTtsLang('en');
-    setTtsGender('any');
   };
 
   const operations = [
@@ -188,23 +123,12 @@ export default function Settings() {
           </div>
         </div>
 
-        {saveSuccess && (
-          <Alert className="bg-green-50 border-green-300 mb-4">
-            <Check className="w-4 h-4 text-green-600" />
-            <AlertDescription className="text-green-800">
-              <strong>Settings saved successfully!</strong> Your preferences have been updated.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {hasChanges && (
-          <Alert className="bg-blue-50 border-blue-300 mb-4">
-            <Info className="w-4 h-4 text-blue-600" />
-            <AlertDescription className="text-blue-800">
-              You have unsaved changes. Click "Save Settings" to apply them.
-            </AlertDescription>
-          </Alert>
-        )}
+        <Alert className="bg-green-50 border-green-300 mb-4">
+          <Check className="w-4 h-4 text-green-600" />
+          <AlertDescription className="text-green-800">
+            <strong>Auto-Save Enabled:</strong> Your preferences are saved automatically as you make changes.
+          </AlertDescription>
+        </Alert>
       </div>
 
       <div className="space-y-6">
@@ -347,106 +271,94 @@ export default function Settings() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
-            <p className="text-sm text-gray-600">Choose your preferred voice and speaking style for explanations.</p>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-semibold mb-1">Language</label>
-                <select
-                  className="w-full border-2 border-indigo-200 rounded-lg p-2"
-                  value={ttsLang}
-                  onChange={(e)=>setTtsLang(e.target.value)}
+            <p className="text-sm text-gray-600">Choose your language and voice for explanations. Changes save automatically.</p>
+            
+            {/* Language Selection */}
+            <div>
+              <label className="block text-sm font-semibold mb-2">Language</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div
+                  onClick={() => setTtsLang('en')}
+                  className={`cursor-pointer border-4 rounded-xl p-4 transition-all text-center ${
+                    ttsLang === 'en'
+                      ? "border-indigo-500 bg-indigo-50"
+                      : "border-gray-200 hover:border-indigo-300"
+                  }`}
                 >
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">Preferred Gender</label>
-                <select
-                  className="w-full border-2 border-indigo-200 rounded-lg p-2"
-                  value={ttsGender}
-                  onChange={(e)=>setTtsGender(e.target.value)}
+                  <h3 className="font-bold text-lg mb-1">English</h3>
+                  {ttsLang === 'en' && (
+                    <Check className="w-5 h-5 mx-auto mt-2 text-indigo-600" />
+                  )}
+                </div>
+                <div
+                  onClick={() => setTtsLang('es')}
+                  className={`cursor-pointer border-4 rounded-xl p-4 transition-all text-center ${
+                    ttsLang === 'es'
+                      ? "border-indigo-500 bg-indigo-50"
+                      : "border-gray-200 hover:border-indigo-300"
+                  }`}
                 >
-                  <option value="any">Any</option>
-                  <option value="female">Female</option>
-                  <option value="male">Male</option>
-                </select>
+                  <h3 className="font-bold text-lg mb-1">Español</h3>
+                  {ttsLang === 'es' && (
+                    <Check className="w-5 h-5 mx-auto mt-2 text-indigo-600" />
+                  )}
+                </div>
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-4 items-end">
-              <div>
-                <label className="block text-sm font-semibold mb-1">Voice</label>
-                <select
-                  className="w-full border-2 border-indigo-200 rounded-lg p-2"
-                  value={ttsVoiceURI ? `uri:${ttsVoiceURI}` : (ttsVoiceName ? `name:${ttsVoiceName}` : 'system')}
-                  onChange={(e) => {
-                    const key = e.target.value;
-                    if (key === 'system') {
-                      setTtsVoiceURI('');
-                      setTtsVoiceName('');
-                      return;
-                    }
-                    if (key.startsWith('uri:')) {
-                      const uri = key.slice(4);
-                      setTtsVoiceURI(uri);
-                      const v = voices.find(v => v.voiceURI === uri);
-                      setTtsVoiceName(v?.name || '');
-                      return;
-                    }
-                    if (key.startsWith('name:')) {
-                      const name = key.slice(5);
-                      setTtsVoiceName(name);
-                      const v = voices.find(v => v.name === name);
-                      setTtsVoiceURI(v?.voiceURI || '');
-                      return;
-                    }
-                  }}
+
+            {/* Voice Selection - David (Male) or Emma (Female) */}
+            <div>
+              <label className="block text-sm font-semibold mb-2">Voice</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div
+                  onClick={() => setTtsVoiceName('David')}
+                  className={`cursor-pointer border-4 rounded-xl p-4 transition-all ${
+                    ttsVoiceName === 'David'
+                      ? "border-indigo-500 bg-indigo-50"
+                      : "border-gray-200 hover:border-indigo-300"
+                  }`}
                 >
-                  {(() => {
-                    const langPref = ttsLang === 'es' ? 'es' : 'en';
-                    const femaleKeys = ['female','woman','girl','aria','zira','jenny','jessa','olivia','emma','sonia','ana','isabella','libby','mia','sara','sofia','francesca'];
-                    const maleKeys = ['male','man','boy','guy','david','mark','ryan','tony','diego','francisco','sebastian','pablo','miguel','matthew','mike','george'];
-                    const filtered = (voices || [])
-                      .filter(v => (v.lang || '').toLowerCase().startsWith(langPref))
-                      .filter(v => {
-                        if (ttsGender === 'any') return true;
-                        const n = (v.name || '').toLowerCase();
-                        if (ttsGender === 'female') return femaleKeys.some(k => n.includes(k));
-                        if (ttsGender === 'male') return maleKeys.some(k => n.includes(k));
-                        return true;
-                      });
-                    const opts = [];
-                    const systemDefaultName = (voices.find(v=>v.default)?.name) || 'Auto';
-                    opts.push(<option key="system-default" value="system">System Default ({systemDefaultName})</option>);
-                    filtered.forEach((v) => {
-                      const key = v.voiceURI ? `uri:${v.voiceURI}` : `name:${v.name}`;
-                      opts.push(<option key={key} value={key}>{v.name} ({v.lang})</option>);
-                    });
-                    // If current selection doesn't exist in the filtered list, reset to system
-                    const hasMatch = filtered.some(v => (
-                      (ttsVoiceURI && v.voiceURI === ttsVoiceURI) || (!ttsVoiceURI && ttsVoiceName && v.name === ttsVoiceName)
-                    ));
-                    if (!hasMatch && (ttsVoiceURI || ttsVoiceName)) {
-                      setTimeout(() => { setTtsVoiceURI(''); setTtsVoiceName(''); }, 0);
-                    }
-                    return opts;
-                  })()}
-                </select>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl">👨</span>
+                    {ttsVoiceName === 'David' && (
+                      <Check className="w-5 h-5 text-indigo-600" />
+                    )}
+                  </div>
+                  <h3 className="font-bold text-lg">David</h3>
+                  <p className="text-xs text-gray-600">Male Voice</p>
+                </div>
+                <div
+                  onClick={() => setTtsVoiceName('Emma')}
+                  className={`cursor-pointer border-4 rounded-xl p-4 transition-all ${
+                    ttsVoiceName === 'Emma'
+                      ? "border-indigo-500 bg-indigo-50"
+                      : "border-gray-200 hover:border-indigo-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl">👩</span>
+                    {ttsVoiceName === 'Emma' && (
+                      <Check className="w-5 h-5 text-indigo-600" />
+                    )}
+                  </div>
+                  <h3 className="font-bold text-lg">Emma</h3>
+                  <p className="text-xs text-gray-600">Female Voice</p>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <TextToSpeech
-                  text={`This is my speaking voice for Math Adventure. Rate ${ttsRate.toFixed(2)} pitch ${ttsPitch.toFixed(2)}.`}
-                  style="button"
-                  label="🔊 Preview Voice"
-                  useSavedPrefs={false}
-                  rate={ttsRate}
-                  pitch={ttsPitch}
-                  overrideLangPref={ttsLang}
-                  overrideGender={ttsGender}
-                  overrideVoiceURI={ttsVoiceURI}
-                  overrideVoiceName={ttsVoiceName}
-                />
-              </div>
+            </div>
+
+            {/* Preview Button */}
+            <div className="flex justify-center">
+              <TextToSpeech
+                text={`Hello, I am ${ttsVoiceName}. This is how I sound in ${ttsLang === 'es' ? 'Spanish' : 'English'}.`}
+                style="button"
+                label="🔊 Preview Voice"
+                useSavedPrefs={false}
+                rate={ttsRate}
+                pitch={ttsPitch}
+                overrideLangPref={ttsLang}
+                overrideVoiceName={ttsVoiceName}
+              />
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -594,7 +506,7 @@ export default function Settings() {
         </Card>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button
             variant="outline"
             onClick={handleReset}
@@ -604,23 +516,13 @@ export default function Settings() {
             Reset to Defaults
           </Button>
 
-          <div className="flex gap-3 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              onClick={() => navigate(createPageUrl("Home"))}
-              className="flex-1 sm:flex-initial"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={!hasChanges}
-              className="flex-1 sm:flex-initial gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:opacity-50"
-            >
-              <Save className="w-4 h-4" />
-              Save Settings
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            onClick={() => navigate(createPageUrl("Home"))}
+            className="w-full sm:w-auto"
+          >
+            Back to Home
+          </Button>
         </div>
       </div>
 
@@ -696,7 +598,7 @@ export default function Settings() {
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-start gap-2">
               <span className="text-purple-500 font-bold">•</span>
-              <span>After making changes, click "Save Settings" to store them on this device.</span>
+              <span>All changes save automatically—no need to click a save button!</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-purple-500 font-bold">•</span>
@@ -709,6 +611,10 @@ export default function Settings() {
             <li className="flex items-start gap-2">
               <span className="text-purple-500 font-bold">•</span>
               <span>Turn down sound effects if you're playing in a quiet environment</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-purple-500 font-bold">•</span>
+              <span>Choose between David (male) or Emma (female) voice for spoken explanations</span>
             </li>
           </ul>
         </CardContent>
