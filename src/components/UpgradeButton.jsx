@@ -139,25 +139,6 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
             })}
           </div>
 
-          {/* Pricing */}
-          <div className="flex gap-2">
-            <Badge
-              variant="outline"
-              onClick={() => (plan !== 'monthly' ? null : null)}
-              className={`flex-1 justify-center py-2 border-purple-300 ${plan === 'monthly' ? 'bg-purple-50' : ''}`}
-            >
-              <span className="text-sm">$9.99/month</span>
-            </Badge>
-            <Badge
-              variant="outline"
-              onClick={() => (plan !== 'yearly' ? null : null)}
-              className={`flex-1 justify-center py-2 border-purple-300 ${plan === 'yearly' ? 'bg-purple-50' : ''}`}
-            >
-              <span className="text-sm font-bold">$79.99/year</span>
-              <span className="text-xs ml-1 text-purple-600">(Save 17%)</span>
-            </Badge>
-          </div>
-
           {/* Google-Required Disclosure (shown only when using external checkout) */}
           {!playReady && (
             <Alert className="bg-blue-50 border-blue-200">
