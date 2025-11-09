@@ -35,30 +35,30 @@ You need to create **6 subscription products** (3 tiers × 2 billing periods):
 
 | Tier | Period | Product ID | Name | Price (USD) | Env Variable |
 |------|--------|------------|------|-------------|--------------|
-| **Premium Player** | Monthly | `play_premium_player_monthly` | Premium Player Monthly | $9.99 | `VITE_PLAY_PREMIUM_PLAYER_MONTHLY_ID` |
-| **Premium Player** | Yearly | `play_premium_player_yearly` | Premium Player Yearly | $99.99 | `VITE_PLAY_PREMIUM_PLAYER_YEARLY_ID` |
-| **Premium Parent** | Monthly | `play_premium_parent_monthly` | Premium Parent Monthly | $14.99 | `VITE_PLAY_PREMIUM_PARENT_MONTHLY_ID` |
-| **Premium Parent** | Yearly | `play_premium_parent_yearly` | Premium Parent Yearly | $149.99 | `VITE_PLAY_PREMIUM_PARENT_YEARLY_ID` |
-| **Family Teacher** | Monthly | `play_family_teacher_monthly` | Family Teacher Monthly | $24.99 | `VITE_PLAY_FAMILY_TEACHER_MONTHLY_ID` |
-| **Family Teacher** | Yearly | `play_family_teacher_yearly` | Family Teacher Yearly | $249.99 | `VITE_PLAY_FAMILY_TEACHER_YEARLY_ID` |
+| **Premium Player** | Monthly | `play_premium_player_monthly` | Premium Player Monthly | $4.99 | `VITE_PLAY_PREMIUM_PLAYER_MONTHLY_ID` |
+| **Premium Player** | Yearly | `play_premium_player_yearly` | Premium Player Yearly | $47.88 | `VITE_PLAY_PREMIUM_PLAYER_YEARLY_ID` |
+| **Premium Parent** | Monthly | `play_premium_parent_monthly` | Premium Parent Monthly | $7.99 | `VITE_PLAY_PREMIUM_PARENT_MONTHLY_ID` |
+| **Premium Parent** | Yearly | `play_premium_parent_yearly` | Premium Parent Yearly | $76.88 | `VITE_PLAY_PREMIUM_PARENT_YEARLY_ID` |
+| **Family Teacher** | Monthly | `play_family_teacher_monthly` | Family Teacher Monthly | $12.99 | `VITE_PLAY_FAMILY_TEACHER_MONTHLY_ID` |
+| **Family Teacher** | Yearly | `play_family_teacher_yearly` | Family Teacher Yearly | $124.88 | `VITE_PLAY_FAMILY_TEACHER_YEARLY_ID` |
 
 ### Tier Features
 
-**Premium Player** ($9.99/mo or $99.99/yr):
+**Premium Player** ($4.99/mo or $47.88/yr):
 - Unlock all 80+ math concepts
 - AI tutor with personalized hints
 - Daily challenges and rewards
 - Progress tracking
 - Ad-free experience
 
-**Premium Parent** ($14.99/mo or $149.99/yr):
+**Premium Parent** ($7.99/mo or $76.88/yr):
 - All Premium Player features
 - Parent portal with analytics
 - Performance insights and reports
 - Goal setting and tracking
 - Time limits and parental controls
 
-**Family Teacher** ($24.99/mo or $249.99/yr):
+**Family Teacher** ($12.99/mo or $124.88/yr):
 - All Premium Parent features
 - Up to 5 student accounts
 - Team challenges and competitions
@@ -80,9 +80,9 @@ You need to create **6 subscription products** (3 tiers × 2 billing periods):
 - ✅ **Reinstates**: Allow automatic restoration
 
 ### Pricing Notes
-- Yearly plans offer ~17% discount vs monthly
-- Set prices for all countries (Play Console suggests local pricing)
-- Consider introductory offers for first-time subscribers
+- Yearly plans offer a 20% discount vs paying monthly (Player saves $11.88, Parent saves $19.00, Family/Teacher saves $30.80)
+- Set prices for all countries (Play Console suggests local pricing) – adjust for purchasing power if needed
+- Consider introductory offers (e.g., first month $0.99) for conversion experiments later
 
 ---
 

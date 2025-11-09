@@ -20,8 +20,8 @@ export default function TierSelectionModal({ open, onOpenChange, onSelectTier, u
       icon: Crown,
       gradient: 'from-purple-500 to-pink-500',
       description: 'Perfect for individual students',
-      monthlyPrice: 9.99,
-      yearlyPrice: 99.99,
+      monthlyPrice: 4.99,
+      yearlyPrice: 47.88, // 12 * 4.99 = 59.88; savings 11.88 (20%)
       features: [
         'Unlimited games',
         '80+ math concepts',
@@ -39,8 +39,8 @@ export default function TierSelectionModal({ open, onOpenChange, onSelectTier, u
       icon: Shield,
       gradient: 'from-blue-500 to-cyan-500',
       description: 'For parents monitoring 1-3 kids',
-      monthlyPrice: 14.99,
-      yearlyPrice: 149.99,
+      monthlyPrice: 7.99,
+      yearlyPrice: 76.88, // 12 * 7.99 = 95.88; savings 19.00 (20%)
       features: [
         'Everything in Premium Player',
         'Parent Portal access',
@@ -59,8 +59,8 @@ export default function TierSelectionModal({ open, onOpenChange, onSelectTier, u
       icon: GraduationCap,
       gradient: 'from-green-500 to-emerald-500',
       description: 'For families or classrooms (4-10 students)',
-      monthlyPrice: 24.99,
-      yearlyPrice: 249.99,
+      monthlyPrice: 12.99,
+      yearlyPrice: 124.88, // 12 * 12.99 = 155.88; savings 30.80 (20%)
       features: [
         'Everything in Premium Parent',
         'Up to 10 child accounts',
@@ -82,7 +82,8 @@ export default function TierSelectionModal({ open, onOpenChange, onSelectTier, u
   const calculateSavings = (tier) => {
     const monthlyTotal = tier.monthlyPrice * 12;
     const savings = monthlyTotal - tier.yearlyPrice;
-    const percentage = Math.round((savings / monthlyTotal) * 100);
+    // We expect ~20% savings per your structure; still compute dynamically.
+    const percentage = ((savings / monthlyTotal) * 100).toFixed(0);
     return { savings: savings.toFixed(2), percentage };
   };
 
@@ -120,7 +121,7 @@ export default function TierSelectionModal({ open, onOpenChange, onSelectTier, u
               )}
             >
               Yearly
-              <Badge className="bg-green-500 text-white text-xs">Save up to 17%</Badge>
+              <Badge className="bg-green-500 text-white text-xs">Save 20%</Badge>
             </button>
           </div>
         </div>
