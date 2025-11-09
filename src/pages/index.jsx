@@ -2,10 +2,10 @@ import React, { lazy, Suspense } from 'react';
 import Layout from "./Layout.jsx";
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import ChunkErrorBoundary from '@/components/ChunkErrorBoundary.jsx';
+import Landing from './Landing'; // Load Landing directly for fast initial load
 
-// Lazy load Home and Landing too to shrink unauthenticated bundle
+// Lazy load Home and other pages
 const Home = lazy(() => import('./Home'));
-const Landing = lazy(() => import('./Landing'));
 
 // Lazy load all other pages for better code splitting
 const Game = lazy(() => import("./Game"));

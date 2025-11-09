@@ -265,9 +265,8 @@ export default function Landing() {
               START FREE NOW! 🚀
             </Button>
             <Button
-              variant="outline"
               onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="h-20 px-10 text-xl font-bold border-4 border-white text-white hover:bg-white hover:text-purple-600 shadow-xl"
+              className="h-20 px-10 text-xl font-bold border-4 border-white text-white bg-transparent hover:bg-white hover:text-purple-600 shadow-xl transition-all"
             >
               See What's Inside
               <ArrowRight className="w-6 h-6 ml-2" />
