@@ -23,16 +23,26 @@ export function useFirebaseUser() {
         // Ensure profile exists
         const profile = await getUserProfile(fbUser.email);
         setUser(profile);
+        setError(null);
         // Subscribe to live updates on the user document
         if (userDocUnsub) userDocUnsub();
-        userDocUnsub = onSnapshot(doc(db, 'users', fbUser.email), (snap) => {
-          if (snap.exists()) {
-            setUser({ id: snap.id, ...snap.data() });
+        userDocUnsub = onSnapshot(
+          doc(db, 'users', fbUser.email),
+          (snap) => {
+            if (snap.exists()) {
+              setUser({ id: snap.id, ...snap.data() });
+            }
+          },
+          (err) => {
+            console.error('Firestore snapshot error:', err);
+            // Don't fail completely on snapshot errors - keep existing user data
           }
-        });
+        );
       } catch (e) {
         console.error('Failed to load user profile', e);
         setError(e);
+        // Set a minimal user object so auth still works
+        setUser({ email: fbUser.email, subscription_tier: 'free', coins: 0 });
       } finally {
         setLoading(false);
       }
