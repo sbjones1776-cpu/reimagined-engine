@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from '@/firebaseConfig';
+import { createUserProfile } from '@/api/firebaseService';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,8 @@ export default function SimpleAuth() {
     try {
       if (mode === 'sign-up') {
         await createUserWithEmailAndPassword(auth, email, password);
+        // Ensure a profile document exists keyed by EMAIL to match listeners
+        await createUserProfile(email);
         setMsg('Account created. You are signed in.');
       } else if (mode === 'sign-in') {
         await signInWithEmailAndPassword(auth, email, password);

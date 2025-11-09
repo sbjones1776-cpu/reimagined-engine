@@ -7,6 +7,7 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { createUserProfile } from "@/api/firebaseService";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Input } from "@/components/ui/input";
@@ -92,8 +93,8 @@ export default function AuthForm({ showTitle = false, redirectTo = "Home" }) {
     try {
       if (mode === "sign-up") {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
-        // Create user profile document
-        const userRef = doc(db, "users", cred.user.uid);
+        // Standardize: create user profile with EMAIL as the document ID so our listeners match
+        const userRef = doc(db, "users", email);
         await setDoc(
           userRef,
           {

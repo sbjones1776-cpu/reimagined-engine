@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA-ji4PrndkvUwbcN6axWGjLJd-pNJrTBY",
@@ -18,4 +18,13 @@ export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const analytics = getAnalytics(app);
+// Guard analytics initialization: avoid runtime errors in unsupported environments (e.g. localhost without measurement or SSR)
+let analyticsInstance = null;
+try {
+  isSupported().then((supported) => {
+    if (supported) {
+      analyticsInstance = getAnalytics(app);
+    }
+  }).catch(() => {/* ignore */});
+} catch {/* ignore */}
+export const analytics = analyticsInstance;
