@@ -18,6 +18,7 @@ import CelebrationAnimation from "../components/game/CelebrationAnimation";
 import Leaderboard from "../components/daily/Leaderboard";
 import { generateDailyChallenge, calculateDailyChallengeRewards } from "../components/daily/DailyChallengeGenerator";
 import TextToSpeech from "@/components/ui/TextToSpeech";
+import { mathToSpeech } from "@/lib/utils";
 
 export default function DailyChallenge() {
   const navigate = useNavigate();
@@ -261,7 +262,7 @@ export default function DailyChallenge() {
 
     const tts = [
       `Let's solve it step by step.`,
-      ...steps.map((s, i) => `Step ${i + 1}. ${s}`),
+  ...steps.map((s, i) => `Step ${i + 1}. ${mathToSpeech(s)}`),
     ].join(' ');
     return { steps, tts };
   };
@@ -296,6 +297,10 @@ export default function DailyChallenge() {
 
   // Continue button after showing explanation for an incorrect answer
   const handleContinueAfterExplanation = () => {
+    // Stop any ongoing speech
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
     setShowExplanation(false);
     setExplanationData(null);
     if (currentQuestion < challengeData.totalQuestions - 1) {

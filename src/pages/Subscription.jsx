@@ -157,7 +157,7 @@ export default function Subscription() {
       color: "from-orange-500 to-red-500",
       features: [
         "All Premium Parent features",
-        "Up to 5 student accounts",
+  "Up to 10 student accounts",
         "Classroom management tools",
         "Lesson assignment system",
         "Team challenges",
@@ -463,7 +463,7 @@ export default function Subscription() {
                   <td className="text-center p-4">1</td>
                   <td className="text-center p-4 bg-purple-50">1</td>
                   <td className="text-center p-4">
-                    <Badge className="bg-orange-500 text-white">Up to 5</Badge>
+                    <Badge className="bg-orange-500 text-white">Up to 10</Badge>
                   </td>
                 </tr>
               </tbody>

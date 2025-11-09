@@ -204,13 +204,15 @@ export default function ParentPortal() {
             <div className="text-center">
               <Button 
                 className="h-14 px-8 text-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                onMouseEnter={() => { try { import('./Subscription'); } catch {} }}
+                onFocus={() => { try { import('./Subscription'); } catch {} }}
                 onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
               >
                 <Crown className="w-5 h-5 mr-2" />
                 View Subscription Plans
               </Button>
               <p className="text-sm text-gray-500 mt-3">
-                Starting at $7.99/month • Cancel anytime
+                Starting at $4.99/month • Cancel anytime
               </p>
             </div>
           </CardContent>

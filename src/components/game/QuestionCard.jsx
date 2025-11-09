@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import TextToSpeech from "@/components/ui/TextToSpeech";
+import { mathToSpeech } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,7 @@ export default function QuestionCard({ question, onAnswer, questionNumber }) {
             <p className="text-sm mb-2 opacity-90">Question {questionNumber}</p>
             <h2 className="text-5xl md:text-6xl font-bold flex items-center gap-2">
               {question.question}
-              <TextToSpeech text={question.question} style="icon" label="Read question" />
+              <TextToSpeech text={mathToSpeech(question.question)} style="icon" label="Read question" />
             </h2>
           </div>
         </CardHeader>
@@ -63,7 +64,7 @@ export default function QuestionCard({ question, onAnswer, questionNumber }) {
                   >
                     <span className="flex items-center gap-2">
                       {option}
-                      <TextToSpeech text={option} style="icon" label={`Read answer option ${index + 1}`} />
+                      <TextToSpeech text={mathToSpeech(option.toString())} style="icon" label={`Read answer option ${index + 1}`} />
                     </span>
                   </Button>
                 </motion.div>
@@ -74,7 +75,7 @@ export default function QuestionCard({ question, onAnswer, questionNumber }) {
       </Card>
       {/* Question summary TTS */}
       <div className="mt-4 flex items-center gap-2">
-        <TextToSpeech text={`Question ${questionNumber}: ${question.question}. Possible answers are: ${question.options.join(', ')}.`} style="button" label="Read question summary" />
+  <TextToSpeech text={mathToSpeech(`Question ${questionNumber}: ${question.question}. Possible answers are: ${question.options.join(', ')}.`)} style="button" label="Read question summary" />
       </div>
     </motion.div>
   );

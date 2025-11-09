@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import TextToSpeech from "@/components/ui/TextToSpeech";
+import { mathToSpeech } from "@/lib/utils";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Lightbulb, BookOpen, Sparkles, ChevronRight, Brain, AlertCircle, XCircle, CheckCircle } from "lucide-react";
 // import { base44 } from "@/api/base44Client";
@@ -210,7 +211,7 @@ export default function AITutor({
                   <span className="font-medium text-gray-700">Question:</span>
                   <span className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                     {question}
-                    <TextToSpeech text={question} style="icon" label="Read question" />
+                    <TextToSpeech text={mathToSpeech(question)} style="icon" label="Read question" />
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -220,7 +221,7 @@ export default function AITutor({
                   </span>
                   <Badge variant="outline" className="bg-red-100 border-red-300 text-red-700 text-lg flex items-center gap-2">
                     {userAnswer}
-                    <TextToSpeech text={userAnswer?.toString()} style="icon" label="Read your answer" />
+                    <TextToSpeech text={mathToSpeech(userAnswer?.toString())} style="icon" label="Read your answer" />
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
@@ -230,7 +231,7 @@ export default function AITutor({
                   </span>
                   <Badge className="bg-green-500 text-white text-lg flex items-center gap-2">
                     {correctAnswer}
-                    <TextToSpeech text={correctAnswer?.toString()} style="icon" label="Read correct answer" />
+                    <TextToSpeech text={mathToSpeech(correctAnswer?.toString())} style="icon" label="Read correct answer" />
                   </Badge>
                 </div>
               </div>
@@ -282,7 +283,7 @@ export default function AITutor({
                   <CardContent>
                     <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">
                       {hint}
-                      <TextToSpeech text={hint} style="icon" label="Read hint" />
+                      <TextToSpeech text={mathToSpeech(hint)} style="icon" label="Read hint" />
                     </p>
                   </CardContent>
                 </Card>
@@ -328,7 +329,7 @@ export default function AITutor({
                         <div className="text-gray-800 whitespace-pre-wrap leading-relaxed space-y-3">
                           {explanation.split('\n\n').map((section, index) => (
                             <div key={index} className="mb-4">
-                              <TextToSpeech text={section.replace(/\*\*/g, '')} style="button" label="Read solution section" />
+                              <TextToSpeech text={mathToSpeech(section.replace(/\*\*/g, ''))} style="button" label="Read solution section" />
                               {section.split('\n').map((line, lineIndex) => {
                                 // Bold headers
                                 if (line.startsWith('**') && line.endsWith('**')) {

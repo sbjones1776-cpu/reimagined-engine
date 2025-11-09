@@ -1,6 +1,7 @@
 
 import React from "react";
 import TextToSpeech from "@/components/ui/TextToSpeech";
+import { mathToSpeech } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -63,11 +64,11 @@ export default function ResultScreen({
             </motion.div>
             <h1 className="text-4xl md:text-5xl font-bold mb-2 flex items-center gap-2">
               Challenge Complete!
-              <TextToSpeech text="Challenge Complete!" style="icon" label="Read title" />
+              <TextToSpeech text={mathToSpeech("Challenge Complete!")} style="icon" label="Read title" />
             </h1>
             <p className="text-xl flex items-center gap-2">
               {message}
-              <TextToSpeech text={message} style="icon" label="Read message" />
+              <TextToSpeech text={mathToSpeech(message)} style="icon" label="Read message" />
             </p>
           </div>
 
@@ -78,7 +79,7 @@ export default function ResultScreen({
                 <Trophy className="w-8 h-8 mx-auto mb-2 text-purple-500" />
                 <div className="text-3xl font-bold text-purple-600 flex items-center gap-2">
                   {score}
-                  <TextToSpeech text={`Your score is ${score}`} style="icon" label="Read score" />
+                  <TextToSpeech text={mathToSpeech(`Your score is ${score}`)} style="icon" label="Read score" />
                 </div>
                 <div className="text-sm text-gray-600">Score</div>
               </div>
@@ -86,7 +87,7 @@ export default function ResultScreen({
                 <Target className="w-8 h-8 mx-auto mb-2 text-green-500" />
                 <div className="text-3xl font-bold text-green-600 flex items-center gap-2">
                   {correctAnswers}/{totalQuestions}
-                  <TextToSpeech text={`You got ${correctAnswers} out of ${totalQuestions} correct`} style="icon" label="Read correct answers" />
+                  <TextToSpeech text={mathToSpeech(`You got ${correctAnswers} out of ${totalQuestions} correct`)} style="icon" label="Read correct answers" />
                 </div>
                 <div className="text-sm text-gray-600">Correct</div>
               </div>
@@ -94,7 +95,7 @@ export default function ResultScreen({
                 <Clock className="w-8 h-8 mx-auto mb-2 text-blue-500" />
                 <div className="text-3xl font-bold text-blue-600 flex items-center gap-2">
                   {timeTaken}s
-                  <TextToSpeech text={`Time taken: ${timeTaken} seconds`} style="icon" label="Read time" />
+                  <TextToSpeech text={mathToSpeech(`Time taken: ${timeTaken} seconds`)} style="icon" label="Read time" />
                 </div>
                 <div className="text-sm text-gray-600">Time</div>
               </div>
@@ -102,7 +103,7 @@ export default function ResultScreen({
                 <Star className="w-8 h-8 mx-auto mb-2 text-yellow-500 fill-yellow-500" />
                 <div className="text-3xl font-bold text-yellow-600 flex items-center gap-2">
                   {stars}
-                  <TextToSpeech text={`You earned ${stars} stars`} style="icon" label="Read stars" />
+                  <TextToSpeech text={mathToSpeech(`You earned ${stars} stars`)} style="icon" label="Read stars" />
                 </div>
                 <div className="text-sm text-gray-600">Stars</div>
               </div>
@@ -120,14 +121,14 @@ export default function ResultScreen({
                       <div>
                         <h3 className="font-bold text-lg flex items-center gap-2">
                           Coins Earned!
-                          <TextToSpeech text={`You earned ${coinsEarned} coins!`} style="icon" label="Read coins" />
+                          <TextToSpeech text={mathToSpeech(`You earned ${coinsEarned} coins!`)} style="icon" label="Read coins" />
                         </h3>
                         <p className="text-sm text-gray-600">Use them in the shop for power-ups</p>
                       </div>
                     </div>
                     <div className="text-3xl font-bold text-cyan-600 flex items-center gap-2">
                       +{coinsEarned}
-                      <TextToSpeech text={`Plus ${coinsEarned} coins`} style="icon" label="Read coins" />
+                      <TextToSpeech text={mathToSpeech(`Plus ${coinsEarned} coins`)} style="icon" label="Read coins" />
                     </div>
                   </div>
                 </CardContent>
@@ -140,7 +141,7 @@ export default function ResultScreen({
                 <Sparkles className="w-4 h-4 text-yellow-600" />
                 <AlertDescription className="text-yellow-800 flex items-center gap-2">
                   <strong>Power-ups were active!</strong> Your rewards have been boosted!
-                  <TextToSpeech text="Power-ups were active! Your rewards have been boosted!" style="icon" label="Read power-ups" />
+                  <TextToSpeech text={mathToSpeech("Power-ups were active! Your rewards have been boosted!")} style="icon" label="Read power-ups" />
                 </AlertDescription>
               </Alert>
             )}

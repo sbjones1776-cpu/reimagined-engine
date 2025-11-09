@@ -34,6 +34,31 @@ export default function Layout({ children, currentPageName }) {
   // Consolidated auth via global context
   const { user, loading: authLoading } = useUser();
 
+  // Prefetch Subscription page chunk to speed up navigation
+  const prefetchSubscription = React.useCallback(() => {
+    try {
+      import('./Subscription');
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    // Idle prefetch once per session
+    const doneKey = 'prefetch.subscription.done';
+    if (sessionStorage.getItem(doneKey)) return;
+    const idle = (cb) => {
+      if ('requestIdleCallback' in window) {
+        // @ts-ignore
+        window.requestIdleCallback(cb, { timeout: 1500 });
+      } else {
+        setTimeout(cb, 800);
+      }
+    };
+    idle(() => {
+      prefetchSubscription();
+      sessionStorage.setItem(doneKey, '1');
+    });
+  }, [prefetchSubscription]);
+
   // Get theme preference
   // Get theme preference from localStorage (Settings auto-saves there)
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -323,6 +348,8 @@ export default function Layout({ children, currentPageName }) {
 
               {subscriptionTier !== "free" ? (
                 <button
+                  onMouseEnter={prefetchSubscription}
+                  onFocus={prefetchSubscription}
                   onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
                   className="hidden md:block"
                 >
@@ -333,6 +360,8 @@ export default function Layout({ children, currentPageName }) {
                 </button>
               ) : (
                 <button
+                  onMouseEnter={prefetchSubscription}
+                  onFocus={prefetchSubscription}
                   onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
                   className="hidden md:block"
                 >
@@ -429,14 +458,14 @@ export default function Layout({ children, currentPageName }) {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("Subscription")} className="cursor-pointer">
+                        <Link to={createPageUrl("Subscription")} className="cursor-pointer" onMouseEnter={prefetchSubscription} onFocus={prefetchSubscription}>
                           <CreditCard className="w-4 h-4 mr-2" />
                           Manage Subscription
                         </Link>
                       </DropdownMenuItem>
                       {isSubscribed && user?.subscription_auto_renew !== false && (
                         <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                          <Link to={createPageUrl("Subscription")} className="cursor-pointer text-orange-600 focus:text-orange-600">
+                          <Link to={createPageUrl("Subscription")} className="cursor-pointer text-orange-600 focus:text-orange-600" onMouseEnter={prefetchSubscription} onFocus={prefetchSubscription}>
                             <XCircle className="w-4 h-4 mr-2" />
                             Cancel Subscription
                           </Link>
@@ -686,6 +715,8 @@ export default function Layout({ children, currentPageName }) {
               <span className={isDarkMode ? 'text-gray-600' : 'text-gray-300'}>•</span>
               <Link
                 to={createPageUrl("Subscription")}
+                onMouseEnter={prefetchSubscription}
+                onFocus={prefetchSubscription}
                 className={`text-sm ${isDarkMode ? 'text-gray-300 hover:text-purple-400' : 'text-gray-600 hover:text-purple-600'} transition-colors`}
               >
                 Pricing
