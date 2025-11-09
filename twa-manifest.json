@@ -1,0 +1,51 @@
+{
+  "packageId": "app.web.math_adventure_app.twa",
+  "host": "math-adventure-app.web.app/",
+  "name": "Math Adventure",
+  "launcherName": "MathAdv",
+  "display": "standalone",
+  "themeColor": "#9333EA",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#FAF5FF",
+  "enableNotifications": true,
+  "startUrl": "https://math-adventure-app.web.app/",
+  "iconUrl": "https://math-adventure-app.web.app/icons/icon-512.png",
+  "maskableIconUrl": "https://math-adventure-app.web.app/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\Bama1\\OneDrive\\Apps\\Designer\\Google Play Console for App\\Android\\math-adventure-9f857897\\android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "2",
+  "appVersionCode": 2,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://math-adventure-app.web.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "playBilling": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://math-adventure-app.web.app/",
+  "minSdkVersion": 21,
+  "orientation": "any",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "2"
+}
