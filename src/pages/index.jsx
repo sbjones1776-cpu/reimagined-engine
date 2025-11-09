@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import Layout from "./Layout.jsx";
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import ChunkErrorBoundary from '@/components/ChunkErrorBoundary.jsx';
 
 // Lazy load Home and Landing too to shrink unauthenticated bundle
 const Home = lazy(() => import('./Home'));
@@ -100,7 +101,8 @@ function PagesContent() {
     
     return (
         <Layout currentPageName={currentPage}>
-            <Suspense fallback={<PageLoader />}>
+            <ChunkErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
                 <Routes>            
                     
                         <Route path="/" element={<Home />} />
@@ -147,7 +149,8 @@ function PagesContent() {
                 <Route path="/Subscribe" element={<Subscribe />} />
                 
                 </Routes>
-            </Suspense>
+                </Suspense>
+            </ChunkErrorBoundary>
         </Layout>
     );
 }

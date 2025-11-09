@@ -36,24 +36,25 @@
 
     // The Util Function to hack URLs of intercepted requests
     const getFixedUrl = (req) => {
-        var now = Date.now()
-        var url = new URL(req.url)
+        const url = new URL(req.url);
+
+        // Do NOT modify versioned asset URLs (Vite hashed chunks)
+        if (url.origin === self.location.origin && url.pathname.startsWith('/assets/')) {
+            return url.href;
+        }
 
         // 1. fixed http URL
         // Just keep syncing with location.protocol
         // fetch(httpURL) belongs to active mixed content.
         // And fetch(httpRequest) is not supported yet.
-        url.protocol = self.location.protocol
+        url.protocol = self.location.protocol;
 
-        // 2. add query for caching-busting.
-        // Github Pages served with Cache-Control: max-age=600
-        // max-age on mutable content is error-prone, with SW life of bugs can even extend.
-        // Until cache mode of Fetch API landed, we have to workaround cache-busting with query string.
-        // Cache-Control-Bug: https://bugs.chromium.org/p/chromium/issues/detail?id=453190
+        // 2. add query for caching-busting on same-origin HTML/JSON/etc.
+        // Avoid breaking cache keys for static hashed assets.
         if (url.hostname === self.location.hostname) {
-            url.search += (url.search ? '&' : '?') + 'cache-bust=' + now
+            url.search += (url.search ? '&' : '?') + 'cache-bust=' + Date.now();
         }
-        return url.href
+        return url.href;
     }
 
     /**
