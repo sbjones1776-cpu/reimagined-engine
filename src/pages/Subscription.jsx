@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Crown, Check, Sparkles, Users, GraduationCap, Star, Shield, Target, MessageSquare, BarChart3, Clock, Lock, CreditCard, XCircle, AlertTriangle, CheckCircle, ExternalLink, Globe } from "lucide-react";
 import { format } from "date-fns";
 import UpgradeButton from "@/components/UpgradeButton";
+import { PAYMENT_LINKS, getPaymentLink } from "@/api/paymentLinks";
 
 export default function Subscription() {
   const queryClient = useQueryClient();
@@ -64,29 +65,14 @@ export default function Subscription() {
   const subscriptionExpires = user?.subscription_expires_at ? new Date(user.subscription_expires_at) : null;
   const daysUntilRenewal = subscriptionExpires ? Math.ceil((subscriptionExpires - new Date()) / (1000 * 60 * 60 * 24)) : 0;
 
-  // Direct Square payment links for each plan
-  // Payment links for monthly and yearly options
-  const paymentLinks = {
-    premium_player: {
-      monthly: "https://square.link/u/nFpI2tMT",
-      yearly: "https://checkout.square.site/merchant/MLZ8SFCEGD55V/checkout/XKMFTRBKLNNDRTMQWSBJ4TOL"
-    },
-    premium_parent: {
-      monthly: "https://square.link/u/mffPglOm",
-      yearly: "https://checkout.square.site/merchant/MLZ8SFCEGD55V/checkout/LJ7EFZTE5IPACDT2HAO2H2IB"
-    },
-    family_teacher: {
-      monthly: "https://square.link/u/bCQAOVfA",
-      yearly: "https://checkout.square.site/merchant/MLZ8SFCEGD55V/checkout/VYNFU5WKRO4AU5KBQAG2S3NM"
-    }
-  };
+  // Centralized Square payment links imported from api/paymentLinks
 
   const handleSubscribe = (tier, period = "monthly") => {
     if (!isExternalBrowser) {
       alert("Please open this page in your web browser to subscribe. Use the 'Open in Browser' button above.");
       return;
     }
-    const url = paymentLinks[tier]?.[period];
+  const url = getPaymentLink(tier, period);
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     } else {
