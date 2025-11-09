@@ -20,11 +20,11 @@ export function useFirebaseUser() {
         return;
       }
       try {
-        // Ensure profile exists
-        const profile = await getUserProfile(fbUser.email);
-        setUser(profile);
+        // Immediately set a minimal user so the app can render without waiting on Firestore
+        setUser((prev) => prev || { email: fbUser.email, subscription_tier: 'free', coins: 0 });
         setError(null);
-        // Subscribe to live updates on the user document
+
+        // Subscribe to live updates on the user document ASAP
         if (userDocUnsub) userDocUnsub();
         userDocUnsub = onSnapshot(
           doc(db, 'users', fbUser.email),
@@ -38,12 +38,20 @@ export function useFirebaseUser() {
             // Don't fail completely on snapshot errors - keep existing user data
           }
         );
+
+        // Ensure profile exists but don't block initial render
+        // This will create a default profile if missing; snapshot above will update state when ready
+        getUserProfile(fbUser.email).catch((e) => {
+          console.error('Failed to ensure user profile', e);
+          setError(e);
+        });
       } catch (e) {
-        console.error('Failed to load user profile', e);
+        console.error('Failed to initialize user session', e);
         setError(e);
         // Set a minimal user object so auth still works
         setUser({ email: fbUser.email, subscription_tier: 'free', coins: 0 });
       } finally {
+        // Don't block UI on profile/network; as soon as auth state is known, stop loading
         setLoading(false);
       }
     });
