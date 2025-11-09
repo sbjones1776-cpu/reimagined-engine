@@ -105,7 +105,7 @@ function PagesContent() {
                 <Suspense fallback={<PageLoader />}>
                 <Routes>            
                     
-                        <Route path="/" element={<Home />} />
+                        <Route path="/" element={<Landing />} />
                     
                     
                     <Route path="/Home" element={<Home />} />

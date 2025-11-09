@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { useQuery } from "@tanstack/react-query";
-// // import { base44 } from "@/api/base44Client";
+import { useUser } from "@/hooks/UserProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,31 +24,20 @@ import { motion } from "framer-motion";
 
 export default function Landing() {
   const navigate = useNavigate();
-
-  const { data: isAuthenticated, isLoading } = useQuery({
-    queryKey: ['isAuthenticated'],
-    queryFn: async () => {
-      try {
-  // TODO: Replace with new authentication check
-        return true;
-      } catch {
-        return false;
-      }
-    },
-  });
+  const { user, loading } = useUser();
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!loading && user) {
       navigate(createPageUrl("Home"));
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [user, loading, navigate]);
 
   const handleGetStarted = () => {
-  // TODO: Replace with new login redirect logic (if needed)
+    navigate(createPageUrl("Home"));
   };
 
   // Show loading while checking auth
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500">
         <div className="text-center">

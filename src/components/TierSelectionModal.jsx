@@ -21,7 +21,7 @@ export default function TierSelectionModal({ open, onOpenChange, onSelectTier, u
       gradient: 'from-purple-500 to-pink-500',
       description: 'Perfect for individual students',
       monthlyPrice: 4.99,
-      yearlyPrice: 47.88, // 12 * 4.99 = 59.88; savings 11.88 (20%)
+      yearlyPrice: 47.99, // 12 * 4.99 = 59.88; save $11.89 (20%)
       features: [
         'Unlimited games',
         '80+ math concepts',

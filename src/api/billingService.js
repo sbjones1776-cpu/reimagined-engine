@@ -38,39 +38,39 @@ let initialized = false;
 const PRODUCT_CONFIG = {
   // Premium Player
   premium_player_monthly: {
-    id: import.meta.env.VITE_PLAY_PREMIUM_PLAYER_MONTHLY_ID || 'play_premium_player_monthly',
+    id: import.meta.env.VITE_PLAY_PREMIUM_PLAYER_MONTHLY_ID || 'play-premium-player-monthly',
     period: 'P1M',
     tier: 'premium_player',
     label: 'Premium Player (Monthly)'
   },
   premium_player_yearly: {
-    id: import.meta.env.VITE_PLAY_PREMIUM_PLAYER_YEARLY_ID || 'play_premium_player_yearly',
+    id: import.meta.env.VITE_PLAY_PREMIUM_PLAYER_YEARLY_ID || 'play-premium-player-yearly',
     period: 'P1Y',
     tier: 'premium_player',
     label: 'Premium Player (Yearly)'
   },
   // Premium Parent
   premium_parent_monthly: {
-    id: import.meta.env.VITE_PLAY_PREMIUM_PARENT_MONTHLY_ID || 'play_premium_parent_monthly',
+    id: import.meta.env.VITE_PLAY_PREMIUM_PARENT_MONTHLY_ID || 'play-premium-parent-monthly',
     period: 'P1M',
     tier: 'premium_parent',
     label: 'Premium Parent (Monthly)'
   },
   premium_parent_yearly: {
-    id: import.meta.env.VITE_PLAY_PREMIUM_PARENT_YEARLY_ID || 'play_premium_parent_yearly',
+    id: import.meta.env.VITE_PLAY_PREMIUM_PARENT_YEARLY_ID || 'play-premium-parent-yearly',
     period: 'P1Y',
     tier: 'premium_parent',
     label: 'Premium Parent (Yearly)'
   },
   // Family / Teacher
   family_teacher_monthly: {
-    id: import.meta.env.VITE_PLAY_FAMILY_TEACHER_MONTHLY_ID || 'play_family_teacher_monthly',
+    id: import.meta.env.VITE_PLAY_FAMILY_TEACHER_MONTHLY_ID || 'play-family-teacher-monthly',
     period: 'P1M',
     tier: 'family_teacher',
     label: 'Family/Teacher (Monthly)'
   },
   family_teacher_yearly: {
-    id: import.meta.env.VITE_PLAY_FAMILY_TEACHER_YEARLY_ID || 'play_family_teacher_yearly',
+    id: import.meta.env.VITE_PLAY_FAMILY_TEACHER_YEARLY_ID || 'play-family-teacher-yearly',
     period: 'P1Y',
     tier: 'family_teacher',
     label: 'Family/Teacher (Yearly)'
