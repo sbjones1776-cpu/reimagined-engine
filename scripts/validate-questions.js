@@ -6,7 +6,7 @@
  *  - Duplicate options
  *  - Option count not 2-6
  */
-import { generateQuestion } from '../src/components/game/QuestionGenerator.jsx';
+import { generateQuestion } from '../src/components/game/QuestionGenerator.js';
 
 const operations = [
   'addition','subtraction','multiplication','division','counting','number_comparison','place_value','patterns','rounding',

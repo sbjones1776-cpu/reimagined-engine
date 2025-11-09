@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 export default function QuestionCard({ question, onAnswer, questionNumber }) {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const displayOptions = Array.isArray(question.optionsDisplay) && question.optionsDisplay.length === question.options.length
+    ? question.optionsDisplay
+    : question.options;
 
   const handleAnswer = (answer) => {
     if (isAnswered) return;
@@ -41,6 +44,7 @@ export default function QuestionCard({ question, onAnswer, questionNumber }) {
         <CardContent className="p-8">
           <div className="grid grid-cols-2 gap-4">
             {question.options.map((option, index) => {
+              const label = displayOptions[index];
               const isCorrect = option === question.answer;
               const isSelected = selectedAnswer === option;
               let buttonClass = "text-2xl font-bold h-24 transition-all transform hover:scale-105";
@@ -63,8 +67,8 @@ export default function QuestionCard({ question, onAnswer, questionNumber }) {
                     disabled={isAnswered}
                   >
                     <span className="flex items-center gap-2">
-                      {option}
-                      <TextToSpeech text={mathToSpeech(option.toString())} style="icon" label={`Read answer option ${index + 1}`} />
+                      {label}
+                      <TextToSpeech text={mathToSpeech(String(label))} style="icon" label={`Read answer option ${index + 1}`} />
                     </span>
                   </Button>
                 </motion.div>
@@ -75,7 +79,7 @@ export default function QuestionCard({ question, onAnswer, questionNumber }) {
       </Card>
       {/* Question summary TTS */}
       <div className="mt-4 flex items-center gap-2">
-  <TextToSpeech text={mathToSpeech(`Question ${questionNumber}: ${question.question}. Possible answers are: ${question.options.join(', ')}.`)} style="button" label="Read question summary" />
+  <TextToSpeech text={mathToSpeech(`Question ${questionNumber}: ${question.question}. Possible answers are: ${displayOptions.join(', ')}.`)} style="button" label="Read question summary" />
       </div>
     </motion.div>
   );
