@@ -32,7 +32,7 @@
       '/icons/icon-512.png'
     ];
 
-    const APP_SHELL_CACHE = 'app-shell-v1';
+    const APP_SHELL_CACHE = 'app-shell-v2'; // Bump version to force update
 
     // The Util Function to hack URLs of intercepted requests
     const getFixedUrl = (req) => {
@@ -64,6 +64,8 @@
      *  waitUntil(): activating ====> activated
      */
         self.addEventListener('install', event => {
+            // Skip waiting immediately to activate new SW faster
+            self.skipWaiting();
             event.waitUntil(
                 caches.open(APP_SHELL_CACHE).then(cache => cache.addAll(STATIC_ASSETS))
             );
@@ -76,6 +78,7 @@
                     await Promise.all(
                         keys.filter(k => k !== APP_SHELL_CACHE && k !== 'pwa-cache').map(k => caches.delete(k))
                     );
+                    // Claim all clients immediately
                     await self.clients.claim();
                 })()
             );
@@ -92,15 +95,16 @@
         if (event.request.method !== 'GET') return;
 
         // Return app shell for navigation requests (SPA offline support)
+        // ALWAYS fetch fresh from network for navigation to avoid stale shell
         if (event.request.mode === 'navigate') {
             event.respondWith(
                 (async () => {
                     try {
-                        const preloadResp = await event.preloadResponse;
-                        if (preloadResp) return preloadResp;
-                        const networkResp = await fetch(event.request);
+                        // Force fresh network fetch for HTML to avoid stale cache
+                        const networkResp = await fetch(event.request, { cache: 'no-cache' });
                         return networkResp;
                     } catch (e) {
+                        // Only use cached shell if network fails (true offline)
                         const cache = await caches.open(APP_SHELL_CACHE);
                         return await cache.match('/index.html');
                     }
