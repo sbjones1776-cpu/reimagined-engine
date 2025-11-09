@@ -23,9 +23,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import AvatarDisplay from "../components/avatar/AvatarDisplay";
-import PetDisplay from "../components/rewards/PetDisplay";
-import InstallPrompt from "../components/InstallPrompt";
+const AvatarDisplay = React.lazy(() => import("../components/avatar/AvatarDisplay"));
+const PetDisplay = React.lazy(() => import("../components/rewards/PetDisplay"));
+const InstallPrompt = React.lazy(() => import("../components/InstallPrompt"));
 import { format, startOfDay } from "date-fns";
 
 export default function Layout({ children, currentPageName }) {
@@ -350,20 +350,22 @@ export default function Layout({ children, currentPageName }) {
                       <Button variant="ghost" className={`${isDarkMode ? 'hover:bg-slate-700 text-gray-50' : 'hover:bg-purple-50 text-gray-900'} h-auto p-2`}>
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
-                            {avatarData && (
-                              <div className="scale-75 origin-center">
-                                <AvatarDisplay avatarData={avatarData} size="small" />
-                              </div>
-                            )}
-                            {petData && (
-                              <div className="scale-50 origin-center -ml-2">
-                                <PetDisplay
-                                  pet={petData}
-                                  experience={user?.pet_experience?.[activePet] || 0}
-                                  size="small"
-                                />
-                              </div>
-                            )}
+                            <React.Suspense fallback={null}>
+                              {avatarData && (
+                                <div className="scale-75 origin-center">
+                                  <AvatarDisplay avatarData={avatarData} size="small" />
+                                </div>
+                              )}
+                              {petData && (
+                                <div className="scale-50 origin-center -ml-2">
+                                  <PetDisplay
+                                    pet={petData}
+                                    experience={user?.pet_experience?.[activePet] || 0}
+                                    size="small"
+                                  />
+                                </div>
+                              )}
+                            </React.Suspense>
                           </div>
                           <div className="text-left hidden xl:block">
                             <p className={`text-sm font-semibold ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
@@ -467,11 +469,13 @@ export default function Layout({ children, currentPageName }) {
               {user && (
                 <div className={`${isDarkMode ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-50' : 'bg-gradient-to-r from-purple-50 to-pink-50'} p-4 rounded-xl mb-4`}>
                   <div className="flex items-center gap-3 mb-3">
-                    {avatarData && (
-                      <div className="scale-90 origin-center">
-                        <AvatarDisplay avatarData={avatarData} size="small" />
-                      </div>
-                    )}
+                    <React.Suspense fallback={null}>
+                      {avatarData && (
+                        <div className="scale-90 origin-center">
+                          <AvatarDisplay avatarData={avatarData} size="small" />
+                        </div>
+                      )}
+                    </React.Suspense>
                     <div>
                       <p className={`font-bold ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{user.email}</p>
@@ -656,7 +660,9 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </div>
 
-      <InstallPrompt />
+      <React.Suspense fallback={null}>
+        <InstallPrompt />
+      </React.Suspense>
 
       <main className="flex-1 pb-20 lg:pb-0">
         {children}

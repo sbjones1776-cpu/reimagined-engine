@@ -2,9 +2,9 @@ import React, { lazy, Suspense } from 'react';
 import Layout from "./Layout.jsx";
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 
-// Eager load critical pages for initial render
-import Home from "./Home";
-import Landing from "./Landing";
+// Lazy load Home and Landing too to shrink unauthenticated bundle
+const Home = lazy(() => import('./Home'));
+const Landing = lazy(() => import('./Landing'));
 
 // Lazy load all other pages for better code splitting
 const Game = lazy(() => import("./Game"));

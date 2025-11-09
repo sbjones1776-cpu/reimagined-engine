@@ -13,7 +13,45 @@ import { createPageUrl } from "@/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import AvatarDisplay from "@/components/avatar/AvatarDisplay";
+import React, { Suspense } from 'react';
+const AvatarDisplayLazy = React.lazy(() => import('@/components/avatar/AvatarDisplay'));
+
+// Starter avatar constant moved outside component to avoid re-allocation each render
+const STARTER_AVATAR = {
+  avatar_skin_tone: "medium",
+  avatar_hair_style: "short",
+  avatar_hair_color: "brown",
+  avatar_eyes: "happy",
+  avatar_face: "smile",
+  avatar_shirt: "t_shirt_basic",
+  avatar_pants: "jeans",
+  avatar_shoes: "sneakers",
+  avatar_hat: "none",
+  avatar_glasses: "none",
+  avatar_accessory: "none",
+  avatar_background: "stars",
+  pet_hat: "none",
+  pet_accessory: "none",
+  unlocked_items: [
+    "t_shirt_basic",
+    "jeans",
+    "sneakers",
+    "short",
+    "long",
+    "black",
+    "brown",
+    "blonde",
+    "normal",
+    "happy",
+    "light",
+    "medium",
+    "tan",
+    "dark",
+    "smile",
+    "big_smile",
+    "plain",
+  ],
+};
 
 export default function AuthForm({ showTitle = false, redirectTo = "Home" }) {
   const navigate = useNavigate();
@@ -26,42 +64,8 @@ export default function AuthForm({ showTitle = false, redirectTo = "Home" }) {
   const [error, setError] = useState("");
   const [showPreview, setShowPreview] = useState(false);
 
-  // Starter avatar that matches AvatarDisplay's expected keys
-  const starterAvatar = {
-    avatar_skin_tone: "medium",
-    avatar_hair_style: "short",
-    avatar_hair_color: "brown",
-    avatar_eyes: "happy",
-    avatar_face: "smile",
-    avatar_shirt: "t_shirt_basic",
-    avatar_pants: "jeans",
-    avatar_shoes: "sneakers",
-    avatar_hat: "none",
-    avatar_glasses: "none",
-    avatar_accessory: "none",
-    avatar_background: "stars",
-    pet_hat: "none",
-    pet_accessory: "none",
-    unlocked_items: [
-      "t_shirt_basic",
-      "jeans",
-      "sneakers",
-      "short",
-      "long",
-      "black",
-      "brown",
-      "blonde",
-      "normal",
-      "happy",
-      "light",
-      "medium",
-      "tan",
-      "dark",
-      "smile",
-      "big_smile",
-      "plain",
-    ],
-  };
+  // Reference the static starter avatar
+  const starterAvatar = STARTER_AVATAR;
 
   const passwordStrength = (() => {
     let score = 0;
@@ -214,7 +218,9 @@ export default function AuthForm({ showTitle = false, redirectTo = "Home" }) {
         <div className="mt-6 p-4 rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
           <h3 className="text-lg font-bold text-purple-700 mb-3">Welcome! Here's your starter look ✨</h3>
           <div className="flex items-center gap-4">
-            <AvatarDisplay avatarData={starterAvatar} size="medium" />
+            <Suspense fallback={<div className="w-24 h-24 flex items-center justify-center">Loading avatar…</div>}>
+              <AvatarDisplayLazy avatarData={starterAvatar} size="medium" />
+            </Suspense>
             <div className="flex-1">
               <p className="text-sm text-gray-700 mb-3">You can customize your avatar now or do it later.</p>
               <div className="flex gap-2">
