@@ -5,6 +5,7 @@ import { useUser } from "@/hooks/UserProvider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import SimpleAuth from "@/components/SimpleAuth";
 import {
   Star,
   Trophy,
@@ -25,6 +26,7 @@ import { motion } from "framer-motion";
 export default function Landing() {
   const navigate = useNavigate();
   const { user, loading } = useUser();
+  const [showAuth, setShowAuth] = React.useState(false);
 
   useEffect(() => {
     if (!loading && user) {
@@ -33,7 +35,11 @@ export default function Landing() {
   }, [user, loading, navigate]);
 
   const handleGetStarted = () => {
-    navigate(createPageUrl("Home"));
+    if (user) {
+      navigate(createPageUrl("Home"));
+    } else {
+      setShowAuth(true);
+    }
   };
 
   // Show loading while checking auth
@@ -509,6 +515,21 @@ export default function Landing() {
           </p>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      {showAuth && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 relative">
+            <button
+              onClick={() => setShowAuth(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+            <SimpleAuth onSuccess={() => navigate(createPageUrl("Home"))} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
