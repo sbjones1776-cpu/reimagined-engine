@@ -1,11 +1,13 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.yourcompany.mathadventure",
+      "package_name": "app.web.math_adventure_app.twa",
       "sha256_cert_fingerprints": [
-        "ED:B3:D3:59:B0:37:07:9B:17:72:F1:D7:B3:4E:99:05:8F:B5:71:D2:3F:75:8C:F9:40:12:31:82:2C:CD:87:D4"
+        "REPLACE_WITH_SHA256_FINGERPRINT"
       ]
     }
   }

@@ -26,14 +26,8 @@
   "shortcuts": [
     {
       "name": "Math Adventure",
-      "url": "/launch",
+      "url": "/",
       "description": "Open the app"
-    }
-  ],
-  "protocol_handlers": [
-    {
-      "protocol": "web+math",
-      "url": "https://math-adventure.com/launch?uri=%s"
     }
   ]
 }
