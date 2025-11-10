@@ -151,9 +151,23 @@ android {
 
         
     }
+    // Configure release signing. Secrets are read from environment variables or Gradle properties.
+    // Required env/props:
+    //   ANDROID_STORE_PASSWORD - Keystore password
+    //   ANDROID_KEY_PASSWORD   - Key password
+    signingConfigs {
+        release {
+            storeFile file('C:/Users/Bama1/OneDrive/Apps/Designer/Google Play Console for App/Android/math-adventure-9f857897/android.keystore')
+            storePassword System.getenv('ANDROID_STORE_PASSWORD') ?: (project.hasProperty('ANDROID_STORE_PASSWORD') ? project.getProperty('ANDROID_STORE_PASSWORD') : null)
+            keyAlias 'android'
+            keyPassword System.getenv('ANDROID_KEY_PASSWORD') ?: (project.hasProperty('ANDROID_KEY_PASSWORD') ? project.getProperty('ANDROID_KEY_PASSWORD') : null)
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true
+            // Sign the release bundle/APK
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
