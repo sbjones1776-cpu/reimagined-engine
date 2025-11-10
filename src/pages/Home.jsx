@@ -17,6 +17,7 @@ import DailyChallengeWidget from "../components/daily/DailyChallengeWidget";
 import SimpleAuth from "../components/SimpleAuth";
 import Logo from "@/components/Logo";
 import UpgradeButton from "@/components/UpgradeButton";
+import AppTrialPromo from "@/components/AppTrialPromo";
 import { format } from "date-fns";
 
 const mathConcepts = [
@@ -1446,7 +1447,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Subscription Status / Upgrade Widget */}
+  {/* Subscription Status / Upgrade Widget */}
       {isSubscribed ? (
         <Card className="mb-8 border-4 border-green-400 shadow-xl bg-gradient-to-r from-green-50 to-emerald-50">
           <CardContent className="p-6">
@@ -1507,6 +1508,9 @@ export default function Home() {
               <div className="h-12">
                 <UpgradeButton />
               </div>
+            </div>
+            <div className="mt-4">
+              <AppTrialPromo compact />
             </div>
           </CardContent>
         </Card>

@@ -319,36 +319,51 @@ export default function AITutor({
                 >
                   <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-300">
                     <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-lg">
-                        <BookOpen className="w-5 h-5 text-blue-600" />
-                        Complete Solution
-                      </CardTitle>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                          <BookOpen className="w-5 h-5 text-blue-600" />
+                          Complete Solution
+                        </CardTitle>
+                        <TextToSpeech 
+                          text={mathToSpeech(explanation.replace(/\*\*/g, '').replace(/\n\n/g, '. ').replace(/\n/g, '. '))} 
+                          style="button" 
+                          label="Read entire solution" 
+                        />
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="prose prose-sm max-w-none">
                         <div className="text-gray-800 whitespace-pre-wrap leading-relaxed space-y-3">
                           {explanation.split('\n\n').map((section, index) => (
                             <div key={index} className="mb-4">
-                              <TextToSpeech text={mathToSpeech(section.replace(/\*\*/g, ''))} style="button" label="Read solution section" />
-                              {section.split('\n').map((line, lineIndex) => {
-                                // Bold headers
-                                if (line.startsWith('**') && line.endsWith('**')) {
-                                  return (
-                                    <h4 key={lineIndex} className="font-bold text-lg mb-2 text-purple-700">
-                                      {line.replace(/\*\*/g, '')}
-                                    </h4>
-                                  );
-                                }
-                                // Numbered steps
-                                if (/^\d+️⃣/.test(line)) {
-                                  return (
-                                    <div key={lineIndex} className="flex gap-3 mb-2 bg-white p-2 rounded-lg">
-                                      <span className="text-blue-600 font-bold">{line}</span>
-                                    </div>
-                                  );
-                                }
-                                return line ? <p key={lineIndex} className="mb-2">{line}</p> : null;
-                              })}
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <div className="flex-1">
+                                  {section.split('\n').map((line, lineIndex) => {
+                                    // Bold headers
+                                    if (line.startsWith('**') && line.endsWith('**')) {
+                                      return (
+                                        <h4 key={lineIndex} className="font-bold text-lg mb-2 text-purple-700">
+                                          {line.replace(/\*\*/g, '')}
+                                        </h4>
+                                      );
+                                    }
+                                    // Numbered steps
+                                    if (/^\d+️⃣/.test(line)) {
+                                      return (
+                                        <div key={lineIndex} className="flex gap-3 mb-2 bg-white p-2 rounded-lg">
+                                          <span className="text-blue-600 font-bold">{line}</span>
+                                        </div>
+                                      );
+                                    }
+                                    return line ? <p key={lineIndex} className="mb-2">{line}</p> : null;
+                                  })}
+                                </div>
+                                <TextToSpeech 
+                                  text={mathToSpeech(section.replace(/\*\*/g, ''))} 
+                                  style="icon" 
+                                  label="Read this section" 
+                                />
+                              </div>
                             </div>
                           ))}
                         </div>

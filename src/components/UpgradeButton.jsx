@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Crown, ExternalLink, Check, Sparkles, Zap, Shield, Star } from 'lucide-react';
+import { PLAY_STORE_URL } from '@/lib/links';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { startUnifiedSubscription, isPlayBillingAvailable, initBilling, fallbackToExternalCheckout } from '@/api/billingService';
@@ -73,8 +74,8 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
       return;
     }
     
-    // Fallback to external checkout
-    fallbackToExternalCheckout();
+    // Fallback to external checkout with tier and period
+    fallbackToExternalCheckout(tier, plan);
     toast('Redirecting to secure checkout...');
     setShowDisclosure(false);
   };
@@ -151,8 +152,12 @@ export default function UpgradeButton({ variant = 'default', size = 'default', c
           )}
 
           {/* Benefits Summary */}
-          <div className="text-center text-xs text-gray-500">
-            ✓ Cancel anytime • ✓ 7-day free trial • ✓ Secure checkout
+          <div className="text-center text-xs text-gray-500 space-y-1">
+            <div>✓ Cancel anytime • ✓ Secure checkout</div>
+            <div>
+              <span className="font-medium text-purple-600">7-day free trial available in the Android app.</span>{' '}
+              <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="underline text-purple-600">Get the app</a>
+            </div>
           </div>
         </div>
 

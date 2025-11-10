@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Crown, Check, Sparkles, Users, GraduationCap, Star, Shield, Target, MessageSquare, BarChart3, Clock, Lock, CreditCard, XCircle, AlertTriangle, CheckCircle, ExternalLink, Globe } from "lucide-react";
+import { Crown, Check, Sparkles, Users, GraduationCap, Star, Shield, Target, MessageSquare, BarChart3, Clock, Lock, CreditCard, XCircle, AlertTriangle, CheckCircle, ExternalLink, Globe, Smartphone } from "lucide-react";
+import AppTrialPromo from "@/components/AppTrialPromo";
 import { format } from "date-fns";
 import UpgradeButton from "@/components/UpgradeButton";
 import { PAYMENT_LINKS, getPaymentLink } from "@/api/paymentLinks";
@@ -182,7 +183,7 @@ export default function Subscription() {
         </Alert>
       )}
 
-      {/* Header */}
+  {/* Header */}
       <div className="text-center mb-12">
         <div className="inline-block mb-4">
           <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-xl animate-pulse">
@@ -195,8 +196,10 @@ export default function Subscription() {
         <p className="text-xl text-gray-600 mb-2">Choose the perfect plan for your learning journey</p>
         <p className="text-md text-green-600 mb-2 font-semibold">Save 20% when you purchase any yearly plan!</p>
         {isExternalBrowser && (
-          <p className="text-sm text-gray-500">Secure payment powered by Square</p>
+          <p className="text-sm text-gray-500 mb-4">Secure payment powered by Square</p>
         )}
+        {/* Trial Promo (Android app only) */}
+        <div className="max-w-xl mx-auto"><AppTrialPromo compact /></div>
       </div>
 
       {/* Current Subscription Status */}

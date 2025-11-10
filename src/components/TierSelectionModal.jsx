@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Users, GraduationCap, Sparkles, Shield, Star, Zap, MessageSquare, BarChart3, Calendar } from 'lucide-react';
+import AppTrialPromo from '@/components/AppTrialPromo';
 import { cn } from '@/lib/utils';
 
 /**
@@ -213,10 +214,10 @@ export default function TierSelectionModal({ open, onOpenChange, onSelectTier, u
           })}
         </div>
 
-        {/* Additional Info */}
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <p>All plans include a 7-day free trial. Cancel anytime.</p>
-          <p className="mt-1">✓ Secure payment • ✓ Money-back guarantee • ✓ Instant access</p>
+        {/* Android App Trial Promo */}
+        <div className="mt-6">
+          <AppTrialPromo />
+          <p className="mt-2 text-center text-sm text-gray-600">✓ Secure payment • ✓ Money-back guarantee • ✓ Instant access</p>
         </div>
       </DialogContent>
     </Dialog>

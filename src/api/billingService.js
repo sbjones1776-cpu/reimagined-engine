@@ -26,6 +26,8 @@
  *   - Network errors during verification.
  */
 
+import { getPaymentLink } from '@/api/paymentLinks';
+
 // Internal state
 let playService = null;
 let playProductsCache = null;
@@ -181,11 +183,22 @@ export async function verifyPlayPurchase(token, productId, userEmail) {
 }
 
 /**
- * fallbackToExternalCheckout()
- * Opens existing external subscription page (Square) with disclosure.
+ * fallbackToExternalCheckout(tier, period)
+ * Opens Square checkout link for specified tier and billing period.
+ * @param {string} tier - 'premium_player' | 'premium_parent' | 'family_teacher'
+ * @param {string} period - 'monthly' | 'yearly'
  */
-export function fallbackToExternalCheckout() {
-  const checkoutUrl = import.meta.env.VITE_CHECKOUT_URL || 'https://yourdomain.com/subscribe';
+export function fallbackToExternalCheckout(tier, period = 'monthly') {
+  const checkoutUrl = getPaymentLink(tier, period);
+  
+  if (!checkoutUrl) {
+    console.error(`No Square checkout link for tier=${tier}, period=${period}`);
+    // Fallback to generic subscription page
+    const genericUrl = import.meta.env.VITE_CHECKOUT_URL || 'https://math-adventure-app.web.app/subscription';
+    window.open(genericUrl, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  
   window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
 }
 
@@ -200,7 +213,10 @@ export async function startUnifiedSubscription(productKey, userEmail) {
   if (!cfg) throw new Error('Unknown product key');
   const result = await purchaseSubscription(cfg.id);
   if (result.externalRequired) {
-    fallbackToExternalCheckout();
+    // Extract tier and period from config to pass to Square checkout
+    const tier = cfg.tier;
+    const period = cfg.period === 'P1Y' ? 'yearly' : 'monthly';
+    fallbackToExternalCheckout(tier, period);
     return { routedExternal: true };
   }
   if (result.canceled) return { canceled: true };
