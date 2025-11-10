@@ -12,7 +12,7 @@
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#FAF5FF",
   "enableNotifications": true,
-  "startUrl": "https://math-adventure-app.web.app/",
+  "startUrl": "/",
   "iconUrl": "https://math-adventure-app.web.app/icons/icon-512.png",
   "maskableIconUrl": "https://math-adventure-app.web.app/icons/icon-512.png",
   "splashScreenFadeOutDuration": 300,
@@ -20,8 +20,8 @@
     "path": "C:\\Users\\Bama1\\OneDrive\\Apps\\Designer\\Google Play Console for App\\Android\\math-adventure-9f857897\\android.keystore",
     "alias": "android"
   },
-  "appVersionName": "Math Adv App Update 1",
-  "appVersionCode": 4,
+  "appVersionName": "Math Adv App Update 2",
+  "appVersionCode": 5,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://math-adventure-app.web.app/manifest.json",
@@ -52,5 +52,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "Math Adv App Update 1"
+  "appVersion": "Math Adv App Update 2"
 }
