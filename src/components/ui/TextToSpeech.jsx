@@ -118,6 +118,16 @@ export default function TextToSpeech({
       return;
     }
     window.speechSynthesis.cancel();
+
+    // Force voices to load if not yet loaded (Chrome/Edge workaround)
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) {
+      // Voices not loaded yet; trigger load and retry
+      window.speechSynthesis.getVoices();
+      setTimeout(() => speak(), 100);
+      return;
+    }
+
     const utter = new window.SpeechSynthesisUtterance(text);
     // Resolve language preference (English default, Spanish optional)
     try {
