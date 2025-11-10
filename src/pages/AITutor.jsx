@@ -12,10 +12,14 @@ import { Brain, TrendingDown, Target, BookOpen, Zap, Award, Sparkles, Play, Chev
 import WeaknessAnalyzer from "../components/tutor/WeaknessAnalyzer";
 import PracticeExercises from "../components/tutor/PracticeExercises";
 import TutorAnalysis from "../components/tutor/TutorAnalysis";
+import PremiumFeatureLock from "@/components/PremiumFeatureLock";
+import { useFirebaseUser } from "@/hooks/useFirebaseUser";
 
 export default function AITutor() {
   const [activeTab, setActiveTab] = useState("analysis");
   const [selectedWeakness, setSelectedWeakness] = useState(null);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const { user: currentUser } = useFirebaseUser();
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -54,8 +58,24 @@ export default function AITutor() {
   const getHintsRequested = () => tutorSessions.filter(s => s.hint_requested).length;
   const getExplanationsViewed = () => tutorSessions.filter(s => s.explanation_viewed).length;
 
+  // Check premium access on mount
+  React.useEffect(() => {
+    if (currentUser && !currentUser.hasPremiumAccess) {
+      setShowUpgradePrompt(true);
+    }
+  }, [currentUser]);
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Premium Lock Modal */}
+      {showUpgradePrompt && (
+        <PremiumFeatureLock
+          featureName="AI Math Tutor"
+          description="Get personalized AI assistance with hints, explanations, and practice exercises tailored to your learning needs."
+          isOpen={showUpgradePrompt}
+          onClose={() => setShowUpgradePrompt(false)}
+        />
+      )}
       {/* Header */}
       <div className="text-center mb-12">
         <div className="inline-block mb-6">

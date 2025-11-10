@@ -15,11 +15,13 @@ import { useUser } from '@/hooks/UserProvider.jsx';
 import { getUserGameProgress, updateUserProfile } from '@/api/firebaseService';
 import { useToast } from '@/components/ui/use-toast';
 import { getAvailableStarsFromGame, getTotalGameStars, getUserCoins } from '@/lib/selectors';
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
+import PremiumFeatureLock from '@/components/PremiumFeatureLock';
 
 const shopItems = {
   pets: [
-    { id: "dragon", name: "Dragon", emoji: "🐉", price: 50, gradient: "from-red-400 to-orange-500", evolveLevel: 5, description: "Breathe fire and soar!" },
-    { id: "unicorn", name: "Unicorn", emoji: "🦄", price: 50, gradient: "from-pink-400 to-purple-500", evolveLevel: 5, description: "Magical and sparkly!" },
+    { id: "dragon", name: "Dragon", emoji: "🐉", price: 50, gradient: "from-red-400 to-orange-500", evolveLevel: 5, description: "Breathe fire and soar!", premium: true },
+    { id: "unicorn", name: "Unicorn", emoji: "🦄", price: 50, gradient: "from-pink-400 to-purple-500", evolveLevel: 5, description: "Magical and sparkly!", premium: true },
     { id: "owl", name: "Owl", emoji: "🦉", price: 50, gradient: "from-indigo-400 to-purple-500", evolveLevel: 5, description: "Wise and clever!" },
     { id: "fox", name: "Fox", emoji: "🦊", price: 50, gradient: "from-orange-400 to-red-500", evolveLevel: 5, description: "Cunning and quick!" },
     { id: "cat", name: "Cat", emoji: "🐱", price: 50, gradient: "from-gray-400 to-slate-500", evolveLevel: 5, description: "Playful and curious!" },
@@ -42,8 +44,8 @@ const shopItems = {
     { id: "purple", name: "Purple Hair", emoji: "💜", price: 15, category: "hair", type: "avatar_hair_color" },
     { id: "green", name: "Green Hair", emoji: "💚", price: 15, category: "hair", type: "avatar_hair_color" },
     { id: "orange", name: "Orange Hair", emoji: "🧡", price: 15, category: "hair", type: "avatar_hair_color" },
-    { id: "white", name: "White Hair", emoji: "🤍", price: 20, category: "hair", type: "avatar_hair_color" },
-    { id: "rainbow", name: "Rainbow Hair", emoji: "🌈", price: 40, category: "hair", type: "avatar_hair_color" },
+    { id: "white", name: "White Hair", emoji: "🤍", price: 20, category: "hair", type: "avatar_hair_color", premium: true },
+    { id: "rainbow", name: "Rainbow Hair", emoji: "🌈", price: 40, category: "hair", type: "avatar_hair_color", premium: true },
     
     // Clothing
     { id: "hoodie", name: "Hoodie", emoji: "🧥", price: 30, category: "clothing", type: "avatar_shirt" },
@@ -143,9 +145,12 @@ export default function Shop() {
   const queryClient = useQueryClient();
   const [purchaseSuccess, setPurchaseSuccess] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("pets");
+  const [showPremiumLock, setShowPremiumLock] = useState(false);
+  const [premiumItem, setPremiumItem] = useState(null);
   const { toast } = useToast();
 
   const { user, loading: authLoading } = useUser();
+  const { user: enrichedUser } = useFirebaseUser();
 
   const { data: progress = [] } = useQuery({
     queryKey: ['gameProgress', user?.email],

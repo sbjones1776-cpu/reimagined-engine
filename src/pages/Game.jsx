@@ -23,6 +23,7 @@ import AdaptiveDifficulty from "../components/game/AdaptiveDifficulty";
 import TimeTracker from "../components/parent/TimeTracker"; // Added TimeTracker
 import { generateQuestion } from "../components/game/QuestionGenerator";
 import { format } from "date-fns"; // Added format
+import PremiumFeatureLock from "@/components/PremiumFeatureLock";
 
 export default function Game() {
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ export default function Game() {
   const [difficultyAdjustment, setDifficultyAdjustment] = useState(null);
   const [activePowerUps, setActivePowerUps] = useState({});
   const [showFocusReminder, setShowFocusReminder] = useState(false); // Added state
+  const [showPremiumLock, setShowPremiumLock] = useState(false);
 
   const totalQuestions = 10;
 
@@ -105,6 +107,16 @@ export default function Game() {
   // Check time limits
   const isTimeLimitReached = enforceTimeLimits && dailyLimit > 0 && (todayUsage.total_minutes || 0) >= dailyLimit;
   const isOperationTimeLimitReached = enforceTimeLimits && operation && operationLimits[operation] && (todayUsage.by_operation?.[operation] || 0) >= operationLimits[operation];
+
+  // Check premium restrictions
+  const isPremiumRestricted = !user?.hasPremiumAccess && (!isOperationAllowed || !isLevelAllowed);
+
+  // Show premium lock if restricted
+  useEffect(() => {
+    if (isPremiumRestricted) {
+      setShowPremiumLock(true);
+    }
+  }, [isPremiumRestricted]);
 
   // Show focus reminder
   useEffect(() => {
@@ -493,6 +505,16 @@ export default function Game() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       {showCelebration && <CelebrationAnimation />}
       
+      {/* Premium Feature Lock */}
+      {showPremiumLock && (
+        <PremiumFeatureLock
+          featureName={`${operation} - ${level} Level`}
+          description={`Unlock all math operations and difficulty levels with a premium subscription. Free users can practice ${freeTierConcepts.join(', ')} on Easy level.`}
+          isOpen={showPremiumLock}
+          onClose={() => navigate('/')}
+        />
+      )}
+
       {/* AI Tutor Modal */}
       {showTutor && wrongAnswer && (
         <AITutor
