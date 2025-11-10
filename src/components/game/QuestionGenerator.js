@@ -319,8 +319,10 @@ function generateCounting(level) {
   };
   
   const range = ranges[level] || ranges.easy;
-  const start = Math.floor(Math.random() * (range.max - 5)) + range.min;
-  const answer = start + Math.floor(Math.random() * 5) + 1;
+  // Pick a valid starting point with enough headroom for +3
+  const start = Math.floor(Math.random() * (range.max - range.min - 3)) + range.min;
+  // For a simple counting sequence (increase by 1), the missing value is start + 2
+  const answer = start + 2;
   
   return {
     question: `Count: ${start}, ${start + 1}, ?, ${start + 3}`,
