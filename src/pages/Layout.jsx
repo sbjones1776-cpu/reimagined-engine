@@ -494,7 +494,7 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className={`lg:hidden mt-4 pb-4 space-y-2 border-t pt-4 ${isDarkMode ? 'border-slate-700' : ''}`}>
+            <div className={`lg:hidden mt-4 pb-4 space-y-2 border-t pt-4 max-h-[calc(100vh-140px)] overflow-y-auto ${isDarkMode ? 'border-slate-700' : ''}`}>
               {user && (
                 <div className={`${isDarkMode ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-50' : 'bg-gradient-to-r from-purple-50 to-pink-50'} p-4 rounded-xl mb-4`}>
                   <div className="flex items-center gap-3 mb-3">
@@ -561,16 +561,6 @@ export default function Layout({ children, currentPageName }) {
                   <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-50 hover:bg-gray-700' : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:bg-gray-300'}`}>
                     <Settings className="w-5 h-5" />
                     <span className="font-medium">App Settings</span>
-                  </div>
-                </Link>
-              </div>
-
-              <div className={`pt-2 border-t ${isDarkMode ? 'border-slate-700' : ''}`}>
-                <Link to={createPageUrl("GenerateIcons")} onClick={() => setMobileMenuOpen(false)}>
-                  <div className={`flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white ${isDarkMode ? 'hover:from-blue-600 hover:to-cyan-600' : ''}`}>
-                    <Sparkles className="w-5 h-5" />
-                    <span className="font-medium">Generate PWA Icons</span>
-                    <Badge className="bg-green-400 text-white text-xs">New!</Badge>
                   </div>
                 </Link>
               </div>
@@ -671,20 +661,19 @@ export default function Layout({ children, currentPageName }) {
 
           <Link
             to={createPageUrl("Avatar")}
-            className={`flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-all ${
+            className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all ${
               location.pathname === createPageUrl("Avatar")
                 ? "bg-purple-500 text-white"
                 : isDarkMode ? "text-gray-300 hover:bg-slate-700" : "text-gray-600"
             }`}
           >
             {avatarData ? (
-              <div className="scale-50 origin-center -my-2">
+              <div className="scale-75 origin-center">
                 <AvatarDisplay avatarData={avatarData} size="small" />
               </div>
             ) : (
-              <UserIcon className="w-5 h-5" />
+              <UserIcon className="w-6 h-6" />
             )}
-            <span className="text-xs font-medium">Profile</span>
           </Link>
         </div>
       </div>

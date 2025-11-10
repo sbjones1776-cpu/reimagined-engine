@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-// Firebase migration
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
-import { app as firebaseApp } from "@/firebaseConfig"; // TODO: Ensure firebaseConfig.js is set up
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// TODO: Refactor to use Firebase or new backend. Base44 import removed.
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { app as firebaseApp } from "@/firebaseConfig";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useUser } from '@/hooks/UserProvider.jsx';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,46 +20,9 @@ import { format } from "date-fns";
 
 export default function Avatar() {
   const queryClient = useQueryClient();
+  const { user, loading: userLoading } = useUser();
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  
-  // Firebase user state
-  const [user, setUser] = useState(null);
-  const [userLoading, setUserLoading] = useState(true);
-  useEffect(() => {
-    const auth = getAuth(firebaseApp);
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const db = getFirestore(firebaseApp);
-        // Always use uid as the canonical document id
-        const userRef = doc(db, "users", firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
-        const data = userSnap.exists() ? userSnap.data() : {};
-        setUser({
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-            full_name: data.full_name || firebaseUser.displayName || firebaseUser.email?.split('@')[0],
-          ...data,
-        });
-      } else {
-        setUser(null);
-      }
-      setUserLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Firebase game progress
-  const [progress, setProgress] = useState([]);
-  useEffect(() => {
-    if (!user) return;
-    const db = getFirestore(firebaseApp);
-    // TODO: Replace 'gameProgress' with your Firestore collection name
-    const q = query(collection(db, "gameProgress"), where("user_email", "==", user.email));
-    getDocs(q).then(snapshot => {
-      setProgress(snapshot.docs.map(doc => doc.data()));
-    });
-  }, [user]);
 
   const [avatarData, setAvatarData] = useState({
     avatar_skin_tone: "medium",
