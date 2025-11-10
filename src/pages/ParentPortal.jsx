@@ -20,11 +20,15 @@ import LessonAssignment from "../components/parent/LessonAssignment";
 import CommunicationCenter from "../components/parent/CommunicationCenter";
 import StudentAccountManager from "../components/parent/StudentAccountManager";
 import AnalyticsDashboard from "../components/parent/AnalyticsDashboard";
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
+import PremiumFeatureLock from '@/components/PremiumFeatureLock';
 
 export default function ParentPortal() {
   const queryClient = useQueryClient();
   const [selectedChildEmail, setSelectedChildEmail] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showPremiumLock, setShowPremiumLock] = useState(false);
+  const { user: enrichedUser } = useFirebaseUser();
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -221,8 +225,25 @@ export default function ParentPortal() {
     );
   }
 
+  // Check premium access
+  React.useEffect(() => {
+    if (enrichedUser && !enrichedUser.hasPremiumAccess) {
+      setShowPremiumLock(true);
+    }
+  }, [enrichedUser]);
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Premium Feature Lock */}
+      {showPremiumLock && (
+        <PremiumFeatureLock
+          featureName="Parent & Teacher Dashboard"
+          description="Monitor your child's progress with detailed analytics, set learning goals, manage parental controls, and communicate with AI tutors."
+          isOpen={showPremiumLock}
+          onClose={() => setShowPremiumLock(false)}
+        />
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>

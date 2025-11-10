@@ -325,6 +325,19 @@ export default function Shop() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Premium Feature Lock */}
+      {showPremiumLock && (
+        <PremiumFeatureLock
+          featureName={premiumItem?.name || "Premium Item"}
+          description="This exclusive item is available to premium subscribers. Upgrade to unlock all premium pets, avatar items, and more!"
+          isOpen={showPremiumLock}
+          onClose={() => {
+            setShowPremiumLock(false);
+            setPremiumItem(null);
+          }}
+        />
+      )}
+
       {/* Header */}
       <div className="text-center mb-8">
         <div className="inline-block mb-4">
@@ -405,12 +418,16 @@ export default function Shop() {
                   const owned = isOwned(pet.id, "pet");
                   const isActive = user?.active_pet === pet.id;
                   const canAfford = getAvailableStars() >= pet.price;
+                  const isPremiumLocked = pet.premium && !enrichedUser?.hasPremiumAccess;
 
                   return (
-                    <Card key={pet.id} className={`border-2 ${isActive ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200'}`}>
+                    <Card key={pet.id} className={`border-2 ${isActive ? 'border-purple-500 ring-2 ring-purple-200' : isPremiumLocked ? 'border-purple-300 bg-purple-50' : 'border-gray-200'}`}>
                       <CardHeader>
                         <CardTitle className="flex items-center justify-between">
-                          <span>{pet.name}</span>
+                          <span>
+                            {pet.name}
+                            {pet.premium && <Crown className="w-4 h-4 inline ml-1 text-purple-500" />}
+                          </span>
                           {isActive && <Badge className="bg-purple-500">Active</Badge>}
                         </CardTitle>
                       </CardHeader>
@@ -437,6 +454,18 @@ export default function Shop() {
                               Set as Active
                             </Button>
                           )
+                        ) : isPremiumLocked ? (
+                          <Button
+                            onClick={() => {
+                              setPremiumItem(pet);
+                              setShowPremiumLock(true);
+                            }}
+                            variant="outline"
+                            className="w-full border-purple-400 text-purple-600"
+                          >
+                            <Crown className="w-4 h-4 mr-2" />
+                            Premium Only
+                          </Button>
                         ) : (
                           <Button
                             onClick={() => handlePurchase(pet, "pet")}
@@ -480,15 +509,32 @@ export default function Shop() {
                       {shopItems.avatarItems.filter(item => item.category === category).map((item) => {
                         const owned = isOwned(item.id);
                         const canAfford = getAvailableStars() >= item.price;
+                        const isPremiumLocked = item.premium && !enrichedUser?.hasPremiumAccess;
 
                         return (
-                          <Card key={item.id} className={`border-2 ${owned ? 'border-green-300 bg-green-50' : 'border-gray-200'}`}>
+                          <Card key={item.id} className={`border-2 ${owned ? 'border-green-300 bg-green-50' : isPremiumLocked ? 'border-purple-300 bg-purple-50' : 'border-gray-200'}`}>
                             <CardContent className="p-4 text-center">
                               <div className="text-4xl mb-2">{item.emoji}</div>
-                              <h3 className="font-bold text-sm mb-2">{item.name}</h3>
+                              <h3 className="font-bold text-sm mb-2">
+                                {item.name}
+                                {item.premium && <Crown className="w-3 h-3 inline ml-1 text-purple-500" />}
+                              </h3>
                               
                               {owned ? (
                                 <Badge className="bg-green-500 text-white">Owned</Badge>
+                              ) : isPremiumLocked ? (
+                                <Button
+                                  onClick={() => {
+                                    setPremiumItem(item);
+                                    setShowPremiumLock(true);
+                                  }}
+                                  size="sm"
+                                  variant="outline"
+                                  className="w-full border-purple-400 text-purple-600"
+                                >
+                                  <Crown className="w-3 h-3 mr-1" />
+                                  Premium
+                                </Button>
                               ) : (
                                 <Button
                                   onClick={() => handlePurchase(item)}
