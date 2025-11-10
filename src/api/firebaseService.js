@@ -38,11 +38,18 @@ const auth = getAuth(app);
 
 export const createUserProfile = async (email, additionalData = {}) => {
   const userRef = doc(db, 'users', email);
+  const now = new Date();
+  const trialExpiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+  
   const userData = {
     email,
     subscription_tier: 'free',
     subscription_expires_at: null,
     subscription_auto_renew: false,
+    // Trial tracking
+    trial_start_date: Timestamp.fromDate(now),
+    trial_expires_at: Timestamp.fromDate(trialExpiresAt),
+    trial_used: false, // Set to true when trial expires
     coins: 0,
     stars_spent: 0,
     total_stars_earned: 0,

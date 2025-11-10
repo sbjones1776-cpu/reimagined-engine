@@ -14,6 +14,7 @@ import { Home, Trophy, Calendar, User as UserIcon, ShoppingBag, Menu, X, Crown, 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import SimpleAuth from "@/components/SimpleAuth";
+import TrialBanner from "@/components/TrialBanner";
 import { useUser } from '@/hooks/UserProvider.jsx';
 import {
   DropdownMenu,
@@ -683,6 +684,11 @@ export default function Layout({ children, currentPageName }) {
       </React.Suspense>
 
       <main className="flex-1 pb-20 lg:pb-0">
+        {user && (
+          <div className="max-w-7xl mx-auto px-4 pt-4">
+            <TrialBanner />
+          </div>
+        )}
         {children}
       </main>
 

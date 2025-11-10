@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, getFirestore } from 'firebase/firestore';
 import { app } from '@/firebaseConfig';
 import { createUserProfile, getUserProfile } from '@/api/firebaseService';
+import { isOnTrial, getTrialDaysRemaining, isTrialExpired, hasPremiumAccess } from '@/utils/trialHelpers';
 
 export function useFirebaseUser() {
   const [user, setUser] = useState(null);
@@ -30,7 +31,18 @@ export function useFirebaseUser() {
           doc(db, 'users', fbUser.email),
           (snap) => {
             if (snap.exists()) {
-              setUser({ id: snap.id, ...snap.data() });
+              const userData = { id: snap.id, ...snap.data() };
+              
+              // Enrich user data with trial information
+              const enrichedUser = {
+                ...userData,
+                isOnTrial: isOnTrial(userData),
+                trialDaysRemaining: getTrialDaysRemaining(userData),
+                trialExpired: isTrialExpired(userData),
+                hasPremiumAccess: hasPremiumAccess(userData)
+              };
+              
+              setUser(enrichedUser);
             }
           },
           (err) => {
