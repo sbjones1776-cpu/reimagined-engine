@@ -120,7 +120,7 @@ export default function Subscribe() {
       
       // Redirect back to app after 3 seconds
       setTimeout(() => {
-        window.location.href = process.env.VITE_APP_URL || '/';
+        window.location.href = process.env.VITE_APP_URL || 'https://math-adventure-app.web.app/';
       }, 3000);
 
     } catch (err) {

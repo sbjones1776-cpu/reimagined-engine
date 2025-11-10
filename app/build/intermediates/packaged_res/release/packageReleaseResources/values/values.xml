@@ -17,7 +17,7 @@
         \"relation\": [\"delegate_permission/common.handle_all_urls\"],
         \"target\": {
             \"namespace\": \"web\",
-            \"site\": \"https://math-adventure-app.web.app/\"
+            \"site\": \"https://math-adventure-app.web.app\"
         }
     }]
     
@@ -25,8 +25,8 @@
     <string name="fallbackType" translatable="false">customtabs</string>
     <string name="fullScopeUrl" translatable="false">https://math-adventure-app.web.app/</string>
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
-    <string name="hostName" translatable="false">math-adventure-app.web.app/</string>
-    <string name="launchUrl" translatable="false">https://math-adventure-app.web.app/https://math-adventure-app.web.app/</string>
+    <string name="hostName" translatable="false">math-adventure-app.web.app</string>
+    <string name="launchUrl" translatable="false">https://math-adventure-app.web.apphttps://math-adventure-app.web.app/</string>
     <string name="launcherName" translatable="false">MathAdv</string>
     <string name="orientation" translatable="false">any</string>
     <string name="providerAuthority" translatable="false">app.web.math_adventure_app.twa.fileprovider</string>

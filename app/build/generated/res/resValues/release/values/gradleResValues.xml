@@ -32,9 +32,9 @@
     <!-- Value from default config. -->
     <string name="generatorApp" translatable="false">bubblewrap-cli</string>
     <!-- Value from default config. -->
-    <string name="hostName" translatable="false">math-adventure-app.web.app/</string>
+    <string name="hostName" translatable="false">math-adventure-app.web.app</string>
     <!-- Value from default config. -->
-    <string name="launchUrl" translatable="false">https://math-adventure-app.web.app/https://math-adventure-app.web.app/</string>
+    <string name="launchUrl" translatable="false">https://math-adventure-app.web.apphttps://math-adventure-app.web.app/</string>
     <!-- Value from default config. -->
     <string name="launcherName" translatable="false">MathAdv</string>
     <!-- Value from default config. -->

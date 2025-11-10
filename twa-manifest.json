@@ -20,8 +20,8 @@
     "path": "C:\\Users\\Bama1\\OneDrive\\Apps\\Designer\\Google Play Console for App\\Android\\math-adventure-9f857897\\android.keystore",
     "alias": "android"
   },
-  "appVersionName": "2.1.0",
-  "appVersionCode": 3,
+  "appVersionName": "Math Adv App Update 1",
+  "appVersionCode": 4,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://math-adventure-app.web.app/manifest.json",
@@ -41,7 +41,10 @@
   "minSdkVersion": 21,
   "orientation": "any",
   "fingerprints": [
-    { "name": "SHA256", "value": "REPLACE_WITH_SHA256_FINGERPRINT" }
+    {
+      "name": "SHA256",
+      "value": "REPLACE_WITH_SHA256_FINGERPRINT"
+    }
   ],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
@@ -49,5 +52,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "2.1.0"
+  "appVersion": "Math Adv App Update 1"
 }
