@@ -16,17 +16,7 @@ export default function Subscription() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [isExternalBrowser, setIsExternalBrowser] = useState(false);
-
-  // Detect if user is in external browser or in-app
-  useEffect(() => {
-    // Check if we're in a standalone PWA or external browser
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
-                      || window.navigator.standalone 
-                      || document.referrer.includes('android-app://');
-    
-    setIsExternalBrowser(!isStandalone);
-  }, []);
+  // Square payments: allow purchasing in both TWA and external browsers
 
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
@@ -69,11 +59,7 @@ export default function Subscription() {
   // Centralized Square payment links imported from api/paymentLinks
 
   const handleSubscribe = (tier, period = "monthly") => {
-    if (!isExternalBrowser) {
-      alert("Please open this page in your web browser to subscribe. Use the 'Open in Browser' button above.");
-      return;
-    }
-  const url = getPaymentLink(tier, period);
+    const url = getPaymentLink(tier, period);
     if (url) {
       window.open(url, '_blank', 'noopener,noreferrer');
     } else {
@@ -158,30 +144,7 @@ export default function Subscription() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* In-App Browser Warning */}
-      {!isExternalBrowser && (
-        <Alert className="mb-8 bg-blue-50 border-blue-300">
-          <Globe className="w-5 h-5 text-blue-600" />
-          <AlertDescription className="text-blue-800">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div>
-                <strong className="block mb-1">Subscriptions Available on Web</strong>
-                <p className="text-sm">To subscribe or manage your subscription, please open this page in your web browser (Chrome, Safari, etc.)</p>
-              </div>
-              <Button 
-                onClick={() => {
-                  const url = window.location.href;
-                  window.open(url, '_blank', 'noopener,noreferrer');
-                }}
-                className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Open in Browser
-              </Button>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
+      {/* Payments are supported both in-app (TWA) and in browser */}
 
   {/* Header */}
       <div className="text-center mb-12">
@@ -195,9 +158,7 @@ export default function Subscription() {
         </h1>
         <p className="text-xl text-gray-600 mb-2">Choose the perfect plan for your learning journey</p>
         <p className="text-md text-green-600 mb-2 font-semibold">Save 20% when you purchase any yearly plan!</p>
-        {isExternalBrowser && (
-          <p className="text-sm text-gray-500 mb-4">Secure payment powered by Square</p>
-        )}
+        <p className="text-sm text-gray-500 mb-4">Secure payment powered by Square</p>
         {/* Trial Promo (Android app only) */}
         <div className="max-w-xl mx-auto"><AppTrialPromo compact /></div>
       </div>
@@ -334,20 +295,13 @@ export default function Subscription() {
                   <div className="space-y-2">
                     <Button
                       onClick={() => handleSubscribe(plan.id, "monthly")}
-                      disabled={loading || !isExternalBrowser}
-                      className={`w-full h-12 text-lg bg-gradient-to-r ${plan.color} hover:opacity-90 ${
-                        !isExternalBrowser ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                      disabled={loading}
+                      className={`w-full h-12 text-lg bg-gradient-to-r ${plan.color} hover:opacity-90`}
                     >
                       {loading ? (
                         <>
                           <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
                           Processing...
-                        </>
-                      ) : !isExternalBrowser ? (
-                        <>
-                          <Lock className="w-5 h-5 mr-2" />
-                          Open in Browser
                         </>
                       ) : (
                         <>
@@ -356,23 +310,21 @@ export default function Subscription() {
                         </>
                       )}
                     </Button>
-                    {isExternalBrowser && (
-                      <Button
-                        onClick={() => handleSubscribe(plan.id, "yearly")}
-                        disabled={loading}
-                        variant="outline"
-                        className="w-full h-12"
-                      >
-                        {loading ? (
-                          'Processing...'
-                        ) : (
-                          <>
-                            <Sparkles className="w-5 h-5 mr-2" />
-                            Subscribe Annually (Save 20%)
-                          </>
-                        )}
-                      </Button>
-                    )}
+                    <Button
+                      onClick={() => handleSubscribe(plan.id, "yearly")}
+                      disabled={loading}
+                      variant="outline"
+                      className="w-full h-12"
+                    >
+                      {loading ? (
+                        'Processing...'
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5 mr-2" />
+                          Subscribe Annually (Save 20%)
+                        </>
+                      )}
+                    </Button>
                   </div>
                 )}
               </CardContent>
