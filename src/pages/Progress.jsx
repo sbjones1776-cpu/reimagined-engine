@@ -6,7 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { 
   getUserGameProgress, 
   getUserDailyChallenges,
-  getUserTutorSessions 
+  getUserTutorSessions,
+  subscribeUserGameProgress
 } from "@/api/firebaseService";
 import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +22,10 @@ import Logo from "@/components/Logo";
 export default function Progress() {
   const { user } = useFirebaseUser();
 
-  const { data: progress = [], isLoading } = useQuery({
+  // Local state for realtime progress (will be kept in sync with query for initial load)
+  const [realtimeProgress, setRealtimeProgress] = React.useState([]);
+
+  const { data: initialProgress = [], isLoading } = useQuery({
     queryKey: ['gameProgress', user?.email],
     queryFn: async () => {
       if (!user?.email) return [];
@@ -29,7 +33,22 @@ export default function Progress() {
     },
     initialData: [],
     enabled: !!user?.email,
+    onSuccess: (data) => {
+      // Seed realtime state if empty
+      if (!realtimeProgress.length) setRealtimeProgress(data);
+    }
   });
+
+  // Subscribe to realtime updates
+  React.useEffect(() => {
+    if (!user?.email) return;
+    const unsubscribe = subscribeUserGameProgress(user.email, (data) => {
+      setRealtimeProgress(data);
+    });
+    return () => unsubscribe();
+  }, [user?.email]);
+
+  const progress = realtimeProgress.length ? realtimeProgress : initialProgress;
 
   const { data: dailyChallenges = [] } = useQuery({
     queryKey: ['userDailyChallenges', user?.email],

@@ -12,7 +12,8 @@ import {
   orderBy, 
   limit,
   serverTimestamp,
-  Timestamp
+  Timestamp,
+  onSnapshot
 } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { app } from '../firebaseConfig';
@@ -141,6 +142,24 @@ export const getUserGameProgress = async (email) => {
   
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+/**
+ * subscribeUserGameProgress(email, callback)
+ * Real-time subscription for a user's game progress ordered by completed_at desc.
+ * Returns an unsubscribe function.
+ */
+export const subscribeUserGameProgress = (email, callback) => {
+  const progressRef = collection(db, 'gameProgress');
+  const q = query(
+    progressRef,
+    where('user_email', '==', email),
+    orderBy('completed_at', 'desc')
+  );
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    callback(data);
+  });
 };
 
 export const getAllGameProgress = async () => {

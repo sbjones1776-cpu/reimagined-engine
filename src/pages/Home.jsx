@@ -5,8 +5,10 @@ import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { 
   getUserGameProgress, 
-  getUserTeamChallenges 
+  getUserTeamChallenges,
+  subscribeUserGameProgress 
 } from "@/api/firebaseService";
+import { useQueryClient } from "@tanstack/react-query";
 import { useUser } from '@/hooks/UserProvider.jsx';
 import { Plus, Minus, X, Divide, Star, Lock, Play, Trophy, Award, Brain, Sparkles, Users, AlertCircle, Crown, CreditCard, Calendar, Percent, DollarSign, Clock, Shapes, BookOpen, TrendingUp, Grid3x3, Zap, Target, Binary, Calculator, BarChart3, Palette } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1196,6 +1198,7 @@ const Label = ({ children, className = "" }) => (
 );
 
 export default function Home() {
+  const queryClient = useQueryClient();
   const [selectedGrade, setSelectedGrade] = useState("all");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { user, loading: authLoading } = useUser();
@@ -1209,6 +1212,15 @@ export default function Home() {
     initialData: [],
     enabled: !!user?.email,
   });
+
+  // Realtime subscription to keep progress in sync without manual refresh
+  useEffect(() => {
+    if (!user?.email) return;
+    const unsub = subscribeUserGameProgress(user.email, (data) => {
+      queryClient.setQueryData(['gameProgress', user.email], data);
+    });
+    return () => unsub();
+  }, [user?.email, queryClient]);
 
   const { data: myTeamChallenges = [] } = useQuery({
     queryKey: ['myTeamChallenges', user?.email],

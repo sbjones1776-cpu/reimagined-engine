@@ -209,17 +209,65 @@ export default function Game() {
       
       return savedProgress;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['gameProgress'] });
-      queryClient.invalidateQueries({ queryKey: ['recentProgress'] });
+    onMutate: async (progressData) => {
+      // Optimistically update cached progress so UI updates immediately
+      await queryClient.cancelQueries({ queryKey: ['gameProgress', user?.email] });
+      await queryClient.cancelQueries({ queryKey: ['recentProgress', user?.email] });
+
+      const prevProgress = queryClient.getQueryData(['gameProgress', user?.email]) || [];
+      const prevRecent = queryClient.getQueryData(['recentProgress', user?.email]) || [];
+
+      const optimistic = {
+        id: 'optimistic-' + Date.now(),
+        user_email: user?.email,
+        operation: progressData.operation,
+        level: progressData.level,
+        score: progressData.score,
+        correct_answers: progressData.correct_answers,
+        total_questions: progressData.total_questions,
+        time_taken: progressData.time_taken,
+        stars_earned: progressData.stars_earned,
+        coins_earned: progressData.coins_earned,
+        completed_at: new Date(),
+      };
+
+      // Prepend newest first (UI expects latest first)
+      queryClient.setQueryData(['gameProgress', user?.email], [optimistic, ...prevProgress]);
+      queryClient.setQueryData(['recentProgress', user?.email], [optimistic, ...prevRecent].slice(0, 5));
+
+      return { prevProgress, prevRecent };
+    },
+    onError: (_err, _vars, context) => {
+      // Rollback optimistic update on failure
+      if (context?.prevProgress) {
+        queryClient.setQueryData(['gameProgress', user?.email], context.prevProgress);
+      }
+      if (context?.prevRecent) {
+        queryClient.setQueryData(['recentProgress', user?.email], context.prevRecent);
+      }
+    },
+    onSettled: () => {
+      // Ensure caches are synced with server
+      queryClient.invalidateQueries({ queryKey: ['gameProgress', user?.email] });
+      queryClient.invalidateQueries({ queryKey: ['recentProgress', user?.email] });
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
     },
   });
 
   const handleAnswer = (selectedAnswer) => {
     const correct = selectedAnswer === questions[currentQuestion].answer;
+
+    // If this is the last question, finish immediately using a snapshot
+    const isLast = currentQuestion === totalQuestions - 1;
+    if (isLast) {
+      const newAnswers = [...answers, { question: currentQuestion, correct }];
+      setAnswers(newAnswers);
+      finishGame(newAnswers);
+      return;
+    }
+
     setAnswers([...answers, { question: currentQuestion, correct }]);
-    
+
     if (correct) {
       setScore(score + 10);
       setShowCelebration(true);
@@ -259,9 +307,10 @@ export default function Game() {
     }
   };
 
-  const finishGame = () => {
+  const finishGame = (answersSnapshot = null) => {
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
-    const correctAnswers = answers.filter(a => a.correct).length;
+    const answerList = answersSnapshot || answers;
+    const correctAnswers = answerList.filter(a => a.correct).length;
     let finalScore = score;
     
     if (activePowerUps.double_stars) {
