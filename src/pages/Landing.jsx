@@ -242,9 +242,9 @@ export default function Landing() {
             transition={{ delay: 0.7 }}
             className="flex flex-wrap items-center justify-center gap-3 mb-8"
           >
-            <Badge className="bg-white text-purple-600 px-6 py-3 text-lg font-bold shadow-xl border-0">
+            <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 text-lg font-bold shadow-xl border-0 animate-pulse">
               <CheckCircle className="w-5 h-5 mr-2" />
-              100% FREE to Start
+              7-Day FREE Trial - All Features!
             </Badge>
             <Badge className="bg-white text-pink-600 px-6 py-3 text-lg font-bold shadow-xl border-0">
               <Heart className="w-5 h-5 mr-2" />
