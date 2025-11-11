@@ -1280,11 +1280,20 @@ export default function Home() {
 
   // Check parental controls (or apply free tier limits)
   const parentalControls = user?.parental_controls || {};
+  // Treat missing OR empty arrays as "no restriction" when premium is active
+  const allOperations = mathConcepts.map(c => c.id);
+  const pcAllowedOps = Array.isArray(parentalControls.allowed_operations)
+    ? parentalControls.allowed_operations
+    : undefined;
+  const pcAllowedLvls = Array.isArray(parentalControls.allowed_levels)
+    ? parentalControls.allowed_levels
+    : undefined;
+
   const allowedOperations = isPremium 
-    ? (parentalControls.allowed_operations || mathConcepts.map(c => c.id))
+    ? ((pcAllowedOps && pcAllowedOps.length > 0) ? pcAllowedOps : allOperations)
     : freeTierConcepts;
   const allowedLevels = isPremium
-    ? (parentalControls.allowed_levels || ["easy", "medium", "hard", "expert"])
+    ? ((pcAllowedLvls && pcAllowedLvls.length > 0) ? pcAllowedLvls : ["easy", "medium", "hard", "expert"])
     : freeTierLevels;
   const focusOperations = parentalControls.focus_operations || [];
 

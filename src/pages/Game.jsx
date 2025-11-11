@@ -85,11 +85,19 @@ export default function Game() {
   
   // Apply free tier limits if not premium, otherwise use parental controls
   const allConcepts = ["addition", "subtraction", "multiplication", "division", "fractions", "decimals", "percentages", "word_problems", "money_math", "time", "geometry", "mixed", "counting", "number_comparison", "skip_counting_2s", "skip_counting_5s", "skip_counting_10s", "even_odd", "ordering_numbers", "place_value", "addition_single_digit", "subtraction_single_digit"];
+  // If parental_controls arrays exist but are empty, treat as unrestricted (otherwise everything appears locked)
+  const pcAllowedOps = Array.isArray(parentalControls.allowed_operations)
+    ? parentalControls.allowed_operations
+    : undefined;
+  const pcAllowedLvls = Array.isArray(parentalControls.allowed_levels)
+    ? parentalControls.allowed_levels
+    : undefined;
+
   const allowedOperations = premiumActive 
-    ? (parentalControls.allowed_operations || allConcepts)
+    ? ((pcAllowedOps && pcAllowedOps.length > 0) ? pcAllowedOps : allConcepts)
     : freeTierConcepts;
   const allowedLevels = premiumActive
-    ? (parentalControls.allowed_levels || ["easy", "medium", "hard", "expert"])
+    ? ((pcAllowedLvls && pcAllowedLvls.length > 0) ? pcAllowedLvls : ["easy", "medium", "hard", "expert"])
     : freeTierLevels;
   
   // Check time limits
