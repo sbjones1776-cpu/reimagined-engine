@@ -56,7 +56,7 @@ function getVoice(lang = "en-US", preferChild = true, options = {}) {
       return voice;
     }
 
-    // Prefer common female voice names
+    // Prefer common female voice names - ONLY use female voices
     const femaleNames = ['emma', 'female', 'woman', 'girl', 'zira', 'jenny', 'olivia', 'sonia', 'ana', 'isabella', 'sara', 'sofia', 'monica', 'paulina'];
     voice = candidates.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n)));
     if (voice) {
@@ -64,10 +64,21 @@ function getVoice(lang = "en-US", preferChild = true, options = {}) {
       return voice;
     }
 
-    // Fallback: pick first available voice in the language
-    if (candidates[0]) {
-      voicesCache[cacheKey] = candidates[0];
-      return candidates[0];
+    // Explicitly filter OUT male voices before fallback
+    const maleNames = ['david', 'male', 'man', 'boy', 'mark', 'james', 'richard', 'thomas', 'daniel', 'george'];
+    const nonMaleCandidates = candidates.filter(v => !maleNames.some(m => v.name.toLowerCase().includes(m)));
+    
+    // Fallback: pick first non-male voice in the language
+    if (nonMaleCandidates.length > 0) {
+      voicesCache[cacheKey] = nonMaleCandidates[0];
+      return nonMaleCandidates[0];
+    }
+    
+    // Last resort: if only male voices available, still pick first female if possible from all voices
+    const allFemaleVoices = voices.filter(v => femaleNames.some(n => v.name.toLowerCase().includes(n)));
+    if (allFemaleVoices.length > 0) {
+      voicesCache[cacheKey] = allFemaleVoices[0];
+      return allFemaleVoices[0];
     }
   }
 

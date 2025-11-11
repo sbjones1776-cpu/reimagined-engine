@@ -93,13 +93,37 @@ export default function QuestionCard({ question, onAnswer, questionNumber }) {
               utterance.lang = langPref === 'es' ? 'es-ES' : 'en-US';
               const savedRate = parseFloat(localStorage.getItem('tts.rate'));
               utterance.rate = isNaN(savedRate) ? 1.0 : Math.min(2, Math.max(0.1, savedRate));
+              utterance.pitch = 1.0;
+              
+              // Select ONLY female voices
+              const voices = window.speechSynthesis.getVoices();
+              const langVoices = voices.filter(v => (v.lang || '').toLowerCase().startsWith(langPref));
+              const femaleNames = ['emma', 'female', 'woman', 'girl', 'zira', 'jenny', 'olivia', 'sonia', 'ana', 'isabella', 'sara', 'sofia', 'monica', 'paulina'];
+              const maleNames = ['david', 'male', 'man', 'boy', 'mark', 'james', 'richard', 'thomas', 'daniel', 'george'];
+              
+              // Try to find Emma first
+              let voice = langVoices.find(v => v.name.toLowerCase().includes('emma'));
+              
+              // If no Emma, find any female voice
+              if (!voice) {
+                voice = langVoices.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n)));
+              }
+              
+              // Filter out male voices as last resort
+              if (!voice) {
+                const nonMaleVoices = langVoices.filter(v => !maleNames.some(m => v.name.toLowerCase().includes(m)));
+                voice = nonMaleVoices[0];
+              }
+              
+              if (voice) utterance.voice = voice;
             } catch {
               utterance.lang = 'en-US';
               utterance.rate = 1.0;
+              utterance.pitch = 1.0;
             }
             window.speechSynthesis.speak(utterance);
           }}
-          className="px-6 py-3 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-4 border-green-300 animate-pulse"
+          className="px-6 py-3 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-4 border-green-300"
         >
           🔊 Read it to Me
         </button>
