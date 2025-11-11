@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot, getFirestore } from 'firebase/firestore';
+import { doc, onSnapshot, getFirestore, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { app } from '@/firebaseConfig';
 import { createUserProfile, getUserProfile, updateUserProfile } from '@/api/firebaseService';
 import { hasPremiumAccess, isOnTrial, isTrialExpired, getTrialDaysRemaining } from '@/utils/trialHelpers';
@@ -26,6 +26,31 @@ export function useFirebaseUser() {
         // Immediately set a minimal user so the app can render without waiting on Firestore
         setUser((prev) => prev || { email: fbUser.email, subscription_tier: 'free', coins: 0 });
         setError(null);
+
+        // Optional immediate trial reset via URL param (?reset_trial=true)
+        try {
+          if (typeof window !== 'undefined' && window.location.search.includes('reset_trial=true')) {
+            const days = 7;
+            const now = Date.now();
+            const expiresAt = new Date(now + days * 24 * 60 * 60 * 1000);
+            await updateUserProfile(fbUser.email, {
+              trial_start_date: serverTimestamp(),
+              trial_expires_at: Timestamp.fromDate(expiresAt),
+              trial_used: false,
+              trial_grace_used: false
+            });
+            // Clear any stored trial log so events & UI re-fire
+            localStorage.removeItem(`trial_log_${fbUser.email}`);
+            // Remove the param from the URL (non-destructive replace)
+            const url = new URL(window.location.href);
+            url.searchParams.delete('reset_trial');
+            window.history.replaceState({}, '', url.toString());
+            // Provide a quick console note for debugging
+            console.info('[trial] Trial reset performed for', fbUser.email);
+          }
+        } catch (resetErr) {
+          console.warn('[trial] Trial reset attempt failed:', resetErr?.message);
+        }
 
         // Subscribe to live updates on the user document ASAP
         if (userDocUnsub) userDocUnsub();
@@ -57,12 +82,25 @@ export function useFirebaseUser() {
               const email = snap.id;
               const logKey = `trial_log_${email}`;
               const storedLog = localStorage.getItem(logKey);
-              const logData = storedLog ? JSON.parse(storedLog) : {};
+              let logData = storedLog ? JSON.parse(storedLog) : {};
+
+              // Detect recreated account (new trial_start_date) and reset stale log
+              const trialStartMs = userData.trial_start_date?.toDate ? userData.trial_start_date.toDate().getTime() : null;
+              if (trialStartMs) {
+                const recordedStart = logData.trial_start_timestamp || null;
+                if (!recordedStart || recordedStart !== trialStartMs) {
+                  // Fresh trial start detected; clear previous dedupe flags
+                  logData = {};
+                }
+              }
 
               // Trial start event (once)
               if (userData.trial_start_date && !logData.trial_start) {
                 trackTrialStart(email);
                 logData.trial_start = true;
+                if (trialStartMs) {
+                  logData.trial_start_timestamp = trialStartMs;
+                }
               }
 
               // Daily event (once per day)
@@ -107,7 +145,11 @@ export function useFirebaseUser() {
                 }
               }
 
-              localStorage.setItem(logKey, JSON.stringify(logData));
+              try {
+                localStorage.setItem(logKey, JSON.stringify(logData));
+              } catch (e) {
+                // Storage might be full or blocked; fail silently
+              }
             }
           },
           (err) => {

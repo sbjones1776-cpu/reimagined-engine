@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUser } from '@/hooks/UserProvider.jsx';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import { cn } from '@/lib/utils';
  * Displays three tiers with feature comparison and monthly/yearly toggle
  */
 export default function TierSelectionModal({ open, onOpenChange, onSelectTier, userEmail }) {
+  const { user } = useUser();
   const [billingPeriod, setBillingPeriod] = useState('yearly'); // yearly as default (better value)
 
   const tiers = [
@@ -203,10 +205,12 @@ export default function TierSelectionModal({ open, onOpenChange, onSelectTier, u
                     Get Started
                   </Button>
 
-                  {/* Show trial message for both monthly and yearly plans */}
-                  <p className="text-xs text-center text-gray-500 mt-3">
-                    New users get a 7-day free trial • Cancel anytime
-                  </p>
+                  {/* Trial eligibility message (only show if user hasn't used trial) */}
+                  {(!user || user.trial_used !== true) && (
+                    <p className="text-xs text-center text-gray-500 mt-3">
+                      New users get a 7-day free trial • Cancel anytime
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             );

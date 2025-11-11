@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { app as firebaseApp } from "@/firebaseConfig";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useUser } from '@/hooks/UserProvider.jsx';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import AvatarDisplay from "../components/avatar/AvatarDisplay";
 import CustomizationSection from "../components/avatar/CustomizationSection";
 import PetDisplay from "../components/rewards/PetDisplay";
 import { format } from "date-fns";
+import { getUserGameProgress } from '@/api/firebaseService';
 
 export default function Avatar() {
   const queryClient = useQueryClient();
@@ -70,7 +71,7 @@ export default function Avatar() {
   const handleSave = async () => {
     if (!user) return;
     const db = getFirestore(firebaseApp);
-    await setDoc(doc(db, "users", user.uid), {
+    await setDoc(doc(db, "users", user.email), {
       ...avatarData,
       full_name: user.full_name,
       email: user.email,
@@ -85,14 +86,14 @@ export default function Avatar() {
     mutationFn: async (partial) => {
       if (!user) return;
       const db = getFirestore(firebaseApp);
-      await setDoc(doc(db, 'users', user.uid), { ...partial }, { merge: true });
+      await setDoc(doc(db, 'users', user.email), { ...partial }, { merge: true });
       return partial;
     },
     onSuccess: (partial) => {
       // Optimistically update local state
       setAvatarData(prev => ({ ...prev, ...partial }));
       // Invalidate any queries that depend on user
-      queryClient.invalidateQueries({ queryKey: ['user', user.uid] });
+      queryClient.invalidateQueries({ queryKey: ['user', user.email] });
     }
   });
 
@@ -100,7 +101,7 @@ export default function Avatar() {
     mutationFn: async () => {
       if (!user) return;
       const db = getFirestore(firebaseApp);
-      await setDoc(doc(db, 'users', user.uid), {
+      await setDoc(doc(db, 'users', user.email), {
         subscription_cancels_at: user.subscription_expires_at,
         subscription_auto_renew: false
       }, { merge: true });
@@ -108,7 +109,7 @@ export default function Avatar() {
     },
     onSuccess: () => {
       setShowCancelConfirm(false);
-      queryClient.invalidateQueries({ queryKey: ['user', user.uid] });
+      queryClient.invalidateQueries({ queryKey: ['user', user.email] });
     }
   });
 
@@ -116,7 +117,7 @@ export default function Avatar() {
   const cancelSubscription = async () => {
     if (!user) return;
     const db = getFirestore(firebaseApp);
-    await setDoc(doc(db, "users", user.uid), {
+    await setDoc(doc(db, "users", user.email), {
       subscription_cancels_at: user.subscription_expires_at,
       subscription_auto_renew: false
     }, { merge: true });
@@ -160,6 +161,12 @@ export default function Avatar() {
     return unlockables.slice(0, 3);
   };
 
+  // Fetch real game progress for unlockables
+  const { data: progress = [], isFetching: progressLoading } = useQuery({
+    queryKey: ['userProgress', user?.email],
+    queryFn: () => getUserGameProgress(user.email),
+    enabled: !!user?.email
+  });
   const newUnlockables = getUnlockableItems();
 
   const activePet = user?.active_pet;
@@ -207,11 +214,10 @@ export default function Avatar() {
               value={user?.full_name || ''}
               onChange={async (e) => {
                 const newName = e.target.value;
-                const auth = getAuth(firebaseApp);
-                const uid = auth.currentUser?.uid || user?.uid;
                 const db = getFirestore(firebaseApp);
-                await setDoc(doc(db, 'users', uid), { full_name: newName }, { merge: true });
-                setUser(prev => ({ ...prev, full_name: newName }));
+                if (user?.email) {
+                  await setDoc(doc(db, 'users', user.email), { full_name: newName }, { merge: true });
+                }
               }}
               placeholder="Your name"
             />
