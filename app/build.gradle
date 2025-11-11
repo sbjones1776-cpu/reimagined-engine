@@ -58,9 +58,9 @@ android {
         minSdkVersion 21
         targetSdkVersion 35
     // Bumped versionCode for Google Play (previous 5 used). Increment when releasing.
-    // Bump versionCode again for revert to web.app
-    versionCode 8
-    versionName "Math Adv App Update 3"
+    // Version 7: Trial unlock fixes, grade K default, green TTS button, assetlinks updated
+    versionCode 7
+    versionName "Math Adv App Update 4"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
