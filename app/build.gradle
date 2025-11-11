@@ -22,7 +22,7 @@ plugins {
 
 def twaManifest = [
     applicationId: 'app.web.math_adventure_app.twa',
-    hostName: 'math-adventure.com', // The domain being opened in the TWA (updated to custom domain).
+    hostName: 'math-adventure-app.web.app', // Reverted to project web.app domain.
     launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
     name: 'Math Adventure', // The application name.
     launcherName: 'MathAdv', // The name shown on the Android Launcher.
@@ -58,8 +58,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 35
     // Bumped versionCode for Google Play (previous 5 used). Increment when releasing.
-    // Bump versionCode due to host/domain change for TWA deep link capture
-    versionCode 7
+    // Bump versionCode again for revert to web.app
+    versionCode 8
     versionName "Math Adv App Update 3"
 
         // The name for the application
@@ -78,14 +78,14 @@ android {
             // The URL the Web Manifest for the Progressive Web App that the TWA points to. This
             // is used by Chrome OS and Meta Quest to open the Web version of the PWA instead of
             // the TWA, as it will probably give a better user experience for non-mobile devices.
-            // Updated to custom domain
-            resValue "string", "webManifestUrl", 'https://math-adventure.com/manifest.json'
+            // Reverted to web.app domain
+            resValue "string", "webManifestUrl", 'https://math-adventure-app.web.app/manifest.json'
         
 
         
             // This is used by Meta Quest.
-            // Updated to custom domain
-            resValue "string", "fullScopeUrl", 'https://math-adventure.com/'
+            // Reverted to web.app domain
+            resValue "string", "fullScopeUrl", 'https://math-adventure-app.web.app/'
         
 
         

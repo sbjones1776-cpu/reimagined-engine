@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/GoogleChromeLabs/bubblewrap/main/packages/cli/schema/twa-manifest.schema.json",
   "packageId": "com.yourcompany.mathadventure",
-  "host": "math-adventure.com",
+  "host": "math-adventure-app.web.app",
   "launcherName": "Math Adventure",
   "name": "Math Adventure",
   "themeColor": "#7c3aed",
@@ -12,8 +12,8 @@
   "navigationDividerColorDark": "#00000000",
   "enableNotifications": false,
   "startUrl": "/",
-  "iconUrl": "https://math-adventure.com/icons/icon-192.png",
-  "maskableIconUrl": "https://math-adventure.com/icons/icon-512.png",
+  "iconUrl": "https://math-adventure-app.web.app/icons/icon-192.png",
+  "maskableIconUrl": "https://math-adventure-app.web.app/icons/icon-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./keys/keystore.jks",
