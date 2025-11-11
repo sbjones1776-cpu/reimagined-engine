@@ -1,17 +1,34 @@
 const functions = require('firebase-functions');
+const functionsV1 = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const { Client, Environment } = require('square');
+const { defineString } = require('firebase-functions/params');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 
 admin.initializeApp();
 const db = admin.firestore();
 
-// Initialize Square client
-// Set environment variables in Firebase Functions config:
-// firebase functions:config:set square.access_token="YOUR_TOKEN" square.location_id="YOUR_LOCATION"
-const squareClient = new Client({
-  accessToken: functions.config().square?.access_token || process.env.SQUARE_ACCESS_TOKEN,
-  environment: functions.config().square?.environment === 'sandbox' ? Environment.Sandbox : Environment.Production
-});
+// Environment parameters (firebase-functions v7+)
+// Configure via: firebase functions:config:set or Firebase Console > Build > Functions > Variables
+// Recommended: use new params API or environment variables
+const SQUARE_ACCESS_TOKEN = defineString('SQUARE_ACCESS_TOKEN');
+const SQUARE_ENVIRONMENT = defineString('SQUARE_ENVIRONMENT'); // 'sandbox' or 'production'
+const PLAY_PACKAGE_NAME = defineString('PLAY_PACKAGE_NAME');
+const SQUARE_LOCATION_ID = defineString('SQUARE_LOCATION_ID');
+
+// Lazy Square client (evaluate params at runtime, not deploy time)
+let squareClientInstance = null;
+function getSquareClient() {
+  if (squareClientInstance) return squareClientInstance;
+  const env = ((SQUARE_ENVIRONMENT.value() || process.env.SQUARE_ENVIRONMENT) === 'sandbox')
+    ? Environment.Sandbox
+    : Environment.Production;
+  squareClientInstance = new Client({
+    accessToken: SQUARE_ACCESS_TOKEN.value() || process.env.SQUARE_ACCESS_TOKEN,
+    environment: env
+  });
+  return squareClientInstance;
+}
 
 /**
  * verifyPlayPurchase
@@ -22,7 +39,7 @@ const squareClient = new Client({
  * POST body: { token, productId, email }
  * Response: { success: true }
  */
-exports.verifyPlayPurchase = functions.https.onRequest(async (req, res) => {
+exports.verifyPlayPurchase = functionsV1.https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
@@ -46,7 +63,7 @@ exports.verifyPlayPurchase = functions.https.onRequest(async (req, res) => {
     const authClient = await auth.getClient();
     const publisher = google.androidpublisher({ version: 'v3', auth: authClient });
 
-    const packageName = functions.config().play?.package || process.env.PLAY_PACKAGE_NAME;
+    const packageName = PLAY_PACKAGE_NAME.value() || process.env.PLAY_PACKAGE_NAME;
     if (!packageName) {
       throw new Error('Missing Play package name (functions.config().play.package or PLAY_PACKAGE_NAME)');
     }
@@ -122,7 +139,7 @@ exports.verifyPlayPurchase = functions.https.onRequest(async (req, res) => {
  * Create a subscription via Square and grant premium access
  * POST body: { email, planId, sourceId, customerId? }
  */
-exports.createSubscription = functions.https.onRequest(async (req, res) => {
+exports.createSubscription = functionsV1.https.onRequest(async (req, res) => {
   // Enable CORS
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -146,12 +163,12 @@ exports.createSubscription = functions.https.onRequest(async (req, res) => {
   }
 
   try {
-    const locationId = functions.config().square?.location_id || process.env.SQUARE_LOCATION_ID;
+  const locationId = SQUARE_LOCATION_ID.value() || process.env.SQUARE_LOCATION_ID;
 
     // Create or use existing customer
     let finalCustomerId = customerId;
     if (!finalCustomerId) {
-      const customerResponse = await squareClient.customersApi.createCustomer({
+  const customerResponse = await getSquareClient().customersApi.createCustomer({
         emailAddress: email,
         referenceId: email,
       });
@@ -159,7 +176,7 @@ exports.createSubscription = functions.https.onRequest(async (req, res) => {
     }
 
     // Create subscription
-    const { result } = await squareClient.subscriptionsApi.createSubscription({
+  const { result } = await getSquareClient().subscriptionsApi.createSubscription({
       locationId: locationId,
       planVariationId: planId,
       customerId: finalCustomerId,
@@ -205,7 +222,7 @@ exports.createSubscription = functions.https.onRequest(async (req, res) => {
  * Handle Square webhook events (subscription updates, cancellations, etc.)
  * Configure this URL in Square Dashboard: https://your-project.cloudfunctions.net/handleSquareWebhook
  */
-exports.handleSquareWebhook = functions.https.onRequest(async (req, res) => {
+exports.handleSquareWebhook = functionsV1.https.onRequest(async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).send('Method not allowed');
     return;
@@ -260,7 +277,7 @@ exports.handleSquareWebhook = functions.https.onRequest(async (req, res) => {
  * Manually grant premium access (for testing or customer support)
  * POST body: { email, expiresInDays? }
  */
-exports.grantPremiumAccess = functions.https.onRequest(async (req, res) => {
+exports.grantPremiumAccess = functionsV1.https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
@@ -312,7 +329,7 @@ exports.grantPremiumAccess = functions.https.onRequest(async (req, res) => {
  * Detects users with trial_expires_at nearing expiration (day 6, day 7, grace day 8)
  * and writes notification docs to Firestore 'notifications' collection.
  */
-exports.checkTrialExpirations = functions.pubsub.schedule('every day 09:00').onRun(async (context) => {
+exports.checkTrialExpirations = onSchedule('every day 09:00', async (event) => {
   console.log('Trial expiration check started');
   const now = admin.firestore.Timestamp.now();
   const nowMs = now.toMillis();
