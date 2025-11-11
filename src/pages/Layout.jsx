@@ -277,20 +277,7 @@ export default function Layout({ children, currentPageName }) {
 
             <nav className="hidden lg:flex items-center gap-2">
               <NavLink to="Home" icon={Home} label="Home" isDarkMode={isDarkMode} />
-              <NavLink
-                to="DailyChallenge"
-                icon={Calendar}
-                label="Daily"
-                badge={!hasCompletedToday ? "!" : null}
-                isDarkMode={isDarkMode}
-              />
               <NavLink to="Progress" icon={Trophy} label="Progress" isDarkMode={isDarkMode} />
-              <NavLink
-                to="AITutor"
-                icon={Brain}
-                label="AI Tutor"
-                isDarkMode={isDarkMode}
-              />
               <NavLink
                 to="Messages"
                 icon={Mail}
@@ -400,6 +387,21 @@ export default function Layout({ children, currentPageName }) {
                               {unreadMessageCount}
                             </Badge>
                           )}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
+                        <Link to={createPageUrl("DailyChallenge")} className="cursor-pointer">
+                          <Calendar className="w-4 h-4 mr-2" />
+                          Daily Challenge
+                          {!hasCompletedToday && (
+                            <Badge className="ml-auto bg-red-500 text-white text-xs animate-pulse">!</Badge>
+                          )}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
+                        <Link to={createPageUrl("AITutor")} className="cursor-pointer">
+                          <Brain className="w-4 h-4 mr-2" />
+                          AI Tutor
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
