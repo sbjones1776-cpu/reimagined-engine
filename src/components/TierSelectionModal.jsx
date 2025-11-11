@@ -203,11 +203,10 @@ export default function TierSelectionModal({ open, onOpenChange, onSelectTier, u
                     Get Started
                   </Button>
 
-                  {billingPeriod === 'yearly' && (
-                    <p className="text-xs text-center text-gray-500 mt-3">
-                      New users get a 7-day free trial • Cancel anytime
-                    </p>
-                  )}
+                  {/* Show trial message for both monthly and yearly plans */}
+                  <p className="text-xs text-center text-gray-500 mt-3">
+                    New users get a 7-day free trial • Cancel anytime
+                  </p>
                 </CardContent>
               </Card>
             );
