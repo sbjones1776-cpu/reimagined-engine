@@ -275,43 +275,12 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </Link>
 
-            <nav className="hidden lg:flex items-center gap-2">
-              <NavLink to="Home" icon={Home} label="Home" isDarkMode={isDarkMode} />
-              <NavLink to="Progress" icon={Trophy} label="Progress" isDarkMode={isDarkMode} />
-              <NavLink
-                to="Messages"
-                icon={Mail}
-                label="Messages"
-                badge={unreadMessageCount > 0 ? unreadMessageCount : null}
-                badgeColor="blue"
-                isDarkMode={isDarkMode}
-              />
-              <NavLink to="Shop" icon={ShoppingBag} label="Shop" isDarkMode={isDarkMode} />
-              <NavLink
-                to="ParentPortal"
-                icon={GraduationCap}
-                label="Parents"
-                badge={user?.is_parent_mode ? "ON" : null}
-                badgeColor="blue"
-                isDarkMode={isDarkMode}
-              />
-            </nav>
-
             <div className="flex items-center gap-2">
               {user && (
-                <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-3 py-2 rounded-xl shadow-md">
+                <div className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-3 py-2 rounded-xl shadow-md">
                   <Coins className="w-4 h-4" />
                   <span className="font-bold text-sm">{user.coins || 0}</span>
                 </div>
-              )}
-              {user && (
-                <Button
-                  variant="outline"
-                  onClick={handleLogout}
-                  className="hidden md:inline-flex"
-                >
-                  Sign out
-                </Button>
               )}
 
               {subscriptionTier !== "free" ? (
