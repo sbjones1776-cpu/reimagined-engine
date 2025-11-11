@@ -14,8 +14,8 @@ import { Home, Trophy, Calendar, User as UserIcon, ShoppingBag, Menu, X, Crown, 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import SimpleAuth from "@/components/SimpleAuth";
-import TrialBanner from "@/components/TrialBanner";
 import { useUser } from '@/hooks/UserProvider.jsx';
+import TrialBanner from '@/components/TrialBanner.jsx';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -240,6 +240,8 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900' : 'bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50'}`}>
+  {/* Trial system banner */}
+  <TrialBanner />
       {/* PWA related meta tags are now handled in useEffect for better SSR compatibility and direct DOM manipulation */}
 
       <style>{`
@@ -684,11 +686,7 @@ export default function Layout({ children, currentPageName }) {
       </React.Suspense>
 
       <main className="flex-1 pb-20 lg:pb-0">
-        {user && (
-          <div className="max-w-7xl mx-auto px-4 pt-4">
-            <TrialBanner />
-          </div>
-        )}
+        {/* Trial banner removed: free trial discontinued */}
         {children}
       </main>
 

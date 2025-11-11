@@ -38,18 +38,17 @@ const auth = getAuth(app);
 
 export const createUserProfile = async (email, additionalData = {}) => {
   const userRef = doc(db, 'users', email);
+  // New users get a 7-day free trial by default
   const now = new Date();
-  const trialExpiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
-  
+  const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   const userData = {
     email,
     subscription_tier: 'free',
     subscription_expires_at: null,
     subscription_auto_renew: false,
-    // Trial tracking
-    trial_start_date: Timestamp.fromDate(now),
-    trial_expires_at: Timestamp.fromDate(trialExpiresAt),
-    trial_used: false, // Set to true when trial expires
+    trial_start_date: serverTimestamp(),
+    trial_expires_at: Timestamp.fromDate(expiresAt),
+    trial_used: false,
     coins: 0,
     stars_spent: 0,
     total_stars_earned: 0,
@@ -94,7 +93,7 @@ export const getUserProfile = async (email) => {
     return { id: userSnap.id, ...userSnap.data() };
   }
   
-  // If user doesn't exist, create default profile
+  // If user doesn't exist, create default profile (no trial)
   return await createUserProfile(email);
 };
 

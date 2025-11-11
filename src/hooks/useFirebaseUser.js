@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, getFirestore } from 'firebase/firestore';
 import { app } from '@/firebaseConfig';
-import { createUserProfile, getUserProfile } from '@/api/firebaseService';
-import { isOnTrial, getTrialDaysRemaining, isTrialExpired, hasPremiumAccess } from '@/utils/trialHelpers';
+import { createUserProfile, getUserProfile, updateUserProfile } from '@/api/firebaseService';
+import { hasPremiumAccess, isOnTrial, isTrialExpired, getTrialDaysRemaining } from '@/utils/trialHelpers';
 
 export function useFirebaseUser() {
   const [user, setUser] = useState(null);
@@ -33,16 +33,22 @@ export function useFirebaseUser() {
             if (snap.exists()) {
               const userData = { id: snap.id, ...snap.data() };
               
-              // Enrich user data with trial information
-              const enrichedUser = {
+              // Derive trial state + premium access
+              const onTrial = isOnTrial(userData);
+              const trialExpired = isTrialExpired(userData);
+              const trialDaysRemaining = getTrialDaysRemaining(userData);
+              setUser({
                 ...userData,
-                isOnTrial: isOnTrial(userData),
-                trialDaysRemaining: getTrialDaysRemaining(userData),
-                trialExpired: isTrialExpired(userData),
+                isOnTrial: onTrial,
+                trialExpired: trialExpired,
+                trialDaysRemaining,
                 hasPremiumAccess: hasPremiumAccess(userData)
-              };
-              
-              setUser(enrichedUser);
+              });
+
+              // If trial is expired and not yet marked used (and still free), mark it
+              if (trialExpired && userData.subscription_tier === 'free' && userData.trial_used !== true) {
+                updateUserProfile(snap.id, { trial_used: true }).catch(() => {});
+              }
             }
           },
           (err) => {

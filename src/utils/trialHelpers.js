@@ -77,12 +77,7 @@ export const hasPremiumAccess = (user) => {
   if (!user) return false;
   
   // Paid subscription
-  if (user.subscription_tier && user.subscription_tier !== 'free') {
-    return true;
-  }
-  
-  // Active trial
-  return isOnTrial(user);
+    return user.subscription_tier && user.subscription_tier !== 'free';
 };
 
 /**
@@ -97,17 +92,6 @@ export const getTrialStatusMessage = (user) => {
     return 'Premium Active';
   }
   
-  if (isOnTrial(user)) {
-    const daysLeft = getTrialDaysRemaining(user);
-    if (daysLeft === 0) {
-      return 'Trial expires today!';
-    }
-    return `${daysLeft} day${daysLeft === 1 ? '' : 's'} left in trial`;
-  }
-  
-  if (isTrialExpired(user)) {
-    return 'Trial expired';
-  }
-  
+    // Trial messaging removed
   return 'Free plan';
 };

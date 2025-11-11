@@ -9,11 +9,9 @@ export default function TrialBanner() {
   const { user } = useUser();
   const navigate = useNavigate();
   const [dismissed, setDismissed] = React.useState(false);
+  const [show, setShow] = React.useState(true);
 
-  // Don't show if dismissed, no user, or user has paid subscription
-  if (dismissed || !user || (user.subscription_tier && user.subscription_tier !== 'free')) {
-    return null;
-  }
+  if (!user || dismissed === true || show === false) return null;
 
   // Only show during active trial or just after expiration
   const showBanner = user.isOnTrial || user.trialExpired;
