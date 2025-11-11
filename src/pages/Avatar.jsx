@@ -286,11 +286,16 @@ export default function Avatar() {
                     </h3>
                     <Badge className="bg-green-500 text-white">
                       <CheckCircle className="w-3 h-3 mr-1" />
-                      Active
+                      Active{user?.subscription_tier === 'free' ? ' (Trial)' : ''}
                     </Badge>
                   </div>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 flex flex-wrap gap-2 items-center">
                     {subscriptionExpires && `Renews ${format(subscriptionExpires, 'MMM d, yyyy')} • ${daysUntilRenewal} days left`}
+                    {!subscriptionExpires && user?.isOnTrial && typeof user?.trialDaysRemaining === 'number' && (
+                      <span className="text-sm text-yellow-700">
+                        Trial: {user.trialDaysRemaining} day{user.trialDaysRemaining === 1 ? '' : 's'} left
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>

@@ -1476,12 +1476,17 @@ export default function Home() {
                        "Family/Teacher"} Active
                     </h3>
                     <Badge className="bg-green-500 text-white">
-                      Premium
+                      Premium{user?.subscription_tier === 'free' ? ' (Trial)' : ''}
                     </Badge>
                   </div>
                   <p className="text-gray-600 flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
                     {subscriptionExpires && `Renews ${format(subscriptionExpires, 'MMM d, yyyy')} • ${daysUntilRenewal} days left`}
+                    {!subscriptionExpires && user?.isOnTrial && typeof user?.trialDaysRemaining === 'number' && (
+                      <span>
+                        {`Trial: ${user.trialDaysRemaining} day${user.trialDaysRemaining === 1 ? '' : 's'} left`}
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
