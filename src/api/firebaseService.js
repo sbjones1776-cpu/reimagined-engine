@@ -49,6 +49,7 @@ export const createUserProfile = async (email, additionalData = {}) => {
     trial_start_date: serverTimestamp(),
     trial_expires_at: Timestamp.fromDate(expiresAt),
     trial_used: false,
+    trial_grace_used: false,
     coins: 0,
     stars_spent: 0,
     total_stars_earned: 0,

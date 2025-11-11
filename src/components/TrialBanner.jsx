@@ -14,12 +14,13 @@ export default function TrialBanner() {
   if (!user || dismissed === true || show === false) return null;
 
   // Only show during active trial or just after expiration
-  const showBanner = user.isOnTrial || user.trialExpired;
+  const showBanner = user.isOnTrial || user.trialExpired || user.inGraceDay;
   
   if (!showBanner) return null;
 
-  const isExpired = user.trialExpired;
+  const isExpired = user.trialExpired && !user.inGraceDay;
   const daysLeft = user.trialDaysRemaining || 0;
+  const inGrace = user.inGraceDay;
 
   return (
     <Alert 
@@ -33,14 +34,23 @@ export default function TrialBanner() {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3 flex-1">
-          {isExpired ? (
+          {inGrace ? (
+            <Crown className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+          ) : isExpired ? (
             <Crown className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
           ) : (
             <Clock className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           )}
-          <AlertDescription className={isExpired ? 'text-red-800' : 'text-blue-800'}>
+          <AlertDescription className={inGrace ? 'text-orange-800' : isExpired ? 'text-red-800' : 'text-blue-800'}>
             <div className="space-y-2">
-              {isExpired ? (
+              {inGrace ? (
+                <>
+                  <p className="font-semibold text-lg">Grace Day: Final Chance!</p>
+                  <p className="text-sm">
+                    Your trial expired, but you still have premium access today only. Upgrade now to keep everything before it locks tomorrow.
+                  </p>
+                </>
+              ) : isExpired ? (
                 <>
                   <p className="font-semibold text-lg">Your 7-day trial has ended</p>
                   <p className="text-sm">
@@ -65,7 +75,9 @@ export default function TrialBanner() {
           <Button
             onClick={() => navigate('/subscription')}
             className={`${
-              isExpired 
+              inGrace
+                ? 'bg-orange-600 hover:bg-orange-700'
+                : isExpired 
                 ? 'bg-red-600 hover:bg-red-700' 
                 : 'bg-blue-600 hover:bg-blue-700'
             } text-white whitespace-nowrap`}

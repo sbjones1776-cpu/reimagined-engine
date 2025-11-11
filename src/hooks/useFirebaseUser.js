@@ -4,6 +4,7 @@ import { doc, onSnapshot, getFirestore } from 'firebase/firestore';
 import { app } from '@/firebaseConfig';
 import { createUserProfile, getUserProfile, updateUserProfile } from '@/api/firebaseService';
 import { hasPremiumAccess, isOnTrial, isTrialExpired, getTrialDaysRemaining } from '@/utils/trialHelpers';
+import { trackTrialStart, trackTrialDay, trackTrialExpired, trackTrialGraceLock } from '@/lib/analytics';
 
 export function useFirebaseUser() {
   const [user, setUser] = useState(null);
@@ -37,18 +38,60 @@ export function useFirebaseUser() {
               const onTrial = isOnTrial(userData);
               const trialExpired = isTrialExpired(userData);
               const trialDaysRemaining = getTrialDaysRemaining(userData);
+              // Grace day (day 8) logic
+              const totalTrialDays = 7;
+              const daysSinceStart = userData.trial_start_date?.toDate ? Math.floor((Date.now() - userData.trial_start_date.toDate().getTime()) / (1000*60*60*24)) : null;
+              const inGraceDay = trialExpired && daysSinceStart === totalTrialDays && userData.trial_grace_used !== true;
+
               setUser({
                 ...userData,
                 isOnTrial: onTrial,
                 trialExpired: trialExpired,
                 trialDaysRemaining,
-                hasPremiumAccess: hasPremiumAccess(userData)
+                inGraceDay,
+                hasPremiumAccess: hasPremiumAccess(userData) || inGraceDay // Allow premium during grace
               });
 
-              // If trial is expired and not yet marked used (and still free), mark it
-              if (trialExpired && userData.subscription_tier === 'free' && userData.trial_used !== true) {
-                updateUserProfile(snap.id, { trial_used: true }).catch(() => {});
+              // Analytics & Firestore updates with localStorage deduplication
+              const email = snap.id;
+              const logKey = `trial_log_${email}`;
+              const storedLog = localStorage.getItem(logKey);
+              const logData = storedLog ? JSON.parse(storedLog) : {};
+
+              // Trial start event (once)
+              if (userData.trial_start_date && !logData.trial_start) {
+                trackTrialStart(email);
+                logData.trial_start = true;
               }
+
+              // Daily event (once per day)
+              if (onTrial && trialDaysRemaining >= 0 && trialDaysRemaining <= 7) {
+                const dayKey = `day_${7 - trialDaysRemaining}`;
+                if (!logData[dayKey]) {
+                  trackTrialDay(email, 7 - trialDaysRemaining);
+                  logData[dayKey] = true;
+                }
+              }
+
+              // Expired event (once)
+              if (trialExpired && userData.subscription_tier === 'free' && !logData.trial_expired) {
+                trackTrialExpired(email);
+                logData.trial_expired = true;
+                if (userData.trial_used !== true) {
+                  updateUserProfile(snap.id, { trial_used: true }).catch(() => {});
+                }
+              }
+
+              // Grace lock event (once)
+              if (inGraceDay && !logData.grace_lock) {
+                trackTrialGraceLock(email);
+                logData.grace_lock = true;
+                if (userData.trial_grace_used !== true) {
+                  updateUserProfile(snap.id, { trial_grace_used: true }).catch(() => {});
+                }
+              }
+
+              localStorage.setItem(logKey, JSON.stringify(logData));
             }
           },
           (err) => {
