@@ -277,6 +277,15 @@ export default function Layout({ children, currentPageName }) {
 
             <div className="flex items-center gap-2">
               {user && (
+                <Link to={createPageUrl("Home")}>
+                  <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg">
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Play Now
+                  </Button>
+                </Link>
+              )}
+              
+              {user && (
                 <div className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-3 py-2 rounded-xl shadow-md">
                   <Coins className="w-4 h-4" />
                   <span className="font-bold text-sm">{user.coins || 0}</span>
