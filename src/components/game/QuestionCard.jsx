@@ -79,7 +79,7 @@ export default function QuestionCard({ question, onAnswer, questionNumber }) {
       </Card>
       {/* Question summary TTS */}
       <div className="mt-4 flex items-center gap-2">
-  <TextToSpeech text={mathToSpeech(`Question ${questionNumber}: ${question.question}. Possible answers are: ${displayOptions.join(', ')}.`)} style="button" label="Read question summary" />
+  <TextToSpeech text={mathToSpeech(`Question ${questionNumber}: ${question.question}. Possible answers are: ${displayOptions.join(', ')}.`)} style="button" label="🔊 Hear the Question" />
       </div>
     </motion.div>
   );

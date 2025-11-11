@@ -85,7 +85,7 @@ export default function Game() {
   
   // Apply free tier limits if not premium.
   // During trial (including optimistic and grace), grant full access regardless of parental controls.
-  const allConcepts = ["addition", "subtraction", "multiplication", "division", "fractions", "decimals", "percentages", "word_problems", "money_math", "time", "geometry", "mixed", "counting", "number_comparison", "skip_counting_2s", "skip_counting_5s", "skip_counting_10s", "even_odd", "ordering_numbers", "place_value", "addition_single_digit", "subtraction_single_digit"];
+  const allConcepts = ["addition", "subtraction", "multiplication", "division", "fractions", "decimals", "percentages", "word_problems", "money_math", "time", "geometry", "mixed", "counting", "number_comparison", "skip_counting_2s", "skip_counting_5s", "skip_counting_10s", "even_odd", "ordering_numbers", "place_value", "addition_single_digit", "subtraction_single_digit"]; 
   // If parental_controls arrays exist but are empty, treat as unrestricted (otherwise everything appears locked)
   const pcAllowedOps = Array.isArray(parentalControls.allowed_operations)
     ? parentalControls.allowed_operations
@@ -95,12 +95,17 @@ export default function Game() {
     : undefined;
 
   const trialActive = !!(user?._optimisticTrial || user?.isOnTrial || user?.inGraceDay);
-  const allowedOperations = premiumActive 
-    ? (trialActive ? allConcepts : ((pcAllowedOps && pcAllowedOps.length > 0) ? pcAllowedOps : allConcepts))
-    : freeTierConcepts;
-  const allowedLevels = premiumActive
-    ? (trialActive ? ["easy", "medium", "hard", "expert"] : ((pcAllowedLvls && pcAllowedLvls.length > 0) ? pcAllowedLvls : ["easy", "medium", "hard", "expert"]))
-    : freeTierLevels;
+  // During trial, grant full access regardless of premium or parental controls
+  const allowedOperations = trialActive
+    ? allConcepts
+    : (premiumActive
+        ? ((pcAllowedOps && pcAllowedOps.length > 0) ? pcAllowedOps : allConcepts)
+        : freeTierConcepts);
+  const allowedLevels = trialActive
+    ? ["easy", "medium", "hard", "expert"]
+    : (premiumActive
+        ? ((pcAllowedLvls && pcAllowedLvls.length > 0) ? pcAllowedLvls : ["easy", "medium", "hard", "expert"])
+        : freeTierLevels);
   
   // Check time limits
   const todayKey = format(new Date(), 'yyyy-MM-dd');
@@ -119,7 +124,7 @@ export default function Game() {
   const isOperationTimeLimitReached = enforceTimeLimits && operation && operationLimits[operation] && (todayUsage.by_operation?.[operation] || 0) >= operationLimits[operation];
 
   // Check premium restrictions
-  const isPremiumRestricted = !user?.hasPremiumAccess && (!isOperationAllowed || !isLevelAllowed);
+  const isPremiumRestricted = !(trialActive || user?.hasPremiumAccess) && (!isOperationAllowed || !isLevelAllowed);
 
   // Show premium lock if restricted
   useEffect(() => {

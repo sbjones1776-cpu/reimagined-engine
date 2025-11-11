@@ -1199,8 +1199,8 @@ const Label = ({ children, className = "" }) => (
 
 export default function Home() {
   const queryClient = useQueryClient();
-  const [selectedGrade, setSelectedGrade] = useState("all");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedGrade, setSelectedGrade] = useState("K");
+  const [selectedCategory, setSelectedCategory] = useState("basics");
   const { user, loading: authLoading } = useUser();
 
   const { data: progress = [] } = useQuery({
