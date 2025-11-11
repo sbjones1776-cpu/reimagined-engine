@@ -7,8 +7,20 @@
       "namespace": "android_app",
       "package_name": "app.web.math_adventure_app.twa",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_SHA256_FINGERPRINT"
+        "REPLACE_WITH_UPLOAD_KEY_SHA256"
       ]
     }
   }
 ]
+
+/*
+Instructions:
+1. Replace REPLACE_WITH_UPLOAD_KEY_SHA256 with the SHA-256 fingerprint of the SIGNING CERT actually used to sign the release (upload key if Play App Signing enabled).
+   Command (PowerShell):
+      keytool -list -v -keystore android.keystore -alias android | Select-String "SHA256"
+   (Add -storepass YOUR_STORE_PASSWORD if not prompted interactively.)
+2. Deploy hosting so this file is served at:
+      https://math-adventure.com/.well-known/assetlinks.json
+3. After deploy, verify in browser and in Play Console (Deep Links / App Integrity).
+4. Once verified, math-adventure.com links will open directly in the TWA (no browser chrome) provided intent filters match.
+*/
