@@ -55,7 +55,7 @@ export default function Settings() {
   });
   const [ttsRate, setTtsRate] = useState(() => {
     const r = parseFloat(localStorage.getItem('tts.rate'));
-    return Number.isNaN(r) ? 0.9 : r;
+    return Number.isNaN(r) ? 1.0 : r;
   });
   const [ttsLang, setTtsLang] = useState(() => localStorage.getItem('tts.lang') || 'en'); // 'en' | 'es'
 
@@ -71,7 +71,7 @@ export default function Settings() {
     localStorage.setItem('tts.lang', ttsLang);
     // Bump cache buster so TextToSpeech re-evaluates selection immediately
     localStorage.setItem('tts.cacheBuster', Date.now().toString());
-  }, [theme, soundVolume, defaultOperation, defaultLevel, defaultDrawingTool, ttsVoiceName, ttsRate, ttsPitch, ttsLang]);
+  }, [theme, soundVolume, defaultOperation, defaultLevel, defaultDrawingTool, ttsVoiceName, ttsRate, ttsLang]);
 
   const handleReset = () => {
     setTheme("light");
@@ -81,7 +81,7 @@ export default function Settings() {
     setDefaultDrawingTool("brush");
     // TTS defaults
     setTtsVoiceName("Emma");
-    setTtsRate(0.9);
+    setTtsRate(1.0);
     setTtsLang('en');
   };
 
@@ -343,6 +343,33 @@ export default function Settings() {
               <div className="flex items-center gap-3">
                 <Slider value={[ttsRate]} onValueChange={(v)=>setTtsRate(parseFloat(v[0]))} min={0.5} max={1.5} step={0.05} className="flex-1" />
                 <Badge className="bg-indigo-500 text-white">{ttsRate.toFixed(2)}x</Badge>
+              </div>
+              {/* Presets */}
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setTtsRate(0.85)}
+                  className={`${Math.abs(ttsRate - 0.85) < 0.001 ? 'border-indigo-500 bg-indigo-50' : ''}`}
+                >
+                  Slow 0.85x
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setTtsRate(1.0)}
+                  className={`${Math.abs(ttsRate - 1.0) < 0.001 ? 'border-indigo-500 bg-indigo-50' : ''}`}
+                >
+                  Normal 1.0x
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setTtsRate(1.2)}
+                  className={`${Math.abs(ttsRate - 1.2) < 0.001 ? 'border-indigo-500 bg-indigo-50' : ''}`}
+                >
+                  Fast 1.2x
+                </Button>
               </div>
             </div>
 
