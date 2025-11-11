@@ -78,8 +78,31 @@ export default function QuestionCard({ question, onAnswer, questionNumber }) {
         </CardContent>
       </Card>
       {/* Question summary TTS */}
-      <div className="mt-4 flex items-center gap-2">
-  <TextToSpeech text={mathToSpeech(`Question ${questionNumber}: ${question.question}. Possible answers are: ${displayOptions.join(', ')}.`)} style="button" label="🔊 Hear the Question" />
+      <div className="mt-4 flex justify-center">
+        <button
+          onClick={() => {
+            const text = mathToSpeech(`Question ${questionNumber}: ${question.question}. Possible answers are: ${displayOptions.join(', ')}.`);
+            if (!("speechSynthesis" in window)) {
+              alert("Text-to-speech is not supported in this browser.");
+              return;
+            }
+            window.speechSynthesis.cancel();
+            const utterance = new window.SpeechSynthesisUtterance(text);
+            try {
+              const langPref = localStorage.getItem('tts.lang') === 'es' ? 'es' : 'en';
+              utterance.lang = langPref === 'es' ? 'es-ES' : 'en-US';
+              const savedRate = parseFloat(localStorage.getItem('tts.rate'));
+              utterance.rate = isNaN(savedRate) ? 1.0 : Math.min(2, Math.max(0.1, savedRate));
+            } catch {
+              utterance.lang = 'en-US';
+              utterance.rate = 1.0;
+            }
+            window.speechSynthesis.speak(utterance);
+          }}
+          className="px-6 py-3 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-4 border-green-300 animate-pulse"
+        >
+          🔊 Read it to Me
+        </button>
       </div>
     </motion.div>
   );
