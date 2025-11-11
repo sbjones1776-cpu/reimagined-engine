@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useIsFetching } from "@tanstack/react-query";
 import { 
   getUserGameProgress, 
   getUserDailyChallenges,
@@ -125,6 +125,9 @@ export default function Progress() {
 
   const newUnlockables = checkUnlockableItems();
 
+  // Indicate when progress is updating/refetching
+  const isFetchingProgress = useIsFetching({ queryKey: ['gameProgress', user?.email] }) > 0;
+
   const getCommonMistakes = () => {
     const mistakes = {};
     tutorSessions.forEach(session => {
@@ -159,6 +162,15 @@ export default function Progress() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Live updating indicator */}
+      {isFetchingProgress && (
+        <div className="fixed top-20 right-4 z-40">
+          <div className="flex items-center gap-2 bg-white/90 backdrop-blur px-3 py-2 rounded-full shadow border">
+            <div className="animate-spin w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full" />
+            <span className="text-sm text-gray-700">Updating…</span>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="text-center mb-12">
         <div className="inline-block mb-6">

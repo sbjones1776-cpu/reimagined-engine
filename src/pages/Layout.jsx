@@ -28,6 +28,7 @@ const AvatarDisplay = React.lazy(() => import("../components/avatar/AvatarDispla
 const PetDisplay = React.lazy(() => import("../components/rewards/PetDisplay"));
 const InstallPrompt = React.lazy(() => import("../components/InstallPrompt"));
 import { format, startOfDay } from "date-fns";
+import ChunkErrorBoundary from "@/components/ChunkErrorBoundary.jsx";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
@@ -349,22 +350,24 @@ export default function Layout({ children, currentPageName }) {
                       <Button variant="ghost" className={`${isDarkMode ? 'hover:bg-slate-700 text-gray-50' : 'hover:bg-purple-50 text-gray-900'} h-auto p-2`}>
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
-                            <React.Suspense fallback={null}>
-                              {avatarData && (
-                                <div className="scale-75 origin-center">
-                                  <AvatarDisplay avatarData={avatarData} size="small" />
-                                </div>
-                              )}
-                              {petData && (
-                                <div className="scale-50 origin-center -ml-2">
-                                  <PetDisplay
-                                    pet={petData}
-                                    experience={user?.pet_experience?.[activePet] || 0}
-                                    size="small"
-                                  />
-                                </div>
-                              )}
-                            </React.Suspense>
+                            <ChunkErrorBoundary>
+                              <React.Suspense fallback={<div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" /> }>
+                                {avatarData && (
+                                  <div className="scale-75 origin-center">
+                                    <AvatarDisplay avatarData={avatarData} size="small" />
+                                  </div>
+                                )}
+                                {petData && (
+                                  <div className="scale-50 origin-center -ml-2">
+                                    <PetDisplay
+                                      pet={petData}
+                                      experience={user?.pet_experience?.[activePet] || 0}
+                                      size="small"
+                                    />
+                                  </div>
+                                )}
+                              </React.Suspense>
+                            </ChunkErrorBoundary>
                           </div>
                           <div className="text-left hidden xl:block">
                             <p className={`text-sm font-semibold ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
@@ -646,13 +649,28 @@ export default function Layout({ children, currentPageName }) {
         </div>
       </div>
 
-      <React.Suspense fallback={null}>
-        <InstallPrompt />
-      </React.Suspense>
+      <ChunkErrorBoundary>
+        <React.Suspense fallback={null}>
+          <InstallPrompt />
+        </React.Suspense>
+      </ChunkErrorBoundary>
 
       <main className="flex-1 pb-20 lg:pb-0">
-        {/* Trial banner removed: free trial discontinued */}
-        {children}
+        <ChunkErrorBoundary>
+          <React.Suspense
+            fallback={
+              <div className="min-h-[40vh] flex items-center justify-center p-6">
+                <div className="text-center">
+                  <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                  <p className="text-gray-600">Loading...</p>
+                </div>
+              </div>
+            }
+          >
+            {/* Trial banner removed: free trial discontinued */}
+            {children}
+          </React.Suspense>
+        </ChunkErrorBoundary>
       </main>
 
       <footer className={`${isDarkMode ? 'bg-slate-800/60 border-slate-700' : 'bg-white/60 border-gray-200'} backdrop-blur-sm mt-12 py-8 border-t`}>
