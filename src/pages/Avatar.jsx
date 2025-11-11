@@ -738,6 +738,20 @@ export default function Avatar() {
             <p className="text-gray-600">
               Allow a parent or teacher to monitor your progress and help you set learning goals.
             </p>
+            {/* How parent/teacher access works */}
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertDescription className="text-sm text-blue-900 space-y-2">
+                <p className="font-semibold">How it works</p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>Enter a parent or teacher's email and tap Save — we'll send them an invite.</li>
+                  <li>They can create/sign in to a free account and link to your profile.</li>
+                  <li>They can see your stars, recent games, concepts practiced, and goals.</li>
+                  <li>They cannot change your avatar, play as you, or make purchases.</li>
+                  <li>You can remove or change the email anytime, or manage access in the Parent Portal.</li>
+                </ul>
+                <p className="text-xs text-blue-800">Tip: If the invite doesn’t arrive, ask them to check spam or try again.</p>
+              </AlertDescription>
+            </Alert>
             <div className="space-y-2">
               <Label htmlFor="parent_email">Parent/Teacher Email</Label>
               <div className="flex gap-2">
@@ -755,11 +769,16 @@ export default function Avatar() {
                   Save
                 </Button>
               </div>
-              {user?.parent_email && (
-                <p className="text-sm text-green-600">
-                  ✓ Linked to: {user.parent_email}
-                </p>
-              )}
+              <div className="flex items-center gap-3">
+                {user?.parent_email && (
+                  <p className="text-sm text-green-600">
+                    ✓ Linked to: {user.parent_email}
+                  </p>
+                )}
+                <Link to={createPageUrl("ParentPortal")} className="text-sm text-blue-600 hover:text-blue-700 underline">
+                  Manage in Parent Portal
+                </Link>
+              </div>
             </div>
           </div>
         </CardContent>
