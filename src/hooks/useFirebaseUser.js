@@ -5,6 +5,7 @@ import { app } from '@/firebaseConfig';
 import { createUserProfile, getUserProfile, updateUserProfile } from '@/api/firebaseService';
 import { hasPremiumAccess, isOnTrial, isTrialExpired, getTrialDaysRemaining } from '@/utils/trialHelpers';
 import { trackTrialStart, trackTrialDay, trackTrialExpired, trackTrialGraceLock } from '@/lib/analytics';
+import { createDay6Notification, createTrialExpiredNotification, createGraceDayNotification } from '@/api/trialNotifications';
 
 export function useFirebaseUser() {
   const [user, setUser] = useState(null);
@@ -71,6 +72,11 @@ export function useFirebaseUser() {
                   trackTrialDay(email, 7 - trialDaysRemaining);
                   logData[dayKey] = true;
                 }
+                // Day 6 notification (1 day left)
+                if (trialDaysRemaining === 1 && !logData.notif_day6) {
+                  createDay6Notification(email);
+                  logData.notif_day6 = true;
+                }
               }
 
               // Expired event (once)
@@ -80,6 +86,11 @@ export function useFirebaseUser() {
                 if (userData.trial_used !== true) {
                   updateUserProfile(snap.id, { trial_used: true }).catch(() => {});
                 }
+                // Create expiration notification
+                if (!logData.notif_expired) {
+                  createTrialExpiredNotification(email);
+                  logData.notif_expired = true;
+                }
               }
 
               // Grace lock event (once)
@@ -88,6 +99,11 @@ export function useFirebaseUser() {
                 logData.grace_lock = true;
                 if (userData.trial_grace_used !== true) {
                   updateUserProfile(snap.id, { trial_grace_used: true }).catch(() => {});
+                }
+                // Grace day notification
+                if (!logData.notif_grace) {
+                  createGraceDayNotification(email);
+                  logData.notif_grace = true;
                 }
               }
 
