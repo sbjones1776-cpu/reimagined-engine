@@ -1486,7 +1486,7 @@ export default function Home() {
                 </div>
               </div>
               <Button 
-                onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
+                onClick={() => window.location.assign(createPageUrl("Subscription"))}
                 className="h-12 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
               >
                 <CreditCard className="w-4 h-4 mr-2" />

@@ -353,7 +353,7 @@ export default function Layout({ children, currentPageName }) {
                 <button
                   onMouseEnter={prefetchSubscription}
                   onFocus={prefetchSubscription}
-                  onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
+                  onClick={() => window.location.assign(createPageUrl("Subscription"))}
                   className="hidden md:block"
                 >
                   <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 px-3 py-1.5 cursor-pointer">
@@ -365,7 +365,7 @@ export default function Layout({ children, currentPageName }) {
                 <button
                   onMouseEnter={prefetchSubscription}
                   onFocus={prefetchSubscription}
-                  onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
+                  onClick={() => window.location.assign(createPageUrl("Subscription"))}
                   className="hidden md:block"
                 >
                   <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 px-3 py-1.5 cursor-pointer animate-pulse">
@@ -572,7 +572,7 @@ export default function Layout({ children, currentPageName }) {
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer');
+                    window.location.assign(createPageUrl("Subscription"));
                   }}
                   className="w-full"
                 >

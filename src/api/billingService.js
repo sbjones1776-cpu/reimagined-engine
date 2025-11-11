@@ -195,11 +195,21 @@ export function fallbackToExternalCheckout(tier, period = 'monthly') {
     console.error(`No Square checkout link for tier=${tier}, period=${period}`);
     // Fallback to generic subscription page
     const genericUrl = import.meta.env.VITE_CHECKOUT_URL || 'https://math-adventure-app.web.app/subscription';
-    window.open(genericUrl, '_blank', 'noopener,noreferrer');
+    // Navigate within same tab for internal subscription page
+    if (genericUrl.includes('/subscription')) {
+      window.location.assign(genericUrl);
+    } else {
+      window.open(genericUrl, '_blank', 'noopener,noreferrer');
+    }
     return;
   }
   
-  window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+  // External Square checkout stays in new tab; internal subscription route uses same tab
+  if (checkoutUrl.includes('/subscription')) {
+    window.location.assign(checkoutUrl);
+  } else {
+    window.open(checkoutUrl, '_blank', 'noopener,noreferrer');
+  }
 }
 
 // Convenience combined flow

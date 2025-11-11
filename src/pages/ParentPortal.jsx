@@ -210,7 +210,7 @@ export default function ParentPortal() {
                 className="h-14 px-8 text-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
                 onMouseEnter={() => { try { import('./Subscription'); } catch {} }}
                 onFocus={() => { try { import('./Subscription'); } catch {} }}
-                onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
+                onClick={() => window.location.assign(createPageUrl("Subscription"))}
               >
                 <Crown className="w-5 h-5 mr-2" />
                 View Subscription Plans
@@ -255,7 +255,7 @@ export default function ParentPortal() {
         <div className="flex gap-3">
           <Button 
             variant="outline"
-            onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
+            onClick={() => window.location.assign(createPageUrl("Subscription"))}
           >
             <CreditCard className="w-4 h-4 mr-2" />
             Manage Subscription
@@ -263,14 +263,14 @@ export default function ParentPortal() {
           <Button
             variant="outline"
             onClick={() => enableParentModeMutation.mutate(false)}
-          >
+          >  
             <Settings className="w-4 h-4 mr-2" />
             Exit Parent Mode
           </Button>
           <Button 
             className="bg-gradient-to-r from-yellow-400 to-orange-500"
-            onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
-          >
+            onClick={() => window.location.assign(createPageUrl("Subscription"))}
+          >  
             <Crown className="w-4 h-4 mr-2" />
             {currentUser?.subscription_tier === "family_teacher" ? "Family Plan" : "Premium"}
           </Button>

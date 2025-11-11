@@ -292,7 +292,7 @@ export default function Avatar() {
                 <Button 
                   variant="outline" 
                   className="h-12"
-                  onClick={() => window.open(createPageUrl("Subscription"), '_blank', 'noopener,noreferrer')}
+                  onClick={() => window.location.assign(createPageUrl("Subscription"))}
                 >
                   <CreditCard className="w-4 h-4 mr-2" />
                   Manage Subscription
