@@ -27,6 +27,31 @@ export function useFirebaseUser() {
         setUser((prev) => prev || { email: fbUser.email, subscription_tier: 'free', coins: 0 });
         setError(null);
 
+        // Optimistic trial access for brand-new accounts (handles brief offline or race conditions)
+        try {
+          const creationMs = fbUser?.metadata?.creationTime
+            ? new Date(fbUser.metadata.creationTime).getTime()
+            : null;
+          const justCreated = creationMs ? (Date.now() - creationMs < 10 * 60 * 1000) : false; // within 10 minutes
+          const optimisticKey = `optimistic_trial_${fbUser.email}`;
+          const hasOptimistic = typeof window !== 'undefined' ? localStorage.getItem(optimisticKey) : null;
+          if (justCreated && !hasOptimistic) {
+            setUser((prev) => ({
+              ...(prev || {}),
+              email: fbUser.email,
+              subscription_tier: 'free',
+              coins: 0,
+              isOnTrial: true,
+              trialExpired: false,
+              trialDaysRemaining: 7,
+              inGraceDay: false,
+              hasPremiumAccess: true,
+              _optimisticTrial: true,
+            }));
+            localStorage.setItem(optimisticKey, 'true');
+          }
+        } catch {}
+
         // Optional immediate trial reset via URL param (?reset_trial=true)
         try {
           if (typeof window !== 'undefined' && window.location.search.includes('reset_trial=true')) {
@@ -162,6 +187,7 @@ export function useFirebaseUser() {
         // This will create a default profile if missing; snapshot above will update state when ready
         getUserProfile(fbUser.email).catch((e) => {
           console.error('Failed to ensure user profile', e);
+          // Preserve optimistic trial state if set; only record error
           setError(e);
         });
       } catch (e) {
