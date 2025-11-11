@@ -12,7 +12,13 @@ export const isOnTrial = (user) => {
   if (!user) return false;
   
   // User must have trial_start_date and trial_expires_at
-  if (!user.trial_start_date || !user.trial_expires_at) return false;
+  // Fallback: if fields missing but trial not marked used and user is free, treat as trial (profile backfill race or offline creation)
+  if (!user.trial_start_date || !user.trial_expires_at) {
+    if (user.subscription_tier === 'free' && user.trial_used !== true) {
+      return true; // provisional trial state
+    }
+    return false;
+  }
   
   // If user has upgraded (not free tier), they're no longer on trial
   if (user.subscription_tier !== 'free') return false;
@@ -77,7 +83,11 @@ export const hasPremiumAccess = (user) => {
   if (!user) return false;
   
   // Paid subscription
-    return user.subscription_tier && user.subscription_tier !== 'free';
+  if (user.subscription_tier && user.subscription_tier !== 'free') return true;
+  // Active trial (including provisional when dates missing)
+  if (isOnTrial(user) && user.trial_used !== true) return true;
+  // Grace day logic handled higher up (in hook) by adding inGraceDay
+  return false;
 };
 
 /**

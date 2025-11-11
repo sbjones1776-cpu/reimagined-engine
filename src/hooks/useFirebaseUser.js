@@ -32,7 +32,8 @@ export function useFirebaseUser() {
           const creationMs = fbUser?.metadata?.creationTime
             ? new Date(fbUser.metadata.creationTime).getTime()
             : null;
-          const justCreated = creationMs ? (Date.now() - creationMs < 10 * 60 * 1000) : false; // within 10 minutes
+          // Consider the account "new" for the first 24 hours to avoid flaky network issues
+          const justCreated = creationMs ? (Date.now() - creationMs < 24 * 60 * 60 * 1000) : false;
           const optimisticKey = `optimistic_trial_${fbUser.email}`;
           const hasOptimistic = typeof window !== 'undefined' ? localStorage.getItem(optimisticKey) : null;
           if (justCreated && !hasOptimistic) {
@@ -84,9 +85,25 @@ export function useFirebaseUser() {
           (snap) => {
             if (snap.exists()) {
               const userData = { id: snap.id, ...snap.data() };
+              // Backfill trial fields if missing (safety for profiles created without defaults)
+              (async () => {
+                try {
+                  if (!userData.trial_start_date || !userData.trial_expires_at) {
+                    const days = 7;
+                    const now = Date.now();
+                    const expiresAt = new Date(now + days * 24 * 60 * 60 * 1000);
+                    await updateUserProfile(fbUser.email, {
+                      trial_start_date: serverTimestamp(),
+                      trial_expires_at: Timestamp.fromDate(expiresAt),
+                      trial_used: false,
+                      trial_grace_used: false
+                    });
+                  }
+                } catch {}
+              })();
               
               // Derive trial state + premium access
-              const onTrial = isOnTrial(userData);
+              const onTrial = isOnTrial(userData) || (!userData.trial_start_date || !userData.trial_expires_at);
               const trialExpired = isTrialExpired(userData);
               const trialDaysRemaining = getTrialDaysRemaining(userData);
               // Grace day (day 8) logic
