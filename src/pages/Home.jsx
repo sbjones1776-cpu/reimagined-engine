@@ -1805,7 +1805,7 @@ export default function Home() {
                         {!conceptAllowed && (
                       <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2">
                         <Lock className="w-12 h-12 text-white" />
-                            {!isSubscribed && (
+                            {!premiumActive && (
                           <Badge className="bg-yellow-500 text-white">
                             <Crown className="w-3 h-3 mr-1" />
                             Premium
@@ -1818,13 +1818,13 @@ export default function Home() {
                     <CardTitle className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <span className="text-lg">{concept.name}</span>
-                        {!conceptAllowed && !isSubscribed && (
+                        {!conceptAllowed && !premiumActive && (
                           <Badge variant="outline" className="bg-yellow-50 border-yellow-400 text-yellow-700 text-xs">
                             <Crown className="w-3 h-3 mr-1" />
                             Premium
                           </Badge>
                         )}
-                        {!conceptAllowed && isSubscribed && (
+                        {!conceptAllowed && premiumActive && (
                           <Badge variant="outline" className="bg-red-50 border-red-300 text-red-700 text-xs">
                             Restricted
                           </Badge>
@@ -1863,13 +1863,13 @@ export default function Home() {
                               <span className="flex items-center gap-2">
                                 <Badge className={`${level.color} text-xs`}>{level.name}</Badge>
                                 {!unlocked && <Lock className="w-3 h-3" />}
-                                {!levelAllowed && conceptAllowed && !isSubscribed && (
+                                {!levelAllowed && conceptAllowed && !premiumActive && (
                                   <Badge variant="outline" className="text-xs bg-yellow-50 border-yellow-400 text-yellow-700">
                                     <Crown className="w-3 h-3 mr-1" />
                                     Premium
                                   </Badge>
                                 )}
-                                {!levelAllowed && conceptAllowed && isSubscribed && (
+                                {!levelAllowed && conceptAllowed && premiumActive && (
                                   <Badge variant="outline" className="text-xs">Restricted</Badge>
                                 )}
                               </span>
