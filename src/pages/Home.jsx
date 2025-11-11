@@ -1289,11 +1289,12 @@ export default function Home() {
     ? parentalControls.allowed_levels
     : undefined;
 
+  const trialActive = !!(user?._optimisticTrial || user?.isOnTrial || user?.inGraceDay);
   const allowedOperations = isPremium 
-    ? ((pcAllowedOps && pcAllowedOps.length > 0) ? pcAllowedOps : allOperations)
+    ? (trialActive ? allOperations : ((pcAllowedOps && pcAllowedOps.length > 0) ? pcAllowedOps : allOperations))
     : freeTierConcepts;
   const allowedLevels = isPremium
-    ? ((pcAllowedLvls && pcAllowedLvls.length > 0) ? pcAllowedLvls : ["easy", "medium", "hard", "expert"])
+    ? (trialActive ? ["easy", "medium", "hard", "expert"] : ((pcAllowedLvls && pcAllowedLvls.length > 0) ? pcAllowedLvls : ["easy", "medium", "hard", "expert"]))
     : freeTierLevels;
   const focusOperations = parentalControls.focus_operations || [];
 

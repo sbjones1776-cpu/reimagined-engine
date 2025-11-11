@@ -3,19 +3,6 @@ import React, { useRef } from "react";
 let voicesCache = {};
 let cacheVersion = null;
 
-function detectGender(name = "") {
-  const n = name.toLowerCase();
-  const femaleKeys = [
-    'female','woman','girl','aria','zira','jenny','jessa','olivia','emma','sonia','ana','isabella','libby','mia','sara','sofia','sofia','sofia', 'francesca'
-  ];
-  const maleKeys = [
-    'male','man','boy','guy','david','mark','ryan','tony','diego','francisco','sebastian','pablo','miguel','matthew','mike','george'
-  ];
-  if (femaleKeys.some(k => n.includes(k))) return 'female';
-  if (maleKeys.some(k => n.includes(k))) return 'male';
-  return 'any';
-}
-
 function getVoice(lang = "en-US", preferChild = true, options = {}) {
   const {
     useSavedPrefs = true,
@@ -36,14 +23,16 @@ function getVoice(lang = "en-US", preferChild = true, options = {}) {
 
   // Resolve effective preferences
   let effectiveLangPref = 'en';
-  let effectiveName = 'David';
+  let effectiveName = 'Emma';
   try {
     if (useSavedPrefs) {
       effectiveLangPref = (localStorage.getItem('tts.lang') === 'es') ? 'es' : 'en';
-      effectiveName = localStorage.getItem('tts.voiceName') || 'David';
+      const stored = localStorage.getItem('tts.voiceName');
+      // If old value was 'David', migrate silently to Emma
+      effectiveName = stored && stored.toLowerCase() !== 'david' ? stored : 'Emma';
     } else {
       effectiveLangPref = (langPrefOverride === 'es') ? 'es' : 'en';
-      effectiveName = voiceNameOverride || 'David';
+      effectiveName = voiceNameOverride || 'Emma';
     }
   } catch {
     // ignore and keep defaults
@@ -57,7 +46,7 @@ function getVoice(lang = "en-US", preferChild = true, options = {}) {
     // Filter by language first
     let candidates = voices.filter(v => (v.lang || '').toLowerCase().startsWith(effectiveLangPref));
     
-    // Look for the requested voice name (David or Emma)
+    // Look for the requested voice name (prefer female voices such as Emma)
     // Search by partial name match (case-insensitive) to handle variants like "Microsoft David Desktop", "Google UK English Male", etc.
     const nameLower = effectiveName.toLowerCase();
     let voice = candidates.find(v => v.name.toLowerCase().includes(nameLower));
@@ -67,24 +56,12 @@ function getVoice(lang = "en-US", preferChild = true, options = {}) {
       return voice;
     }
 
-    // If David not found, try common male voice names
-    if (nameLower === 'david') {
-      const maleNames = ['david', 'male', 'guy', 'man', 'diego', 'juan', 'george', 'mark'];
-      voice = candidates.find(v => maleNames.some(n => v.name.toLowerCase().includes(n)));
-      if (voice) {
-        voicesCache[cacheKey] = voice;
-        return voice;
-      }
-    }
-
-    // If Emma not found, try common female voice names
-    if (nameLower === 'emma') {
-      const femaleNames = ['emma', 'female', 'woman', 'girl', 'zira', 'jenny', 'olivia', 'sonia', 'ana', 'isabella', 'sara', 'sofia', 'monica', 'paulina'];
-      voice = candidates.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n)));
-      if (voice) {
-        voicesCache[cacheKey] = voice;
-        return voice;
-      }
+    // Prefer common female voice names
+    const femaleNames = ['emma', 'female', 'woman', 'girl', 'zira', 'jenny', 'olivia', 'sonia', 'ana', 'isabella', 'sara', 'sofia', 'monica', 'paulina'];
+    voice = candidates.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n)));
+    if (voice) {
+      voicesCache[cacheKey] = voice;
+      return voice;
     }
 
     // Fallback: pick first available voice in the language
@@ -103,12 +80,11 @@ export default function TextToSpeech({
   lang = "en-US",
   style = "button",
   label = "🔊 Listen",
-  pitch = 1.1,
   rate = 0.9,
   // New: control whether to use saved prefs or on-the-fly overrides (useful for Settings preview)
   useSavedPrefs = true,
   overrideLangPref, // 'en' | 'es'
-  overrideVoiceName, // 'David' | 'Emma'
+  overrideVoiceName, // 'Emma'
 }) {
   const utterRef = useRef(null);
 
@@ -140,24 +116,18 @@ export default function TextToSpeech({
     }
     // Apply pitch and rate
     try {
-      if (useSavedPrefs) {
-        const savedPitch = parseFloat(localStorage.getItem('tts.pitch'));
-        const savedRate = parseFloat(localStorage.getItem('tts.rate'));
-        utter.pitch = Number.isNaN(savedPitch) ? pitch : Math.min(2, Math.max(0, savedPitch));
-        utter.rate = Number.isNaN(savedRate) ? rate : Math.min(2, Math.max(0.1, savedRate));
-      } else {
-        utter.pitch = Math.min(2, Math.max(0, pitch));
-        utter.rate = Math.min(2, Math.max(0.1, rate));
-      }
+      const savedRate = useSavedPrefs ? parseFloat(localStorage.getItem('tts.rate')) : rate;
+      utter.pitch = 1.0; // fixed neutral pitch
+      utter.rate = Number.isNaN(savedRate) ? rate : Math.min(2, Math.max(0.1, savedRate));
     } catch {
-      utter.pitch = Math.min(2, Math.max(0, pitch));
+      utter.pitch = 1.0;
       utter.rate = Math.min(2, Math.max(0.1, rate));
     }
     // Resolve voice selection with ability to override from the caller
     utter.voice = getVoice(utter.lang, true, {
       useSavedPrefs,
       langPrefOverride: overrideLangPref,
-      voiceNameOverride: overrideVoiceName,
+      voiceNameOverride: overrideVoiceName || 'Emma',
     });
     utterRef.current = utter;
     window.speechSynthesis.speak(utter);

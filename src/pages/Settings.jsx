@@ -48,15 +48,14 @@ export default function Settings() {
   const [defaultLevel, setDefaultLevel] = useState(() => localStorage.getItem('app.defaultLevel') || "easy");
   const [defaultDrawingTool, setDefaultDrawingTool] = useState(() => localStorage.getItem('app.defaultDrawingTool') || "brush");
 
-  // TTS preferences - simplified to David (male) or Emma (female)
-  const [ttsVoiceName, setTtsVoiceName] = useState(() => localStorage.getItem('tts.voiceName') || "David");
+  // TTS preferences - single female voice (Emma)
+  const [ttsVoiceName, setTtsVoiceName] = useState(() => {
+    const stored = localStorage.getItem('tts.voiceName');
+    return stored && stored.toLowerCase() !== 'david' ? stored : 'Emma';
+  });
   const [ttsRate, setTtsRate] = useState(() => {
     const r = parseFloat(localStorage.getItem('tts.rate'));
     return Number.isNaN(r) ? 0.9 : r;
-  });
-  const [ttsPitch, setTtsPitch] = useState(() => {
-    const p = parseFloat(localStorage.getItem('tts.pitch'));
-    return Number.isNaN(p) ? 1.1 : p;
   });
   const [ttsLang, setTtsLang] = useState(() => localStorage.getItem('tts.lang') || 'en'); // 'en' | 'es'
 
@@ -67,9 +66,8 @@ export default function Settings() {
     localStorage.setItem('app.defaultOperation', defaultOperation);
     localStorage.setItem('app.defaultLevel', defaultLevel);
     localStorage.setItem('app.defaultDrawingTool', defaultDrawingTool);
-    localStorage.setItem('tts.voiceName', ttsVoiceName || 'David');
+  localStorage.setItem('tts.voiceName', ttsVoiceName || 'Emma');
     localStorage.setItem('tts.rate', String(ttsRate));
-    localStorage.setItem('tts.pitch', String(ttsPitch));
     localStorage.setItem('tts.lang', ttsLang);
     // Bump cache buster so TextToSpeech re-evaluates selection immediately
     localStorage.setItem('tts.cacheBuster', Date.now().toString());
@@ -82,9 +80,8 @@ export default function Settings() {
     setDefaultLevel("easy");
     setDefaultDrawingTool("brush");
     // TTS defaults
-    setTtsVoiceName("David");
+    setTtsVoiceName("Emma");
     setTtsRate(0.9);
-    setTtsPitch(1.1);
     setTtsLang('en');
   };
 
@@ -306,44 +303,25 @@ export default function Settings() {
               </div>
             </div>
 
-            {/* Voice Selection - David (Male) or Emma (Female) */}
+            {/* Voice Selection - single Emma voice */}
             <div>
               <label className="block text-sm font-semibold mb-2">Voice</label>
-              <div className="grid grid-cols-2 gap-3">
-                <div
-                  onClick={() => setTtsVoiceName('David')}
-                  className={`cursor-pointer border-4 rounded-xl p-4 transition-all ${
-                    ttsVoiceName === 'David'
-                      ? "border-indigo-500 bg-indigo-50"
-                      : "border-gray-200 hover:border-indigo-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl">👨</span>
-                    {ttsVoiceName === 'David' && (
-                      <Check className="w-5 h-5 text-indigo-600" />
-                    )}
-                  </div>
-                  <h3 className="font-bold text-lg">David</h3>
-                  <p className="text-xs text-gray-600">Male Voice</p>
+              <div
+                onClick={() => setTtsVoiceName('Emma')}
+                className={`cursor-pointer border-4 rounded-xl p-4 transition-all ${
+                  ttsVoiceName === 'Emma'
+                    ? "border-indigo-500 bg-indigo-50"
+                    : "border-gray-200 hover:border-indigo-300"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl">👩</span>
+                  {ttsVoiceName === 'Emma' && (
+                    <Check className="w-5 h-5 text-indigo-600" />
+                  )}
                 </div>
-                <div
-                  onClick={() => setTtsVoiceName('Emma')}
-                  className={`cursor-pointer border-4 rounded-xl p-4 transition-all ${
-                    ttsVoiceName === 'Emma'
-                      ? "border-indigo-500 bg-indigo-50"
-                      : "border-gray-200 hover:border-indigo-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl">👩</span>
-                    {ttsVoiceName === 'Emma' && (
-                      <Check className="w-5 h-5 text-indigo-600" />
-                    )}
-                  </div>
-                  <h3 className="font-bold text-lg">Emma</h3>
-                  <p className="text-xs text-gray-600">Female Voice</p>
-                </div>
+                <h3 className="font-bold text-lg">Emma</h3>
+                <p className="text-xs text-gray-600">Female Voice (default)</p>
               </div>
             </div>
 
@@ -355,26 +333,16 @@ export default function Settings() {
                 label="🔊 Preview Voice"
                 useSavedPrefs={false}
                 rate={ttsRate}
-                pitch={ttsPitch}
                 overrideLangPref={ttsLang}
                 overrideVoiceName={ttsVoiceName}
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold mb-2">Speaking Rate</label>
-                <div className="flex items-center gap-3">
-                  <Slider value={[ttsRate]} onValueChange={(v)=>setTtsRate(parseFloat(v[0]))} min={0.5} max={1.5} step={0.05} className="flex-1" />
-                  <Badge className="bg-indigo-500 text-white">{ttsRate.toFixed(2)}x</Badge>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Pitch</label>
-                <div className="flex items-center gap-3">
-                  <Slider value={[ttsPitch]} onValueChange={(v)=>setTtsPitch(parseFloat(v[0]))} min={0.5} max={2} step={0.05} className="flex-1" />
-                  <Badge className="bg-indigo-500 text-white">{ttsPitch.toFixed(2)}</Badge>
-                </div>
+            <div>
+              <label className="block text-sm font-semibold mb-2">Speaking Rate</label>
+              <div className="flex items-center gap-3">
+                <Slider value={[ttsRate]} onValueChange={(v)=>setTtsRate(parseFloat(v[0]))} min={0.5} max={1.5} step={0.05} className="flex-1" />
+                <Badge className="bg-indigo-500 text-white">{ttsRate.toFixed(2)}x</Badge>
               </div>
             </div>
 
@@ -614,7 +582,7 @@ export default function Settings() {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-purple-500 font-bold">•</span>
-              <span>Choose between David (male) or Emma (female) voice for spoken explanations</span>
+              <span>Female voice (Emma) is used for spoken explanations; you can adjust language and speaking rate</span>
             </li>
           </ul>
         </CardContent>
