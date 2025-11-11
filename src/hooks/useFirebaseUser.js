@@ -75,7 +75,7 @@ export function useFirebaseUser() {
                 trialExpired: trialExpired,
                 trialDaysRemaining,
                 inGraceDay,
-                hasPremiumAccess: hasPremiumAccess(userData) || inGraceDay // Allow premium during grace
+                hasPremiumAccess: hasPremiumAccess(userData) || onTrial || inGraceDay // Allow premium during active trial and grace
               });
 
               // Analytics & Firestore updates with localStorage deduplication
