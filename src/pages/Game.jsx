@@ -66,8 +66,8 @@ export default function Game() {
     enabled: !!user?.email,
   });
 
-  // Check premium status from entitlements
-  const isPremium = user?.entitlements?.premium || false;
+  // Check premium status including trial/grace via unified flag
+  const premiumActive = !!user?.hasPremiumAccess;
 
   // Free tier limitations: only basic concepts and Easy level
   const freeTierConcepts = [
@@ -85,10 +85,10 @@ export default function Game() {
   
   // Apply free tier limits if not premium, otherwise use parental controls
   const allConcepts = ["addition", "subtraction", "multiplication", "division", "fractions", "decimals", "percentages", "word_problems", "money_math", "time", "geometry", "mixed", "counting", "number_comparison", "skip_counting_2s", "skip_counting_5s", "skip_counting_10s", "even_odd", "ordering_numbers", "place_value", "addition_single_digit", "subtraction_single_digit"];
-  const allowedOperations = isPremium 
+  const allowedOperations = premiumActive 
     ? (parentalControls.allowed_operations || allConcepts)
     : freeTierConcepts;
-  const allowedLevels = isPremium
+  const allowedLevels = premiumActive
     ? (parentalControls.allowed_levels || ["easy", "medium", "hard", "expert"])
     : freeTierLevels;
   
@@ -392,7 +392,7 @@ export default function Game() {
   }
 
   if (!isOperationAllowed || !isLevelAllowed) {
-    const isPremiumLocked = !isPremium && (!freeTierConcepts.includes(operation) || !freeTierLevels.includes(level));
+    const isPremiumLocked = !premiumActive && (!freeTierConcepts.includes(operation) || !freeTierLevels.includes(level));
     
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">

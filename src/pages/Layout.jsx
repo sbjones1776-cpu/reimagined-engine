@@ -35,30 +35,7 @@ export default function Layout({ children, currentPageName }) {
   // Consolidated auth via global context
   const { user, loading: authLoading } = useUser();
 
-  // Prefetch Subscription page chunk to speed up navigation
-  const prefetchSubscription = React.useCallback(() => {
-    try {
-      import('./Subscription');
-    } catch {}
-  }, []);
-
-  useEffect(() => {
-    // Idle prefetch once per session
-    const doneKey = 'prefetch.subscription.done';
-    if (sessionStorage.getItem(doneKey)) return;
-    const idle = (cb) => {
-      if ('requestIdleCallback' in window) {
-        // @ts-ignore
-        window.requestIdleCallback(cb, { timeout: 1500 });
-      } else {
-        setTimeout(cb, 800);
-      }
-    };
-    idle(() => {
-      prefetchSubscription();
-      sessionStorage.setItem(doneKey, '1');
-    });
-  }, [prefetchSubscription]);
+  // Removed dynamic prefetch of Subscription to improve reliability offline/poor networks
 
   // Get theme preference
   // Get theme preference from localStorage (Settings auto-saves there)
@@ -350,29 +327,19 @@ export default function Layout({ children, currentPageName }) {
               )}
 
               {subscriptionTier !== "free" ? (
-                <button
-                  onMouseEnter={prefetchSubscription}
-                  onFocus={prefetchSubscription}
-                  onClick={() => window.location.assign(createPageUrl("Subscription"))}
-                  className="hidden md:block"
-                >
+                <Link to={createPageUrl("Subscription")} className="hidden md:block">
                   <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 px-3 py-1.5 cursor-pointer">
                     <Crown className="w-3 h-3 mr-1" />
                     {subscriptionTier === "family_teacher" ? "Family" : subscriptionTier === "premium_player" ? "Premium" : "Parent"}
                   </Badge>
-                </button>
+                </Link>
               ) : (
-                <button
-                  onMouseEnter={prefetchSubscription}
-                  onFocus={prefetchSubscription}
-                  onClick={() => window.location.assign(createPageUrl("Subscription"))}
-                  className="hidden md:block"
-                >
+                <Link to={createPageUrl("Subscription")} className="hidden md:block">
                   <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 px-3 py-1.5 cursor-pointer animate-pulse">
                     <Crown className="w-3 h-3 mr-1" />
                     Upgrade
                   </Badge>
-                </button>
+                </Link>
               )}
 
               {user && (
@@ -461,14 +428,14 @@ export default function Layout({ children, currentPageName }) {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("Subscription")} className="cursor-pointer" onMouseEnter={prefetchSubscription} onFocus={prefetchSubscription}>
+                        <Link to={createPageUrl("Subscription")} className="cursor-pointer">
                           <CreditCard className="w-4 h-4 mr-2" />
                           Manage Subscription
                         </Link>
                       </DropdownMenuItem>
                       {isSubscribed && user?.subscription_auto_renew !== false && (
                         <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                          <Link to={createPageUrl("Subscription")} className="cursor-pointer text-orange-600 focus:text-orange-600" onMouseEnter={prefetchSubscription} onFocus={prefetchSubscription}>
+                          <Link to={createPageUrl("Subscription")} className="cursor-pointer text-orange-600 focus:text-orange-600">
                             <XCircle className="w-4 h-4 mr-2" />
                             Cancel Subscription
                           </Link>
@@ -569,12 +536,10 @@ export default function Layout({ children, currentPageName }) {
               </div>
 
               <div className={`pt-2 border-t ${isDarkMode ? 'border-slate-700' : ''}`}>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    window.location.assign(createPageUrl("Subscription"));
-                  }}
-                  className="w-full"
+                <Link
+                  to={createPageUrl("Subscription")}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full block"
                 >
                   <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${
                     subscriptionTier !== "free"
@@ -586,7 +551,7 @@ export default function Layout({ children, currentPageName }) {
                       {subscriptionTier !== "free" ? "Manage Subscription" : "Upgrade to Premium"}
                     </span>
                   </div>
-                </button>
+                </Link>
               </div>
 
               {user && (
@@ -708,8 +673,6 @@ export default function Layout({ children, currentPageName }) {
               <span className={isDarkMode ? 'text-gray-600' : 'text-gray-300'}>•</span>
               <Link
                 to={createPageUrl("Subscription")}
-                onMouseEnter={prefetchSubscription}
-                onFocus={prefetchSubscription}
                 className={`text-sm ${isDarkMode ? 'text-gray-300 hover:text-purple-400' : 'text-gray-600 hover:text-purple-600'} transition-colors`}
               >
                 Pricing

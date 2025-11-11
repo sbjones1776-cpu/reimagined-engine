@@ -22,9 +22,11 @@ import StudentAccountManager from "../components/parent/StudentAccountManager";
 import AnalyticsDashboard from "../components/parent/AnalyticsDashboard";
 import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 import PremiumFeatureLock from '@/components/PremiumFeatureLock';
+import { useNavigate } from 'react-router-dom';
 
 export default function ParentPortal() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [selectedChildEmail, setSelectedChildEmail] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [showPremiumLock, setShowPremiumLock] = useState(false);
@@ -107,8 +109,8 @@ export default function ParentPortal() {
   const selectedChild = myChildren.find(c => c.email === selectedChildEmail);
   const childData = allUsers.find(u => u.email === selectedChildEmail);
 
-  // Check if user has premium access (parent portal is premium-only)
-  const hasPremiumParent = currentUser?.entitlements?.premium || false;
+  // Unified premium access (includes trial/grace). Use enrichedUser which has hasPremiumAccess set in hook.
+  const hasPremiumParent = !!enrichedUser?.hasPremiumAccess;
 
   if (!currentUser?.is_parent_mode) {
     return (
@@ -208,9 +210,7 @@ export default function ParentPortal() {
             <div className="text-center">
               <Button 
                 className="h-14 px-8 text-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-                onMouseEnter={() => { try { import('./Subscription'); } catch {} }}
-                onFocus={() => { try { import('./Subscription'); } catch {} }}
-                onClick={() => window.location.assign(createPageUrl("Subscription"))}
+                onClick={() => navigate(createPageUrl("Subscription"))}
               >
                 <Crown className="w-5 h-5 mr-2" />
                 View Subscription Plans
@@ -255,7 +255,7 @@ export default function ParentPortal() {
         <div className="flex gap-3">
           <Button 
             variant="outline"
-            onClick={() => window.location.assign(createPageUrl("Subscription"))}
+            onClick={() => navigate(createPageUrl("Subscription"))}
           >
             <CreditCard className="w-4 h-4 mr-2" />
             Manage Subscription
@@ -269,7 +269,7 @@ export default function ParentPortal() {
           </Button>
           <Button 
             className="bg-gradient-to-r from-yellow-400 to-orange-500"
-            onClick={() => window.location.assign(createPageUrl("Subscription"))}
+            onClick={() => navigate(createPageUrl("Subscription"))}
           >  
             <Crown className="w-4 h-4 mr-2" />
             {currentUser?.subscription_tier === "family_teacher" ? "Family Plan" : "Premium"}

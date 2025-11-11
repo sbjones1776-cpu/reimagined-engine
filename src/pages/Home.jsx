@@ -1490,13 +1490,14 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <Button 
-                onClick={() => window.location.assign(createPageUrl("Subscription"))}
-                className="h-12 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-              >
-                <CreditCard className="w-4 h-4 mr-2" />
-                Manage Subscription
-              </Button>
+              <Link to={createPageUrl("Subscription")}>
+                <Button 
+                  className="h-12 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Manage Subscription
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

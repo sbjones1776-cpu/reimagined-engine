@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Sparkles, Save, User as UserIcon, Users, ShoppingBag, Crown, CreditCard, XCircle, AlertTriangle, CheckCircle, Shirt, Footprints, Glasses as GlassesIcon, Watch, Smile, Palette } from "lucide-react";
 import AvatarDisplay from "../components/avatar/AvatarDisplay";
@@ -20,6 +20,7 @@ import { format } from "date-fns";
 import { getUserGameProgress } from '@/api/firebaseService';
 
 export default function Avatar() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, loading: userLoading } = useUser();
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -202,9 +203,16 @@ export default function Avatar() {
             <UserIcon className="w-10 h-10 text-white" />
           </div>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-          Customize Your Avatar
-        </h1>
+        <div className="flex flex-col items-center gap-2">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+            Customize Your Avatar
+          </h1>
+          {(user?.hasPremiumAccess && (user?.subscription_tier === 'free' || user?.isOnTrial)) && (
+            <Badge className="bg-green-500 text-white">
+              Premium (Trial){typeof user?.trialDaysRemaining === 'number' ? ` • ${user.trialDaysRemaining} day${user.trialDaysRemaining === 1 ? '' : 's'} left` : ''}
+            </Badge>
+          )}
+        </div>
         <p className="text-xl text-gray-600">Express yourself with tons of options!</p>
         {/* Display name editor */}
         <div className="mt-4 mx-auto max-w-sm">
@@ -303,7 +311,7 @@ export default function Avatar() {
                 <Button 
                   variant="outline" 
                   className="h-12"
-                  onClick={() => window.location.assign(createPageUrl("Subscription"))}
+                  onClick={() => navigate(createPageUrl("Subscription"))}
                 >
                   <CreditCard className="w-4 h-4 mr-2" />
                   Manage Subscription
