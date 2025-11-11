@@ -1256,15 +1256,15 @@ export default function Home() {
     return false;
   };
 
-  // Check premium status from entitlements
-  const isPremium = user?.entitlements?.premium || false;
+  // Unified premium access: includes paid subscription, active trial, and grace day
+  const isPremium = user?.hasPremiumAccess || user?.entitlements?.premium || false;
   const subscriptionStatus = user?.subscription?.status;
   const subscriptionExpires = user?.subscription?.chargedThroughDate 
     ? new Date(user.subscription.chargedThroughDate) 
     : null;
   // Unify naming used later in the JSX (older code referenced isSubscribed/currentTier without defining them)
   const subscriptionTier = user?.subscription_tier || (isPremium ? 'premium_player' : 'free');
-  const isSubscribed = subscriptionTier !== 'free';
+  const premiumActive = !!isPremium; // includes trial/grace via hasPremiumAccess
   const currentTier = subscriptionTier;
   const daysUntilRenewal = subscriptionExpires 
     ? Math.ceil((subscriptionExpires - new Date()) / (1000 * 60 * 60 * 24)) 
@@ -1460,7 +1460,7 @@ export default function Home() {
       </div>
 
   {/* Subscription Status / Upgrade Widget */}
-      {isSubscribed ? (
+      {premiumActive ? (
         <Card className="mb-8 border-4 border-green-400 shadow-xl bg-gradient-to-r from-green-50 to-emerald-50">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
