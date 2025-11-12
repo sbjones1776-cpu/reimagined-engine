@@ -267,7 +267,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
       <header className={`${isDarkMode ? 'bg-slate-800/90' : 'bg-white/80'} backdrop-blur-md shadow-sm sticky top-0 z-50`}>
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-2 md:px-4 py-2 md:py-3">
           <div className="flex items-center justify-between">
             <Link to={createPageUrl("Home")} className="flex items-center gap-3">
               {/* App logo replaced emoji */}
@@ -281,16 +281,16 @@ export default function Layout({ children, currentPageName }) {
 
             <div className="flex items-center gap-2">
               {user && (
-                <Link to={createPageUrl("Home")}>
+                <Link to={createPageUrl("Home")} className="hidden md:inline-block">
                   <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg">
                     <Sparkles className="w-4 h-4 mr-2" />
                     Play Now
                   </Button>
                 </Link>
               )}
-              
+
               {user && (
-                <div className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-3 py-2 rounded-xl shadow-md">
+                <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-3 py-2 rounded-xl shadow-md">
                   <Coins className="w-4 h-4" />
                   <span className="font-bold text-sm">{user.coins || 0}</span>
                 </div>
@@ -313,7 +313,7 @@ export default function Layout({ children, currentPageName }) {
               )}
 
               {user && (
-                <div className="hidden lg:block">
+                <div className="block">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className={`${isDarkMode ? 'hover:bg-slate-700 text-gray-50' : 'hover:bg-purple-50 text-gray-900'} h-auto p-2`}>
@@ -327,7 +327,7 @@ export default function Layout({ children, currentPageName }) {
                                   </div>
                                 )}
                                 {petData && (
-                                  <div className="scale-50 origin-center -ml-2">
+                                  <div className="hidden md:block scale-50 origin-center -ml-2">
                                     <PetDisplay
                                       pet={petData}
                                       experience={user?.pet_experience?.[activePet] || 0}
@@ -338,11 +338,11 @@ export default function Layout({ children, currentPageName }) {
                               </React.Suspense>
                             </ChunkErrorBoundary>
                           </div>
-                          <div className="text-left hidden xl:block">
+                          <div className="text-left hidden md:block">
                             <p className={`text-sm font-semibold ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
                             <p className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>{user.email}</p>
                           </div>
-                          <ChevronDown className={`w-4 h-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`} />
+                          <ChevronDown className={`hidden md:block w-4 h-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`} />
                         </div>
                       </Button>
                     </DropdownMenuTrigger>

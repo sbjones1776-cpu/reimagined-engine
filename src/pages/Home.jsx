@@ -1448,7 +1448,7 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
       {/* Hero Section */}
       <div className="text-center mb-12">
         <div className="inline-block mb-6 animate-bounce">
@@ -1462,9 +1462,9 @@ export default function Home() {
         <p className="text-xl text-gray-600 mb-4">Choose your challenge and start learning!</p>
         
         {/* Total Stars */}
-        <div className="inline-flex items-center gap-2 bg-white rounded-full px-6 py-3 shadow-lg">
-          <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
-          <span className="text-2xl font-bold text-gray-800">{getTotalStars()}</span>
+        <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 md:px-6 md:py-3 shadow-lg">
+          <Star className="w-5 h-5 md:w-6 md:h-6 fill-yellow-400 text-yellow-400" />
+          <span className="text-xl md:text-2xl font-bold text-gray-800">{getTotalStars()}</span>
           <span className="text-gray-600">Total Stars</span>
         </div>
       </div>
@@ -1502,7 +1502,7 @@ export default function Home() {
               </div>
               <Link to={createPageUrl("Subscription")}>
                 <Button 
-                  className="h-12 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                  className="h-10 md:h-12 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
                 >
                   <CreditCard className="w-4 h-4 mr-2" />
                   Manage Subscription
@@ -1579,11 +1579,11 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Badge className="bg-green-500 text-white text-lg px-4 py-2">
+                <Badge className="bg-green-500 text-white text-base md:text-lg px-3 py-1.5 md:px-4 md:py-2">
                   {myTeamChallenges.length} Active
                 </Badge>
                 <Link to={createPageUrl("TeamChallenges")}>
-                  <Button className="h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
+                  <Button className="h-10 md:h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
                     <Users className="w-5 h-5 mr-2" />
                     View Team Challenges
                   </Button>
@@ -1606,7 +1606,7 @@ export default function Home() {
               </div>
             </div>
             <Link to={createPageUrl("Leaderboards")}>
-              <Button className="h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+              <Button className="h-10 md:h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
                 <Award className="w-5 h-5 mr-2" />
                 View Leaderboards
               </Button>
@@ -1663,7 +1663,7 @@ export default function Home() {
             </div>
             <div className="flex gap-2">
               <Link to={createPageUrl("ColorByNumbers?operation=addition&level=easy")}>
-                <Button className="h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                <Button className="h-10 md:h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
                   <Palette className="w-5 h-5 mr-2" />
                   Try It Now!
                 </Button>
@@ -1794,7 +1794,7 @@ export default function Home() {
             </Button>
           </Card>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
             {filteredConcepts.map((concept) => {
               const conceptAllowed = isConceptAllowed(concept.id);
               const isFocused = focusOperations.includes(concept.id);
@@ -1810,8 +1810,8 @@ export default function Home() {
                       : "hover:shadow-xl hover:border-purple-300"
                   }`}
                 >
-                  <div className={`h-32 bg-gradient-to-br ${concept.color} flex items-center justify-center relative`}>
-                    <span className="text-6xl">{concept.emoji}</span>
+                  <div className={`h-24 md:h-32 bg-gradient-to-br ${concept.color} flex items-center justify-center relative`}>
+                    <span className="text-5xl md:text-6xl">{concept.emoji}</span>
                     {isFocused && (
                       <Badge className="absolute top-2 right-2 bg-purple-500 text-white">
                         <Star className="w-3 h-3 mr-1 fill-white" />
