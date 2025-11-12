@@ -132,6 +132,8 @@ export default function Avatar() {
   // Removed duplicate handleSave declaration
 
   const isUnlocked = (item) => {
+    // Trial users get access to all customization options
+    if (user?.hasPremiumAccess) return true;
     return (avatarData.unlocked_items || []).includes(item) || 
            (user?.purchased_items || []).includes(item);
   };
