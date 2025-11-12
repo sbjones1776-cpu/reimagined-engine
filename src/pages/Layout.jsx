@@ -186,9 +186,13 @@ export default function Layout({ children, currentPageName }) {
   const subscriptionTier = user?.subscription_tier || "free";
   const isSubscribed = subscriptionTier !== "free";
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     const auth = getAuth(firebaseApp);
-    signOut(auth);
+    await signOut(auth);
+    // Clear any cached data
+    localStorage.clear();
+    // Redirect to landing page
+    window.location.href = '/';
   };
 
   const NavLink = ({ to, icon: Icon, label, badge, badgeColor = "red", isDarkMode }) => {
