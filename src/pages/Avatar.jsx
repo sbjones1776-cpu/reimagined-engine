@@ -26,6 +26,7 @@ export default function Avatar() {
   const { user, loading: userLoading } = useUser();
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [displayName, setDisplayName] = useState("");
 
   const [avatarData, setAvatarData] = useState({
     avatar_skin_tone: "medium",
@@ -48,6 +49,7 @@ export default function Avatar() {
 
   useEffect(() => {
     if (user) {
+      setDisplayName(user.full_name || "");
       setAvatarData({
         avatar_skin_tone: user.avatar_skin_tone || "medium",
         avatar_hair_style: user.avatar_hair_style || "short",
@@ -222,21 +224,19 @@ export default function Avatar() {
           <Label className="text-sm text-gray-600">Display name</Label>
           <div className="flex gap-2 mt-1">
             <Input
-              value={user?.full_name || ''}
-              onChange={async (e) => {
-                const newName = e.target.value;
-                const db = getFirestore(firebaseApp);
-                if (user?.email) {
-                  await setDoc(doc(db, 'users', user.email), { full_name: newName }, { merge: true });
-                }
-              }}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your name"
             />
             <Button
               variant="outline"
               onClick={async () => {
-                // Force a small confirmation alert
-                alert('Name saved');
+                const db = getFirestore(firebaseApp);
+                if (user?.email) {
+                  await setDoc(doc(db, 'users', user.email), { full_name: displayName }, { merge: true });
+                  queryClient.invalidateQueries({ queryKey: ['user', user.email] });
+                  alert('Name saved!');
+                }
               }}
             >Save</Button>
           </div>
@@ -410,26 +410,14 @@ export default function Avatar() {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="appearance" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-6">
+                <TabsList className="grid w-full grid-cols-3 mb-6">
                   <TabsTrigger value="appearance">
                     <Smile className="w-4 h-4 mr-1" />
                     Face
                   </TabsTrigger>
-                  <TabsTrigger value="hair">
-                    <Palette className="w-4 h-4 mr-1" />
-                    Hair
-                  </TabsTrigger>
                   <TabsTrigger value="clothing">
                     <Shirt className="w-4 h-4 mr-1" />
                     Clothing
-                  </TabsTrigger>
-                  <TabsTrigger value="footwear">
-                    <Footprints className="w-4 h-4 mr-1" />
-                    Shoes
-                  </TabsTrigger>
-                  <TabsTrigger value="accessories">
-                    <GlassesIcon className="w-4 h-4 mr-1" />
-                    Access.
                   </TabsTrigger>
                   <TabsTrigger value="pet">
                     <Sparkles className="w-4 h-4 mr-1" />
@@ -535,49 +523,6 @@ export default function Avatar() {
                   />
                 </TabsContent>
 
-                {/* Hair Tab */}
-                <TabsContent value="hair" className="space-y-6">
-                  <CustomizationSection
-                    title="Hair Style"
-                    options={[
-                      { id: "short", label: "Short", emoji: "💇" },
-                      { id: "long", label: "Long", emoji: "💁" },
-                      { id: "curly", label: "Curly", emoji: "🦱" },
-                      { id: "spiky", label: "Spiky", emoji: "⚡" },
-                      { id: "bald", label: "Bald", emoji: "🧑‍🦲" },
-                      { id: "ponytail", label: "Ponytail", emoji: "🎀" },
-                      { id: "braids", label: "Braids", emoji: "🧵" },
-                      { id: "afro", label: "Afro", emoji: "🌀" },
-                      { id: "mohawk", label: "Mohawk", emoji: "🔥" },
-                      { id: "bun", label: "Bun", emoji: "🍔" },
-                    ]}
-                    selected={avatarData.avatar_hair_style}
-                    onChange={(value) => handleChange("avatar_hair_style", value)}
-                    isUnlocked={isUnlocked}
-                  />
-
-                  <CustomizationSection
-                    title="Hair Color"
-                    options={[
-                      { id: "black", label: "Black", color: "#000000" },
-                      { id: "brown", label: "Brown", color: "#8B4513" },
-                      { id: "blonde", label: "Blonde", color: "#FFD700" },
-                      { id: "red", label: "Red", color: "#DC143C" },
-                      { id: "blue", label: "Blue", color: "#4169E1" },
-                      { id: "pink", label: "Pink", color: "#FF69B4" },
-                      { id: "purple", label: "Purple", color: "#9370DB" },
-                      { id: "green", label: "Green", color: "#32CD32" },
-                      { id: "orange", label: "Orange", color: "#FF8C00" },
-                      { id: "white", label: "White", color: "#F5F5F5" },
-                      { id: "rainbow", label: "Rainbow", emoji: "🌈" },
-                    ]}
-                    selected={avatarData.avatar_hair_color}
-                    onChange={(value) => handleChange("avatar_hair_color", value)}
-                    isUnlocked={isUnlocked}
-                    type="color"
-                  />
-                </TabsContent>
-
                 {/* Clothing Tab */}
                 <TabsContent value="clothing" className="space-y-6">
                   <CustomizationSection
@@ -612,84 +557,6 @@ export default function Avatar() {
                     ]}
                     selected={avatarData.avatar_pants}
                     onChange={(value) => handleChange("avatar_pants", value)}
-                    isUnlocked={isUnlocked}
-                  />
-                </TabsContent>
-
-                {/* Footwear Tab */}
-                <TabsContent value="footwear" className="space-y-6">
-                  <CustomizationSection
-                    title="Shoes"
-                    options={[
-                      { id: "sneakers", label: "Sneakers", emoji: "👟" },
-                      { id: "boots", label: "Boots", emoji: "🥾" },
-                      { id: "sandals", label: "Sandals", emoji: "🩴" },
-                      { id: "dress_shoes", label: "Dress Shoes", emoji: "👞" },
-                      { id: "high_tops", label: "High Tops", emoji: "👟" },
-                      { id: "cleats", label: "Cleats", emoji: "⚽" },
-                      { id: "slippers", label: "Slippers", emoji: "🩴" },
-                      { id: "bare_feet", label: "Bare Feet", emoji: "🦶" },
-                    ]}
-                    selected={avatarData.avatar_shoes}
-                    onChange={(value) => handleChange("avatar_shoes", value)}
-                    isUnlocked={isUnlocked}
-                  />
-                </TabsContent>
-
-                {/* Accessories Tab */}
-                <TabsContent value="accessories" className="space-y-6">
-                  <CustomizationSection
-                    title="Hats & Headwear"
-                    options={[
-                      { id: "none", label: "None", emoji: "🚫" },
-                      { id: "baseball_cap", label: "Baseball Cap", emoji: "🧢" },
-                      { id: "beanie", label: "Beanie", emoji: "🎩" },
-                      { id: "sun_hat", label: "Sun Hat", emoji: "👒" },
-                      { id: "wizard_hat", label: "Wizard Hat", emoji: "🧙" },
-                      { id: "party_hat", label: "Party Hat", emoji: "🎉" },
-                      { id: "graduation_cap", label: "Graduation Cap", emoji: "🎓" },
-                      { id: "crown", label: "Crown", emoji: "👑" },
-                      { id: "top_hat", label: "Top Hat", emoji: "🎩" },
-                      { id: "cowboy_hat", label: "Cowboy Hat", emoji: "🤠" },
-                    ]}
-                    selected={avatarData.avatar_hat}
-                    onChange={(value) => handleChange("avatar_hat", value)}
-                    isUnlocked={isUnlocked}
-                  />
-
-                  <CustomizationSection
-                    title="Glasses & Eyewear"
-                    options={[
-                      { id: "none", label: "None", emoji: "🚫" },
-                      { id: "regular", label: "Regular", emoji: "👓" },
-                      { id: "sunglasses", label: "Sunglasses", emoji: "😎" },
-                      { id: "reading", label: "Reading", emoji: "🤓" },
-                      { id: "safety_goggles", label: "Safety Goggles", emoji: "🥽" },
-                      { id: "3d_glasses", label: "3D Glasses", emoji: "🕶️" },
-                      { id: "heart_shaped", label: "Heart Glasses", emoji: "😍" },
-                      { id: "star_shaped", label: "Star Glasses", emoji: "🤩" },
-                    ]}
-                    selected={avatarData.avatar_glasses}
-                    onChange={(value) => handleChange("avatar_glasses", value)}
-                    isUnlocked={isUnlocked}
-                  />
-
-                  <CustomizationSection
-                    title="Other Accessories"
-                    options={[
-                      { id: "none", label: "None", emoji: "🚫" },
-                      { id: "backpack", label: "Backpack", emoji: "🎒" },
-                      { id: "cape", label: "Cape", emoji: "🦸" },
-                      { id: "scarf", label: "Scarf", emoji: "🧣" },
-                      { id: "bow_tie", label: "Bow Tie", emoji: "🎀" },
-                      { id: "necklace", label: "Necklace", emoji: "📿" },
-                      { id: "watch", label: "Watch", emoji: "⌚" },
-                      { id: "headphones", label: "Headphones", emoji: "🎧" },
-                      { id: "earrings", label: "Earrings", emoji: "💎" },
-                      { id: "bracelet", label: "Bracelet", emoji: "📿" },
-                    ]}
-                    selected={avatarData.avatar_accessory}
-                    onChange={(value) => handleChange("avatar_accessory", value)}
                     isUnlocked={isUnlocked}
                   />
                 </TabsContent>
