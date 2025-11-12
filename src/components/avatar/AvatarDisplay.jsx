@@ -205,16 +205,6 @@ export default function AvatarDisplay({ avatarData, size = "medium", showPet = f
           </div>
         )}
 
-        {/* Hair */}
-        <div 
-          className="text-3xl mb-1" 
-          style={avatarData.avatar_hair_color === "rainbow" ? 
-            { background: hairColor, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" } : 
-            { color: hairColor }}
-        >
-          {getHairEmoji(avatarData.avatar_hair_style)}
-        </div>
-
         {/* Face/Head with skin tone */}
         <div 
           className="w-16 h-16 rounded-full flex items-center justify-center relative"
