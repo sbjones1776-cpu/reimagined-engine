@@ -16,6 +16,7 @@ import { Sparkles, Save, User as UserIcon, Users, ShoppingBag, Crown, CreditCard
 import AvatarDisplay from "../components/avatar/AvatarDisplay";
 import CustomizationSection from "../components/avatar/CustomizationSection";
 import PetDisplay from "../components/rewards/PetDisplay";
+import FacePreview from "../components/avatar/FacePreview";
 import { format } from "date-fns";
 import { getUserGameProgress } from '@/api/firebaseService';
 
@@ -438,6 +439,39 @@ export default function Avatar() {
 
                 {/* Appearance Tab */}
                 <TabsContent value="appearance" className="space-y-6">
+                  {/* Adorable Face Presets */}
+                  <div className="mb-8">
+                    <h3 className="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-purple-500" />
+                      Quick Pick - Adorable Faces!
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      {[
+                        { id: 'happy_kid', eyes: 'normal', face: 'big_smile', label: '😄 Happy' },
+                        { id: 'playful', eyes: 'wink', face: 'tongue_out', label: '😜 Playful' },
+                        { id: 'sweet_smile', eyes: 'normal', face: 'smile', label: '😊 Sweet' },
+                        { id: 'excited', eyes: 'normal', face: 'open_smile', label: '😃 Excited' },
+                        { id: 'sleepy_cute', eyes: 'sleepy', face: 'smile', label: '😌 Sleepy' },
+                      ].map((preset) => (
+                        <button
+                          key={preset.id}
+                          onClick={() => {
+                            handleChange('avatar_eyes', preset.eyes);
+                            handleChange('avatar_face', preset.face);
+                          }}
+                          className="relative p-6 rounded-xl border-4 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 hover:border-purple-400 hover:shadow-xl transition-all group"
+                        >
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                              <FacePreview type="face" value={preset.face} size={56} />
+                            </div>
+                            <span className="text-sm font-bold text-gray-700">{preset.label}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <CustomizationSection
                     title="Skin Tone"
                     options={[
@@ -455,19 +489,15 @@ export default function Avatar() {
                   <CustomizationSection
                     title="Eyes"
                     options={[
-                      { id: "normal", label: "Normal", emoji: "👀" },
+                      { id: "normal", label: "Round", emoji: "👀" },
                       { id: "happy", label: "Happy", emoji: "😊" },
-                      { id: "cool", label: "Cool", emoji: "😎" },
-                      { id: "star", label: "Star", emoji: "🤩" },
-                      { id: "heart", label: "Heart", emoji: "😍" },
+                      { id: "wink", label: "Wink", emoji: "�" },
                       { id: "sleepy", label: "Sleepy", emoji: "😴" },
-                      { id: "angry", label: "Determined", emoji: "😠" },
-                      { id: "surprised", label: "Surprised", emoji: "😲" },
-                      { id: "wink", label: "Wink", emoji: "😉" },
                     ]}
                     selected={avatarData.avatar_eyes}
                     onChange={(value) => handleChange("avatar_eyes", value)}
                     isUnlocked={isUnlocked}
+                    previewType="eyes"
                   />
 
                   <CustomizationSection
@@ -475,14 +505,15 @@ export default function Avatar() {
                     options={[
                       { id: "smile", label: "Smile", emoji: "😊" },
                       { id: "big_smile", label: "Big Smile", emoji: "😄" },
-                      { id: "laughing", label: "Laughing", emoji: "😆" },
-                      { id: "determined", label: "Determined", emoji: "😤" },
+                      { id: "grin", label: "Grin", emoji: "�" },
+                      { id: "open_smile", label: "Open Smile", emoji: "�" },
                       { id: "neutral", label: "Neutral", emoji: "😐" },
                       { id: "tongue_out", label: "Playful", emoji: "😛" },
                     ]}
                     selected={avatarData.avatar_face}
                     onChange={(value) => handleChange("avatar_face", value)}
                     isUnlocked={isUnlocked}
+                    previewType="mouth"
                   />
 
                   <CustomizationSection

@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import FacePreview from "./FacePreview";
 
 export default function CustomizationSection({
   title,
@@ -16,7 +17,8 @@ export default function CustomizationSection({
   onChange,
   isUnlocked,
   unlockableItems = [],
-  type = "default"
+  type = "default",
+  previewType = null // "eyes", "mouth", or "face" for SVG previews
 }) {
   const getUnlockRequirement = (itemId) => {
     const item = unlockableItems.find(i => i.id === itemId);
@@ -82,7 +84,13 @@ export default function CustomizationSection({
                         : "border-gray-200 bg-white hover:border-purple-300 hover:bg-purple-50"
                     } ${!unlocked && "opacity-50 cursor-not-allowed"}`}
                   >
-                    <div className="text-3xl mb-1">{option.emoji}</div>
+                    {previewType ? (
+                      <div className="mb-1 flex justify-center">
+                        <FacePreview type={previewType} value={option.id} size={48} />
+                      </div>
+                    ) : (
+                      <div className="text-3xl mb-1">{option.emoji}</div>
+                    )}
                     <div className="text-xs font-medium text-gray-600 truncate">{option.label}</div>
                     
                     {!unlocked && (

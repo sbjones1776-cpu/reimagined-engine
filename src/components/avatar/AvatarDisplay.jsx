@@ -81,32 +81,48 @@ export default function AvatarDisplay({ avatarData, size = "medium", showPet = f
     bare_feet: skinTones[avatarData.avatar_skin_tone] || skinTones.medium,
   };
 
-  // Get emojis for items
-  const getEyeEmoji = (eye) => {
-    const eyes = {
-      normal: "👀",
-      happy: "😊",
-      cool: "😎",
-      star: "🤩",
-      heart: "😍",
-      sleepy: "😴",
-      angry: "😠",
-      surprised: "😲",
-      wink: "😉",
-    };
-    return eyes[eye] || eyes.normal;
+  // Map legacy eye/face ids to new kid-friendly drawing variants
+  const mapEyes = (eye) => {
+    switch (eye) {
+      case 'normal':
+      case 'happy':
+        return 'round';
+      case 'wink':
+        return 'wink';
+      case 'sleepy':
+        return 'sleepy';
+      // Less kid-friendly options map to round
+      case 'cool':
+      case 'angry':
+      case 'surprised':
+      case 'star':
+      case 'heart':
+      default:
+        return 'round';
+    }
   };
 
-  const getFaceEmoji = (face) => {
-    const faces = {
-      smile: "😊",
-      big_smile: "😄",
-      laughing: "😆",
-      determined: "😤",
-      neutral: "😐",
-      tongue_out: "😛",
-    };
-    return faces[face] || faces.smile;
+  const mapMouth = (face) => {
+    switch (face) {
+      case 'big_smile':
+        return 'big_smile';
+      case 'tongue_out':
+        return 'tongue_out';
+      case 'neutral':
+        return 'neutral';
+      case 'grin':
+        return 'grin';
+      case 'open_smile':
+        return 'open_smile';
+      // Legacy mapping
+      case 'laughing':
+        return 'big_smile';
+      case 'determined':
+        return 'smile';
+      case 'smile':
+      default:
+        return 'smile';
+    }
   };
 
   const getHairEmoji = (style) => {
@@ -201,25 +217,98 @@ export default function AvatarDisplay({ avatarData, size = "medium", showPet = f
 
         {/* Face/Head with skin tone */}
         <div 
-          className="w-16 h-16 rounded-full flex flex-col items-center justify-center"
+          className="w-16 h-16 rounded-full flex items-center justify-center relative"
           style={{ backgroundColor: skinColor }}
         >
-          {/* Glasses (if any) */}
+          {/* Draw kid-friendly eyes + mouth with SVG for a cuter look (CHIBI style - bigger eyes!) */}
+          <svg width="64" height="64" viewBox="0 0 64 64" className="absolute">
+            {/* EYES - Enlarged for chibi look */}
+            {(() => {
+              const t = mapEyes(avatarData.avatar_eyes);
+              if (t === 'wink') {
+                return (
+                  <g>
+                    {/* left round eye - bigger */}
+                    <circle cx="20" cy="24" r="7" fill="#111827" />
+                    <circle cx="20" cy="23" r="3" fill="#ffffff" />
+                    <circle cx="21" cy="22" r="1.5" fill="#ffffff" opacity="0.6" />
+                    {/* right wink line */}
+                    <path d="M38 24 Q 44 24 50 24" stroke="#111827" strokeWidth="3" strokeLinecap="round" />
+                  </g>
+                );
+              }
+              if (t === 'sleepy') {
+                return (
+                  <g>
+                    <path d="M14 24 Q 20 30 26 24" stroke="#111827" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    <path d="M38 24 Q 44 30 50 24" stroke="#111827" strokeWidth="3" strokeLinecap="round" fill="none" />
+                  </g>
+                );
+              }
+              // default round eyes - BIGGER for chibi
+              return (
+                <g>
+                  <circle cx="20" cy="24" r="7" fill="#111827" />
+                  <circle cx="20" cy="23" r="3" fill="#ffffff" />
+                  <circle cx="21" cy="22" r="1.5" fill="#ffffff" opacity="0.6" />
+                  <circle cx="44" cy="24" r="7" fill="#111827" />
+                  <circle cx="44" cy="23" r="3" fill="#ffffff" />
+                  <circle cx="45" cy="22" r="1.5" fill="#ffffff" opacity="0.6" />
+                </g>
+              );
+            })()}
+            {/* MOUTH - Enlarged and more expressive */}
+            {(() => {
+              const m = mapMouth(avatarData.avatar_face);
+              if (m === 'big_smile') {
+                return (
+                  <>
+                    <path d="M18 42 Q 32 56 46 42" stroke="#111827" strokeWidth="3" fill="none" strokeLinecap="round" />
+                    <path d="M22 42 Q 32 52 42 42" stroke="#ef4444" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                  </>
+                );
+              }
+              if (m === 'open_smile') {
+                return (
+                  <path d="M20 40 Q 32 56 44 40 Q 32 48 20 40 Z" fill="#ef4444" stroke="#111827" strokeWidth="2.5" />
+                );
+              }
+              if (m === 'grin') {
+                return (
+                  <>
+                    <path d="M18 44 Q 32 52 46 44" stroke="#111827" strokeWidth="3" fill="none" strokeLinecap="round" />
+                    {/* teeth lines */}
+                    <path d="M28 44 L 28 47" stroke="#111827" strokeWidth="1.5" />
+                    <path d="M36 44 L 36 47" stroke="#111827" strokeWidth="1.5" />
+                  </>
+                );
+              }
+              if (m === 'tongue_out') {
+                return (
+                  <>
+                    <path d="M20 42 Q 32 50 44 42" stroke="#111827" strokeWidth="3" fill="none" strokeLinecap="round" />
+                    <path d="M28 42 Q 32 52 36 42" fill="#f87171" stroke="#111827" strokeWidth="1.5" />
+                  </>
+                );
+              }
+              if (m === 'neutral') {
+                return (
+                  <path d="M22 44 L 42 44" stroke="#111827" strokeWidth="3" strokeLinecap="round" />
+                );
+              }
+              // default soft smile - bigger curve
+              return (
+                <path d="M20 42 Q 32 50 44 42" stroke="#111827" strokeWidth="3" fill="none" strokeLinecap="round" />
+              );
+            })()}
+          </svg>
+
+          {/* Glasses overlay (optional) */}
           {avatarData.avatar_glasses && avatarData.avatar_glasses !== "none" && (
             <div className="absolute text-xl">
               {getGlassesEmoji(avatarData.avatar_glasses)}
             </div>
           )}
-
-          {/* Eyes */}
-          <div className="text-xl">
-            {getEyeEmoji(avatarData.avatar_eyes)}
-          </div>
-
-          {/* Face expression */}
-          <div className="text-xs">
-            {getFaceEmoji(avatarData.avatar_face || "smile")}
-          </div>
         </div>
 
         {/* Body - Shirt */}
