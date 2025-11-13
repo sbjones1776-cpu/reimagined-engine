@@ -442,7 +442,7 @@ export default function Layout({ children, currentPageName }) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={isDarkMode ? 'text-gray-50 hover:bg-slate-700' : ''}
+                className={`lg:hidden ${isDarkMode ? 'text-gray-50 hover:bg-slate-700' : ''}`}
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </Button>
