@@ -42,11 +42,4 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-// Ensure Gradle uses a Java 21 toolchain even if a newer JDK is the system default
-gradle.projectsEvaluated {
-    allprojects { proj ->
-        proj.tasks.withType(JavaCompile).configureEach {
-            javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(21) }
-        }
-    }
-}
+// Toolchain configuration is handled via org.gradle.java.home and compileOptions
