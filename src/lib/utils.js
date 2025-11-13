@@ -64,6 +64,30 @@ export function mathToSpeech(text, options = {}) {
 
   // Replace math symbols with spoken words
   // Order matters - replace longer patterns first
+  const fractionWordsEn = {
+    '2': 'half',
+    '3': 'third',
+    '4': 'fourth',
+    '5': 'fifth',
+    '6': 'sixth',
+    '7': 'seventh',
+    '8': 'eighth',
+    '9': 'ninth',
+    '10': 'tenth',
+    '12': 'twelfth',
+  };
+  const fractionWordsEs = {
+    '2': 'medios',
+    '3': 'tercios',
+    '4': 'cuartos',
+    '5': 'quintos',
+    '6': 'sextos',
+    '7': 'séptimos',
+    '8': 'octavos',
+    '9': 'novenos',
+    '10': 'décimos',
+    '12': 'duodécimos',
+  };
   const replacements = [
     // Division symbols
     { pattern: /\s*÷\s*/g, spoken: langPref === 'es' ? ' dividido entre ' : ' divided by ' },
@@ -91,8 +115,18 @@ export function mathToSpeech(text, options = {}) {
     { pattern: /\s*≥\s*/g, spoken: langPref === 'es' ? ' es mayor o igual que ' : ' is greater than or equal to ' },
     { pattern: /\s*≤\s*/g, spoken: langPref === 'es' ? ' es menor o igual que ' : ' is less than or equal to ' },
     
-    // Fractions (basic pattern like "1/2" spoken as "1 half" or "one over two")
-    { pattern: /(\d+)\/(\d+)/g, spoken: langPref === 'es' ? '$1 sobre $2' : '$1 over $2' },
+    // Fractions (replace with natural language if possible)
+    { pattern: /(\d+)\/(\d+)/g, spoken: (m, num, denom) => {
+      if (langPref === 'es') {
+        return `${num} ${fractionWordsEs[denom] || 'sobre ' + denom}`;
+      } else {
+        // Plural for numerator > 1
+        if (fractionWordsEn[denom]) {
+          return `${num === '1' ? 'one' : numToWordsEn(Number(num))} ${fractionWordsEn[denom]}${num !== '1' ? 's' : ''}`;
+        }
+        return `${num} over ${denom}`;
+      }
+    } },
     
     // Percentage
     { pattern: /%/g, spoken: langPref === 'es' ? ' por ciento' : ' percent' },
