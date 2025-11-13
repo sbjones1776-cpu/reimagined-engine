@@ -1,0 +1,38 @@
+# Line ending normalization and file attributes
+
+# Default: normalize text files to LF in repo, convert on checkout per rule
+* text=auto eol=lf
+
+# Windows scripts should use CRLF on checkout
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Treat common binaries as binary (no diff/merge)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.apk binary
+*.aab binary
+*.idsig binary
+*.keystore binary
+*.jks binary
+
+# SVGs and XML are text
+*.svg text
+*.xml text
+
+# Keep JSON/JS/CSS/HTML plainly as text
+*.json text
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.css text
+*.scss text
+*.html text
+*.md text
