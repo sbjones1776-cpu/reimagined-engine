@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -1310,540 +1309,548 @@ export default function Home() {
 
   const grades = ["K", "1", "2", "3", "4", "5", "6", "7", "8"];
   
+  // Device compatibility banner (always at top)
+  const DeviceBanner = () => (
+    <div style={{
+      background: "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
+      color: "#fff",
+      padding: "12px 0",
+      textAlign: "center",
+      fontWeight: "bold",
+      fontSize: "1.1rem",
+      letterSpacing: "0.01em",
+      zIndex: 100,
+      position: "sticky",
+      top: 0
+    }}>
+      <span role="img" aria-label="lightbulb" style={{marginRight: 8}}>💡</span>
+      Best Experience: <span style={{fontWeight: 700}}>Math Adventure</span> works best on <span style={{textDecoration: "underline"}}>tablets</span> and <span style={{textDecoration: "underline"}}>desktop computers</span> for optimal gameplay and features.
+    </div>
+  );
+
   // Show auth gate if not logged in
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-xl text-gray-600">Loading...</p>
+      <>
+        <DeviceBanner />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-xl text-gray-600">Loading...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 overflow-auto">
-        {/* Device Compatibility Notice - Fixed at top */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-500 py-3 px-4 shadow-lg sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-center gap-3 text-white">
-              <span className="text-2xl">💡</span>
-              <p className="text-xs md:text-sm font-medium text-center">
-                <strong>Best Experience:</strong> Math Adventure works best on <strong>tablets</strong> and <strong>desktop computers</strong> for optimal gameplay and features.
-              </p>
-            </div>
-          </div>
-        </div>
+      <>
+        <DeviceBanner />
+        <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 overflow-auto">
+          {/* Device Compatibility Notice - Fixed at top */}
+          
 
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <Logo size="xl" variant="circle" className="mx-auto mb-6" />
-            <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-3 drop-shadow-2xl">Math Adventure</h1>
-            <p className="text-xl md:text-2xl text-white mb-2 drop-shadow-lg">Make Learning Math Fun & Engaging!</p>
-            <p className="text-lg text-white/90 drop-shadow-lg">🎮 80+ Math Games • 🏆 Earn Rewards • 🤖 AI Tutor • 📊 Track Progress</p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-8 items-start max-w-6xl mx-auto">
-            {/* Auth Form */}
-            <div className="order-2 lg:order-1">
-              <SimpleAuth />
-              
-              {/* Features List */}
-              <Card className="mt-6 bg-white/95 backdrop-blur">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-lg mb-4 text-gray-800">✨ What You'll Get:</h3>
-                  <ul className="space-y-3 text-sm text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      <span><strong>80+ Math Concepts</strong> - Addition, subtraction, fractions, geometry & more!</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      <span><strong>AI Math Tutor</strong> - Get instant help with step-by-step explanations</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      <span><strong>Daily Challenges</strong> - New problems every day with bonus rewards</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      <span><strong>Progress Tracking</strong> - See improvement with detailed analytics</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      <span><strong>Earn Stars & Rewards</strong> - Unlock pets, avatars, and power-ups!</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-500 font-bold">👑</span>
-                      <span><strong>Free Tier</strong> - Start with 8 basic concepts on Easy level</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
+          <div className="max-w-7xl mx-auto px-4 py-12">
+            {/* Header */}
+            <div className="text-center mb-12">
+              <Logo size="xl" variant="circle" className="mx-auto mb-6" />
+              <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-3 drop-shadow-2xl">Math Adventure</h1>
+              <p className="text-xl md:text-2xl text-white mb-2 drop-shadow-lg">Make Learning Math Fun & Engaging!</p>
+              <p className="text-lg text-white/90 drop-shadow-lg">🎮 80+ Math Games • 🏆 Earn Rewards • 🤖 AI Tutor • 📊 Track Progress</p>
             </div>
 
-            {/* App Screenshots Preview */}
-            <div className="order-1 lg:order-2 space-y-4">
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border-2 border-white/20">
-                <h3 className="text-white font-bold text-xl mb-4 text-center">📸 See It In Action</h3>
+            <div className="grid lg:grid-cols-2 gap-8 items-start max-w-6xl mx-auto">
+              {/* Auth Form */}
+              <div className="order-2 lg:order-1">
+                <SimpleAuth />
                 
-                {/* Screenshot 1 - Game Selection */}
-                <div className="bg-white rounded-xl overflow-hidden shadow-2xl mb-4">
-                  <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 text-white text-sm font-bold">
-                    🎯 Choose Your Math Game
-                  </div>
-                  <div className="p-4 space-y-2">
-                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg">
-                      <span className="text-3xl">➕</span>
-                      <div className="flex-1">
-                        <div className="font-bold text-sm">Addition</div>
-                        <div className="text-xs text-gray-600">Learn to add numbers</div>
-                      </div>
-                      <div className="flex gap-1">
-                        <span className="text-yellow-400">⭐</span>
-                        <span className="text-yellow-400">⭐</span>
-                        <span className="text-yellow-400">⭐</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg opacity-60">
-                      <span className="text-3xl">✖️</span>
-                      <div className="flex-1">
-                        <div className="font-bold text-sm">Multiplication</div>
-                        <div className="text-xs text-gray-600">Times tables & more</div>
-                      </div>
-                      <span className="text-xs bg-yellow-100 px-2 py-1 rounded">👑 Premium</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Screenshot 2 - Playing Game */}
-                <div className="bg-white rounded-xl overflow-hidden shadow-2xl">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 text-white text-sm font-bold">
-                    🧮 Solve Problems & Earn Stars
-                  </div>
-                  <div className="p-6 text-center">
-                    <div className="text-4xl font-bold text-purple-600 mb-3">5 + 3 = ?</div>
-                    <div className="grid grid-cols-2 gap-2 max-w-[200px] mx-auto">
-                      <button className="bg-purple-100 hover:bg-purple-200 p-3 rounded-lg font-bold text-purple-700">6</button>
-                      <button className="bg-green-500 text-white p-3 rounded-lg font-bold">8</button>
-                      <button className="bg-purple-100 hover:bg-purple-200 p-3 rounded-lg font-bold text-purple-700">7</button>
-                      <button className="bg-purple-100 hover:bg-purple-200 p-3 rounded-lg font-bold text-purple-700">9</button>
-                    </div>
-                    <div className="mt-4 text-sm text-gray-600">⏱️ 1:23 • ⭐ Score: 90%</div>
-                  </div>
-                </div>
+                {/* Features List */}
+                <Card className="mt-6 bg-white/95 backdrop-blur">
+                  <CardContent className="p-6">
+                    <h3 className="font-bold text-lg mb-4 text-gray-800">✨ What You'll Get:</h3>
+                    <ul className="space-y-3 text-sm text-gray-700">
+                      <li className="flex items-start gap-2">
+                        <span className="text-green-500 font-bold">✓</span>
+                        <span><strong>80+ Math Concepts</strong> - Addition, subtraction, fractions, geometry & more!</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-green-500 font-bold">✓</span>
+                        <span><strong>AI Math Tutor</strong> - Get instant help with step-by-step explanations</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-green-500 font-bold">✓</span>
+                        <span><strong>Daily Challenges</strong> - New problems every day with bonus rewards</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-green-500 font-bold">✓</span>
+                        <span><strong>Progress Tracking</strong> - See improvement with detailed analytics</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-green-500 font-bold">✓</span>
+                        <span><strong>Earn Stars & Rewards</strong> - Unlock pets, avatars, and power-ups!</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-purple-500 font-bold">👑</span>
+                        <span><strong>Free Tier</strong> - Start with 8 basic concepts on Easy level</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
               </div>
 
-              {/* Trust Badges */}
-              <div className="flex flex-wrap justify-center gap-4 text-white/90 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">🔒</span>
-                  <span>Safe & Secure</span>
+              {/* App Screenshots Preview */}
+              <div className="order-1 lg:order-2 space-y-4">
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border-2 border-white/20">
+                  <h3 className="text-white font-bold text-xl mb-4 text-center">📸 See It In Action</h3>
+                  
+                  {/* Screenshot 1 - Game Selection */}
+                  <div className="bg-white rounded-xl overflow-hidden shadow-2xl mb-4">
+                    <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-3 text-white text-sm font-bold">
+                      🎯 Choose Your Math Game
+                    </div>
+                    <div className="p-4 space-y-2">
+                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg">
+                        <span className="text-3xl">➕</span>
+                        <div className="flex-1">
+                          <div className="font-bold text-sm">Addition</div>
+                          <div className="text-xs text-gray-600">Learn to add numbers</div>
+                        </div>
+                        <div className="flex gap-1">
+                          <span className="text-yellow-400">⭐</span>
+                          <span className="text-yellow-400">⭐</span>
+                          <span className="text-yellow-400">⭐</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg opacity-60">
+                        <span className="text-3xl">✖️</span>
+                        <div className="flex-1">
+                          <div className="font-bold text-sm">Multiplication</div>
+                          <div className="text-xs text-gray-600">Times tables & more</div>
+                        </div>
+                        <span className="text-xs bg-yellow-100 px-2 py-1 rounded">👑 Premium</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Screenshot 2 - Playing Game */}
+                  <div className="bg-white rounded-xl overflow-hidden shadow-2xl">
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 text-white text-sm font-bold">
+                      🧮 Solve Problems & Earn Stars
+                    </div>
+                    <div className="p-6 text-center">
+                      <div className="text-4xl font-bold text-purple-600 mb-3">5 + 3 = ?</div>
+                      <div className="grid grid-cols-2 gap-2 max-w-[200px] mx-auto">
+                        <button className="bg-purple-100 hover:bg-purple-200 p-3 rounded-lg font-bold text-purple-700">6</button>
+                        <button className="bg-green-500 text-white p-3 rounded-lg font-bold">8</button>
+                        <button className="bg-purple-100 hover:bg-purple-200 p-3 rounded-lg font-bold text-purple-700">7</button>
+                        <button className="bg-purple-100 hover:bg-purple-200 p-3 rounded-lg font-bold text-purple-700">9</button>
+                      </div>
+                      <div className="mt-4 text-sm text-gray-600">⏱️ 1:23 • ⭐ Score: 90%</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">👨‍👩‍👧</span>
-                  <span>Parent Controls</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">📱</span>
-                  <span>Works Everywhere</span>
+
+                {/* Trust Badges */}
+                <div className="flex flex-wrap justify-center gap-4 text-white/90 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🔒</span>
+                    <span>Safe & Secure</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">👨‍👩‍👧</span>
+                    <span>Parent Controls</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">📱</span>
+                    <span>Works Everywhere</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Device Compatibility Notice - Fixed at top */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-500 py-3 px-4 shadow-lg sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-center gap-3 text-white">
-            <span className="text-2xl">💡</span>
-            <p className="text-xs md:text-sm font-medium text-center">
-              <strong>Best Experience:</strong> Math Adventure works best on <strong>tablets</strong> and <strong>desktop computers</strong> for optimal gameplay and features.
-            </p>
+    <>
+      <DeviceBanner />
+      <div className="min-h-screen">
+        {/* Device Compatibility Notice - Fixed at top */}
+
+        <div className="max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
+
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <div className="inline-block mb-6 animate-bounce">
+            <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl">
+              <span className="text-5xl">🎯</span>
+            </div>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
+            Welcome to Math Adventure!
+          </h1>
+          <p className="text-xl text-gray-600 mb-4">Choose your challenge and start learning!</p>
+          
+          {/* Total Stars */}
+          <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 md:px-6 md:py-3 shadow-lg">
+            <Star className="w-5 h-5 md:w-6 md:h-6 fill-yellow-400 text-yellow-400" />
+            <span className="text-xl md:text-2xl font-bold text-gray-800">{getTotalStars()}</span>
+            <span className="text-gray-600">Total Stars</span>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
-
-      {/* Hero Section */}
-      <div className="text-center mb-12">
-        <div className="inline-block mb-6 animate-bounce">
-          <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl">
-            <span className="text-5xl">🎯</span>
-          </div>
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-          Welcome to Math Adventure!
-        </h1>
-        <p className="text-xl text-gray-600 mb-4">Choose your challenge and start learning!</p>
-        
-        {/* Total Stars */}
-        <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 md:px-6 md:py-3 shadow-lg">
-          <Star className="w-5 h-5 md:w-6 md:h-6 fill-yellow-400 text-yellow-400" />
-          <span className="text-xl md:text-2xl font-bold text-gray-800">{getTotalStars()}</span>
-          <span className="text-gray-600">Total Stars</span>
-        </div>
-      </div>
-
-  {/* Subscription Status / Upgrade Widget */}
-      {premiumActive ? (
-        <Card className="mb-8 border-4 border-green-400 shadow-xl bg-gradient-to-r from-green-50 to-emerald-50">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                  <Crown className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-xl font-bold text-gray-800">
-                      {currentTier === "premium_parent" ? "Premium Parent" : 
-                       currentTier === "premium_player" ? "Premium Player" : 
-                       "Family/Teacher"} Active
-                    </h3>
-                    <Badge className="bg-green-500 text-white">
-                      Premium{user?.subscription_tier === 'free' ? ' (Trial)' : ''}
-                    </Badge>
+    {/* Subscription Status / Upgrade Widget */}
+        {premiumActive ? (
+          <Card className="mb-8 border-4 border-green-400 shadow-xl bg-gradient-to-r from-green-50 to-emerald-50">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                    <Crown className="w-8 h-8 text-white" />
                   </div>
-                  <p className="text-gray-600 flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
-                    {subscriptionExpires && `Renews ${format(subscriptionExpires, 'MMM d, yyyy')} • ${daysUntilRenewal} days left`}
-                    {!subscriptionExpires && user?.isOnTrial && typeof user?.trialDaysRemaining === 'number' && (
-                      <span>
-                        {`Trial: ${user.trialDaysRemaining} day${user.trialDaysRemaining === 1 ? '' : 's'} left`}
-                      </span>
-                    )}
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-xl font-bold text-gray-800">
+                        {currentTier === "premium_parent" ? "Premium Parent" : 
+                         currentTier === "premium_player" ? "Premium Player" : 
+                         "Family/Teacher"} Active
+                      </h3>
+                      <Badge className="bg-green-500 text-white">
+                        Premium{user?.subscription_tier === 'free' ? ' (Trial)' : ''}
+                      </Badge>
+                    </div>
+                    <p className="text-gray-600 flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      {subscriptionExpires && `Renews ${format(subscriptionExpires, 'MMM d, yyyy')} • ${daysUntilRenewal} days left`}
+                      {!subscriptionExpires && user?.isOnTrial && typeof user?.trialDaysRemaining === 'number' && (
+                        <span>
+                          {`Trial: ${user.trialDaysRemaining} day${user.trialDaysRemaining === 1 ? '' : 's'} left`}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <Link to={createPageUrl("Subscription")}>
+                  <Button 
+                    className="h-10 md:h-12 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                  >
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Manage Subscription
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="mb-8 border-4 border-yellow-400 shadow-xl bg-gradient-to-r from-yellow-50 to-orange-50">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                    <Crown className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                      <Lock className="w-5 h-5" />
+                      Free Tier - Limited Access
+                    </h3>
+                    <p className="text-gray-700 font-medium">
+                      📚 Only 8 basic math concepts • 🎯 Easy level only
+                    </p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Upgrade to unlock 80+ concepts, all difficulty levels, and premium features!
+                    </p>
+                  </div>
+                </div>
+                {/* Use unified UpgradeButton component which handles Play Billing vs fallback */}
+                <div className="h-12">
+                  <UpgradeButton />
                 </div>
               </div>
-              <Link to={createPageUrl("Subscription")}>
-                <Button 
-                  className="h-10 md:h-12 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-                >
-                  <CreditCard className="w-4 h-4 mr-2" />
-                  Manage Subscription
+              <div className="mt-4">
+                <AppTrialPromo compact />
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Parent-Set Focus Alert */}
+        {focusOperations.length > 0 && (
+          <Alert className="mb-8 bg-purple-50 border-purple-300">
+            <AlertCircle className="w-4 h-4 text-purple-600" />
+            <AlertDescription className="text-purple-800">
+              <strong>Practice Recommendation:</strong> Your parent suggests focusing on{" "}
+              {focusOperations.map((op, i) => (
+                <span key={op}>
+                  <strong>{mathConcepts.find(c => c.id === op)?.name || op}</strong>
+                  {i < focusOperations.length - 1 && (i === focusOperations.length - 2 ? " and " : ", ")}
+                </span>
+              ))}
+              . Try playing those games more!
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Daily Challenge Widget */}
+        <div className="mb-12">
+          <DailyChallengeWidget />
+        </div>
+
+        {/* Team Challenge Banner */}
+        {myTeamChallenges.length > 0 && (
+          <Card className="mb-12 border-4 border-green-300 shadow-xl bg-gradient-to-r from-green-50 to-emerald-50">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <Users className="w-12 h-12 text-green-600" />
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">Active Team Challenges!</h3>
+                    <p className="text-gray-600">Work together with friends and family</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge className="bg-green-500 text-white text-base md:text-lg px-3 py-1.5 md:px-4 md:py-2">
+                    {myTeamChallenges.length} Active
+                  </Badge>
+                  <Link to={createPageUrl("TeamChallenges")}>
+                    <Button className="h-10 md:h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
+                      <Users className="w-5 h-5 mr-2" />
+                      View Team Challenges
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Tournament Banner */}
+        <Card className="mb-12 border-4 border-orange-300 shadow-xl bg-gradient-to-r from-orange-50 to-red-50">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <Trophy className="w-12 h-12 text-orange-600" />
+                <div>
+                  <h3 className="text-xl font-bold text-gray-800">Weekly Tournament Active!</h3>
+                  <p className="text-gray-600">Compete for 50 bonus stars and exclusive badges</p>
+                </div>
+              </div>
+              <Link to={createPageUrl("Leaderboards")}>
+                <Button className="h-10 md:h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+                  <Award className="w-5 h-5 mr-2" />
+                  View Leaderboards
                 </Button>
               </Link>
             </div>
           </CardContent>
         </Card>
-      ) : (
-        <Card className="mb-8 border-4 border-yellow-400 shadow-xl bg-gradient-to-r from-yellow-50 to-orange-50">
+
+        {/* AI Tutor Feature Banner */}
+        <Card className="mb-8 border-4 border-blue-300 shadow-xl bg-gradient-to-r from-blue-50 to-purple-50">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                  <Crown className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                  <Brain className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Lock className="w-5 h-5" />
-                    Free Tier - Limited Access
-                  </h3>
-                  <p className="text-gray-700 font-medium">
-                    📚 Only 8 basic math concepts • 🎯 Easy level only
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Upgrade to unlock 80+ concepts, all difficulty levels, and premium features!
-                  </p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-xl font-bold text-gray-800">AI Math Tutor</h3>
+                    <Badge className="bg-blue-500 text-white">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      New!
+                    </Badge>
+                  </div>
+                  <p className="text-gray-600">Get instant help with step-by-step explanations when you need it!</p>
                 </div>
               </div>
-              {/* Use unified UpgradeButton component which handles Play Billing vs fallback */}
-              <div className="h-12">
-                <UpgradeButton />
+              <div className="bg-white p-4 rounded-xl border-2 border-blue-200 text-center">
+                <div className="text-2xl font-bold text-blue-600">✨</div>
+                <div className="text-sm text-gray-600 mt-1">Adaptive Learning</div>
               </div>
-            </div>
-            <div className="mt-4">
-              <AppTrialPromo compact />
             </div>
           </CardContent>
         </Card>
-      )}
 
-      {/* Parent-Set Focus Alert */}
-      {focusOperations.length > 0 && (
-        <Alert className="mb-8 bg-purple-50 border-purple-300">
-          <AlertCircle className="w-4 h-4 text-purple-600" />
-          <AlertDescription className="text-purple-800">
-            <strong>Practice Recommendation:</strong> Your parent suggests focusing on{" "}
-            {focusOperations.map((op, i) => (
-              <span key={op}>
-                <strong>{mathConcepts.find(c => c.id === op)?.name || op}</strong>
-                {i < focusOperations.length - 1 && (i === focusOperations.length - 2 ? " and " : ", ")}
-              </span>
-            ))}
-            . Try playing those games more!
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Daily Challenge Widget */}
-      <div className="mb-12">
-        <DailyChallengeWidget />
-      </div>
-
-      {/* Team Challenge Banner */}
-      {myTeamChallenges.length > 0 && (
-        <Card className="mb-12 border-4 border-green-300 shadow-xl bg-gradient-to-r from-green-50 to-emerald-50">
+        {/* Color by Numbers Feature Banner */}
+        <Card className="mb-8 border-4 border-purple-300 shadow-xl bg-gradient-to-r from-purple-50 to-pink-50">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <Users className="w-12 h-12 text-green-600" />
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                  <Palette className="w-8 h-8 text-white" />
+                </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-800">Active Team Challenges!</h3>
-                  <p className="text-gray-600">Work together with friends and family</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-xl font-bold text-gray-800">Color by Numbers</h3>
+                    <Badge className="bg-purple-500 text-white">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      New Game!
+                    </Badge>
+                  </div>
+                  <p className="text-gray-600">Solve math problems while creating colorful artwork!</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <Badge className="bg-green-500 text-white text-base md:text-lg px-3 py-1.5 md:px-4 md:py-2">
-                  {myTeamChallenges.length} Active
-                </Badge>
-                <Link to={createPageUrl("TeamChallenges")}>
-                  <Button className="h-10 md:h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
-                    <Users className="w-5 h-5 mr-2" />
-                    View Team Challenges
+              <div className="flex gap-2">
+                <Link to={createPageUrl("ColorByNumbers?operation=addition&level=easy")}>
+                  <Button className="h-10 md:h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                    <Palette className="w-5 h-5 mr-2" />
+                    Try It Now!
                   </Button>
                 </Link>
               </div>
             </div>
           </CardContent>
         </Card>
-      )}
 
-      {/* Tournament Banner */}
-      <Card className="mb-12 border-4 border-orange-300 shadow-xl bg-gradient-to-r from-orange-50 to-red-50">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <Trophy className="w-12 h-12 text-orange-600" />
+        {/* Grade & Category Filters */}
+        <Card className="mb-8 border-2 border-gray-200">
+          <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-gray-700" />
+              Browse by Grade Level & Category ({filteredConcepts.length} Games)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-xl font-bold text-gray-800">Weekly Tournament Active!</h3>
-                <p className="text-gray-600">Compete for 50 bonus stars and exclusive badges</p>
-              </div>
-            </div>
-            <Link to={createPageUrl("Leaderboards")}>
-              <Button className="h-10 md:h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-                <Award className="w-5 h-5 mr-2" />
-                View Leaderboards
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* AI Tutor Feature Banner */}
-      <Card className="mb-8 border-4 border-blue-300 shadow-xl bg-gradient-to-r from-blue-50 to-purple-50">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
-                <Brain className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xl font-bold text-gray-800">AI Math Tutor</h3>
-                  <Badge className="bg-blue-500 text-white">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    New!
-                  </Badge>
-                </div>
-                <p className="text-gray-600">Get instant help with step-by-step explanations when you need it!</p>
-              </div>
-            </div>
-            <div className="bg-white p-4 rounded-xl border-2 border-blue-200 text-center">
-              <div className="text-2xl font-bold text-blue-600">✨</div>
-              <div className="text-sm text-gray-600 mt-1">Adaptive Learning</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Color by Numbers Feature Banner */}
-      <Card className="mb-8 border-4 border-purple-300 shadow-xl bg-gradient-to-r from-purple-50 to-pink-50">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
-                <Palette className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xl font-bold text-gray-800">Color by Numbers</h3>
-                  <Badge className="bg-purple-500 text-white">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    New Game!
-                  </Badge>
-                </div>
-                <p className="text-gray-600">Solve math problems while creating colorful artwork!</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Link to={createPageUrl("ColorByNumbers?operation=addition&level=easy")}>
-                <Button className="h-10 md:h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-                  <Palette className="w-5 h-5 mr-2" />
-                  Try It Now!
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Grade & Category Filters */}
-      <Card className="mb-8 border-2 border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-gray-700" />
-            Browse by Grade Level & Category ({filteredConcepts.length} Games)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <Label className="mb-3 block font-bold text-gray-700">Grade Level</Label>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={selectedGrade === "all" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedGrade("all")}
-                  className={selectedGrade === "all" ? "bg-purple-500 text-white hover:bg-purple-600" : ""}
-                >
-                  All Grades
-                </Button>
-                {grades.map(grade => (
+                <Label className="mb-3 block font-bold text-gray-700">Grade Level</Label>
+                <div className="flex flex-wrap gap-2">
                   <Button
-                    key={grade}
-                    variant={selectedGrade === grade ? "default" : "outline"}
+                    variant={selectedGrade === "all" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSelectedGrade(grade)}
-                    className={selectedGrade === grade ? "bg-purple-500 text-white hover:bg-purple-600" : ""}
+                    onClick={() => setSelectedGrade("all")}
+                    className={selectedGrade === "all" ? "bg-purple-500 text-white hover:bg-purple-600" : ""}
                   >
-                    Grade {grade}
+                    All Grades
                   </Button>
-                ))}
+                  {grades.map(grade => (
+                    <Button
+                      key={grade}
+                      variant={selectedGrade === grade ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedGrade(grade)}
+                      className={selectedGrade === grade ? "bg-purple-500 text-white hover:bg-purple-600" : ""}
+                    >
+                      Grade {grade}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-3 block font-bold text-gray-700">Category</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={selectedCategory === "all" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory("all")}
+                    className={selectedCategory === "all" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
+                  >
+                    All
+                  </Button>
+                  <Button
+                    variant={selectedCategory === "basics" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory("basics")}
+                    className={selectedCategory === "basics" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
+                  >
+                    Basics
+                  </Button>
+                  <Button
+                    variant={selectedCategory === "core" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory("core")}
+                    className={selectedCategory === "core" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
+                  >
+                    Core Operations
+                  </Button>
+                  <Button
+                    variant={selectedCategory === "advanced" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory("advanced")}
+                    className={selectedCategory === "advanced" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
+                  >
+                    Advanced
+                  </Button>
+                  <Button
+                    variant={selectedCategory === "applied" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory("applied")}
+                    className={selectedCategory === "applied" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
+                  >
+                    Applied
+                  </Button>
+                  <Button
+                    variant={selectedCategory === "algebra" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory("algebra")}
+                    className={selectedCategory === "algebra" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
+                  >
+                    Algebra
+                  </Button>
+                  <Button
+                    variant={selectedCategory === "challenge" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory("challenge")}
+                    className={selectedCategory === "challenge" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
+                  >
+                    Challenge
+                  </Button>
+                </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
 
-            <div>
-              <Label className="mb-3 block font-bold text-gray-700">Category</Label>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant={selectedCategory === "all" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("all")}
-                  className={selectedCategory === "all" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
-                >
-                  All
-                </Button>
-                <Button
-                  variant={selectedCategory === "basics" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("basics")}
-                  className={selectedCategory === "basics" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
-                >
-                  Basics
-                </Button>
-                <Button
-                  variant={selectedCategory === "core" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("core")}
-                  className={selectedCategory === "core" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
-                >
-                  Core Operations
-                </Button>
-                <Button
-                  variant={selectedCategory === "advanced" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("advanced")}
-                  className={selectedCategory === "advanced" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
-                >
-                  Advanced
-                </Button>
-                <Button
-                  variant={selectedCategory === "applied" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("applied")}
-                  className={selectedCategory === "applied" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
-                >
-                  Applied
-                </Button>
-                <Button
-                  variant={selectedCategory === "algebra" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("algebra")}
-                  className={selectedCategory === "algebra" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
-                >
-                  Algebra
-                </Button>
-                <Button
-                  variant={selectedCategory === "challenge" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory("challenge")}
-                  className={selectedCategory === "challenge" ? "bg-blue-500 text-white hover:bg-blue-600" : ""}
-                >
-                  Challenge
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Math Concepts Grid */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-purple-500" />
+            Math Games ({filteredConcepts.length})
+          </h2>
+          
+          {filteredConcepts.length === 0 ? (
+            <Card className="p-12 text-center">
+              <p className="text-xl text-gray-600">No games match your filters</p>
+              <Button
+                onClick={() => {
+                  setSelectedGrade("all");
+                  setSelectedCategory("all");
+                }}
+                className="mt-4"
+              >
+                Clear Filters
+              </Button>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {filteredConcepts.map((concept) => {
+                const conceptAllowed = isConceptAllowed(concept.id);
+                const isFocused = focusOperations.includes(concept.id);
 
-      {/* Math Concepts Grid */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-purple-500" />
-          Math Games ({filteredConcepts.length})
-        </h2>
-        
-        {filteredConcepts.length === 0 ? (
-          <Card className="p-12 text-center">
-            <p className="text-xl text-gray-600">No games match your filters</p>
-            <Button
-              onClick={() => {
-                setSelectedGrade("all");
-                setSelectedCategory("all");
-              }}
-              className="mt-4"
-            >
-              Clear Filters
-            </Button>
-          </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            {filteredConcepts.map((concept) => {
-              const conceptAllowed = isConceptAllowed(concept.id);
-              const isFocused = focusOperations.includes(concept.id);
-
-              return (
-                <Card 
-                  key={concept.id} 
-                  className={`overflow-hidden transition-all duration-300 border-2 ${
-                    !conceptAllowed 
-                      ? "opacity-50 cursor-not-allowed" 
-                      : isFocused
-                      ? "border-purple-400 ring-2 ring-purple-200 hover:shadow-xl"
-                      : "hover:shadow-xl hover:border-purple-300"
-                  }`}
-                >
-                  <div className={`h-24 md:h-32 bg-gradient-to-br ${concept.color} flex items-center justify-center relative`}>
-                    <span className="text-5xl md:text-6xl">{concept.emoji}</span>
-                    {isFocused && (
-                      <Badge className="absolute top-2 right-2 bg-purple-500 text-white">
-                        <Star className="w-3 h-3 mr-1 fill-white" />
-                        Focus
-                      </Badge>
-                    )}
+                return (
+                  <Card 
+                    key={concept.id} 
+                    className={`overflow-hidden transition-all duration-300 border-2 ${
+                      !conceptAllowed 
+                        ? "opacity-50 cursor-not-allowed" 
+                        : isFocused
+                        ? "border-purple-400 ring-2 ring-purple-200 hover:shadow-xl"
+                        : "hover:shadow-xl hover:border-purple-300"
+                    }`}
+                  >
+                    <div className={`h-24 md:h-32 bg-gradient-to-br ${concept.color} flex items-center justify-center relative`}>
+                      <span className="text-5xl md:text-6xl">{concept.emoji}</span>
+                      {isFocused && (
+                        <Badge className="absolute top-2 right-2 bg-purple-500 text-white">
+                          <Star className="w-3 h-3 mr-1 fill-white" />
+                          Focus
+                        </Badge>
+                      )}
                         {!conceptAllowed && (
                       <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-2">
                         <Lock className="w-12 h-12 text-white" />
@@ -1855,116 +1862,117 @@ export default function Home() {
                         )}
                       </div>
                     )}
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg">{concept.name}</span>
-                        {!conceptAllowed && !premiumActive && (
-                          <Badge variant="outline" className="bg-yellow-50 border-yellow-400 text-yellow-700 text-xs">
-                            <Crown className="w-3 h-3 mr-1" />
-                            Premium
-                          </Badge>
-                        )}
-                        {!conceptAllowed && premiumActive && (
-                          <Badge variant="outline" className="bg-red-50 border-red-300 text-red-700 text-xs">
-                            Restricted
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-600 font-normal">{concept.description}</p>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {concept.grades.map(g => (
-                          <Badge key={g} variant="outline" className="text-xs">
-                            Grade {g}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {levels.slice(0, 3).map((level) => {
-                        const unlocked = isLevelUnlocked(level.id);
-                        const levelAllowed = isLevelAllowed(level.id);
-                        const canPlay = conceptAllowed && levelAllowed && unlocked;
-                        const stars = getStarsForConcept(concept.id, level.id);
-                        
-                        return (
-                          <Link
-                            key={level.id}
-                            to={canPlay ? createPageUrl(`Game?operation=${concept.id}&level=${level.id}`) : "#"}
-                            className={`block ${!canPlay && "pointer-events-none"}`}
-                          >
-                            <Button
-                              variant="outline"
-                              className={`w-full justify-between text-sm ${!canPlay && "opacity-50"}`}
-                              disabled={!canPlay}
-                              size="sm"
-                            >
-                              <span className="flex items-center gap-2">
-                                <Badge className={`${level.color} text-xs`}>{level.name}</Badge>
-                                {!unlocked && <Lock className="w-3 h-3" />}
-                                {!levelAllowed && conceptAllowed && !premiumActive && (
-                                  <Badge variant="outline" className="text-xs bg-yellow-50 border-yellow-400 text-yellow-700">
-                                    <Crown className="w-3 h-3 mr-1" />
-                                    Premium
-                                  </Badge>
-                                )}
-                                {!levelAllowed && conceptAllowed && premiumActive && (
-                                  <Badge variant="outline" className="text-xs">Restricted</Badge>
-                                )}
-                              </span>
-                              <div className="flex gap-1">
-                                {[1, 2, 3].map((s) => (
-                                  <Star
-                                    key={s}
-                                    className={`w-3 h-3 ${
-                                      stars >= s ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                            </Button>
-                          </Link>
-                        );
-                      })}
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                    <CardHeader>
+                      <CardTitle className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg">{concept.name}</span>
+                          {!conceptAllowed && !premiumActive && (
+                            <Badge variant="outline" className="bg-yellow-50 border-yellow-400 text-yellow-700 text-xs">
+                              <Crown className="w-3 h-3 mr-1" />
+                              Premium
+                            </Badge>
+                          )}
+                          {!conceptAllowed && premiumActive && (
+                            <Badge variant="outline" className="bg-red-50 border-red-300 text-red-700 text-xs">
+                              Restricted
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-600 font-normal">{concept.description}</p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {concept.grades.map(g => (
+                            <Badge key={g} variant="outline" className="text-xs">
+                              Grade {g}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {levels.slice(0, 3).map((level) => {
+                          const unlocked = isLevelUnlocked(level.id);
+                          const levelAllowed = isLevelAllowed(level.id);
+                          const canPlay = conceptAllowed && levelAllowed && unlocked;
+                          const stars = getStarsForConcept(concept.id, level.id);
+                          
+                          return (
+                            <Link
+                              key={level.id}
+                              to={canPlay ? createPageUrl(`Game?operation=${concept.id}&level=${level.id}`) : "#"}
+                              className={`block ${!canPlay && "pointer-events-none"}`}
+                            >
+                              <Button
+                                variant="outline"
+                                className={`w-full justify-between text-sm ${!canPlay && "opacity-50"}`}
+                                disabled={!canPlay}
+                                size="sm"
+                              >
+                                <span className="flex items-center gap-2">
+                                  <Badge className={`${level.color} text-xs`}>{level.name}</Badge>
+                                  {!unlocked && <Lock className="w-3 h-3" />}
+                                  {!levelAllowed && conceptAllowed && !premiumActive && (
+                                    <Badge variant="outline" className="text-xs bg-yellow-50 border-yellow-400 text-yellow-700">
+                                      <Crown className="w-3 h-3 mr-1" />
+                                      Premium
+                                    </Badge>
+                                  )}
+                                  {!levelAllowed && conceptAllowed && premiumActive && (
+                                    <Badge variant="outline" className="text-xs">Restricted</Badge>
+                                  )}
+                                </span>
+                                <div className="flex gap-1">
+                                  {[1, 2, 3].map((s) => (
+                                    <Star
+                                      key={s}
+                                      className={`w-3 h-3 ${
+                                        stars >= s ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              </Button>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
-      {/* Instructions */}
-      <Card className="bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span className="text-2xl">📚</span>
-            How to Play
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid md:grid-cols-3 gap-4">
-          <div className="text-center p-4">
-            <div className="text-4xl mb-2">1️⃣</div>
-            <h3 className="font-bold mb-1">Choose Your Challenge</h3>
-            <p className="text-sm text-gray-600">Pick from 30+ math games and difficulty level</p>
-          </div>
-          <div className="text-center p-4">
-            <div className="text-4xl mb-2">2️⃣</div>
-            <h3 className="font-bold mb-1">Solve Problems</h3>
-            <p className="text-sm text-gray-600">Answer 10 questions as fast as you can</p>
-          </div>
-          <div className="text-center p-4">
-            <div className="text-4xl mb-2">3️⃣</div>
-            <h3 className="font-bold mb-1">Earn Stars</h3>
-            <p className="text-sm text-gray-600">Get stars based on your performance!</p>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Instructions */}
+        <Card className="bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span className="text-2xl">📚</span>
+              How to Play
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid md:grid-cols-3 gap-4">
+            <div className="text-center p-4">
+              <div className="text-4xl mb-2">1️⃣</div>
+              <h3 className="font-bold mb-1">Choose Your Challenge</h3>
+              <p className="text-sm text-gray-600">Pick from 30+ math games and difficulty level</p>
+            </div>
+            <div className="text-center p-4">
+              <div className="text-4xl mb-2">2️⃣</div>
+              <h3 className="font-bold mb-1">Solve Problems</h3>
+              <p className="text-sm text-gray-600">Answer 10 questions as fast as you can</p>
+            </div>
+            <div className="text-center p-4">
+              <div className="text-4xl mb-2">3️⃣</div>
+              <h3 className="font-bold mb-1">Earn Stars</h3>
+              <p className="text-sm text-gray-600">Get stars based on your performance!</p>
+            </div>
+          </CardContent>
+        </Card>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
