@@ -1309,22 +1309,26 @@ export default function Home() {
 
   const grades = ["K", "1", "2", "3", "4", "5", "6", "7", "8"];
   
-  // Device compatibility banner (always at top)
+  // Device compatibility banner (block, not fixed)
   const DeviceBanner = () => (
-    <div style={{
-      background: "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
-      color: "#fff",
-      padding: "12px 0",
-      textAlign: "center",
-      fontWeight: "bold",
-      fontSize: "1.1rem",
-      letterSpacing: "0.01em",
-      zIndex: 100,
-      position: "sticky",
-      top: 0
-    }}>
-      <span role="img" aria-label="lightbulb" style={{marginRight: 8}}>💡</span>
-      Best Experience: <span style={{fontWeight: 700}}>Math Adventure</span> works best on <span style={{textDecoration: "underline"}}>tablets</span> and <span style={{textDecoration: "underline"}}>desktop computers</span> for optimal gameplay and features.
+    <div
+      style={{
+        background: "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
+        color: "#fff",
+        padding: "14px 0 12px 0",
+        textAlign: "center",
+        fontWeight: "bold",
+        fontSize: "1.1rem",
+        letterSpacing: "0.01em",
+        boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
+        borderBottom: "2px solid #fff",
+        borderRadius: 8,
+        margin: "0 auto 24px auto",
+        maxWidth: 900,
+      }}
+    >
+      <span role="img" aria-label="lightbulb" style={{ marginRight: 8 }}>💡</span>
+      Best Experience: <span style={{ fontWeight: 700 }}>Math Adventure</span> works best on <span style={{ textDecoration: "underline" }}>tablets</span> and <span style={{ textDecoration: "underline" }}>desktop computers</span> for optimal gameplay and features.
     </div>
   );
 
@@ -1332,7 +1336,6 @@ export default function Home() {
   if (authLoading) {
     return (
       <>
-        <DeviceBanner />
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -1346,19 +1349,17 @@ export default function Home() {
   if (!user) {
     return (
       <>
-        <DeviceBanner />
         <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 overflow-auto">
-          {/* Device Compatibility Notice - Fixed at top */}
-          
-
           <div className="max-w-7xl mx-auto px-4 py-12">
             {/* Header */}
-            <div className="text-center mb-12">
+            <div className="text-center mb-6">
               <Logo size="xl" variant="circle" className="mx-auto mb-6" />
               <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-3 drop-shadow-2xl">Math Adventure</h1>
               <p className="text-xl md:text-2xl text-white mb-2 drop-shadow-lg">Make Learning Math Fun & Engaging!</p>
               <p className="text-lg text-white/90 drop-shadow-lg">🎮 80+ Math Games • 🏆 Earn Rewards • 🤖 AI Tutor • 📊 Track Progress</p>
             </div>
+            {/* Device Compatibility Banner below header */}
+            <DeviceBanner />
 
             <div className="grid lg:grid-cols-2 gap-8 items-start max-w-6xl mx-auto">
               {/* Auth Form */}
@@ -1474,16 +1475,14 @@ export default function Home() {
     );
   }
 
+
   return (
     <>
-      <DeviceBanner />
       <div className="min-h-screen">
-        {/* Device Compatibility Notice - Fixed at top */}
-
         <div className="max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
 
         {/* Hero Section */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-6">
           <div className="inline-block mb-6 animate-bounce">
             <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl">
               <span className="text-5xl">🎯</span>
@@ -1493,7 +1492,6 @@ export default function Home() {
             Welcome to Math Adventure!
           </h1>
           <p className="text-xl text-gray-600 mb-4">Choose your challenge and start learning!</p>
-          
           {/* Total Stars */}
           <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 md:px-6 md:py-3 shadow-lg">
             <Star className="w-5 h-5 md:w-6 md:h-6 fill-yellow-400 text-yellow-400" />
@@ -1501,6 +1499,8 @@ export default function Home() {
             <span className="text-gray-600">Total Stars</span>
           </div>
         </div>
+        {/* Device Compatibility Banner below header */}
+        <DeviceBanner />
 
     {/* Subscription Status / Upgrade Widget */}
         {premiumActive ? (
