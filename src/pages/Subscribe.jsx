@@ -174,15 +174,15 @@ export default function Subscribe() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 p-4 py-8 overflow-x-hidden">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full mb-4">
             <Crown className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">Upgrade to Premium</h1>
-          <p className="text-gray-600">Unlock unlimited learning for {user.email}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Upgrade to Premium</h1>
+          <p className="text-gray-600 break-words">Unlock unlimited learning for {user.email}</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4 mb-6">
@@ -200,9 +200,9 @@ export default function Subscribe() {
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="font-bold text-lg">{plan.name}</h3>
-                    <p className="text-2xl font-bold text-purple-600">{plan.price}</p>
-                    <p className="text-sm text-gray-600">{plan.interval}</p>
+                    <h3 className="font-bold text-lg break-words">{plan.name}</h3>
+                    <p className="text-xl sm:text-2xl font-bold text-purple-600">{plan.price}</p>
+                    <p className="text-sm text-gray-600 break-words">{plan.interval}</p>
                   </div>
                   {selectedPlan === key && (
                     <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
@@ -238,7 +238,7 @@ export default function Subscribe() {
             <Button
               onClick={handleSubscribe}
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-base sm:text-lg"
               size="lg"
             >
               {loading ? (
@@ -251,7 +251,7 @@ export default function Subscribe() {
               )}
             </Button>
 
-            <p className="text-xs text-center text-gray-500">
+            <p className="text-xs text-center text-gray-500 break-words">
               By subscribing, you agree to our Terms of Service and Privacy Policy.
               Your subscription will automatically renew. Cancel anytime.
             </p>
@@ -271,9 +271,9 @@ export default function Subscribe() {
                 'Exclusive rewards and badges',
                 'Priority support',
               ].map((feature, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-sm">
+                <li key={idx} className="flex items-start gap-2 text-sm min-w-0">
                   <Check className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span>{feature}</span>
+                  <span className="flex-1 min-w-0 break-words">{feature}</span>
                 </li>
               ))}
             </ul>

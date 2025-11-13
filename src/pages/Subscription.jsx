@@ -18,6 +18,17 @@ export default function Subscription() {
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   // Square payments: allow purchasing in both TWA and external browsers
 
+  // Detect if we're running inside the Android TWA vs an external browser
+  const isExternalBrowser = (() => {
+    try {
+      const isAndroid = /Android/i.test(navigator.userAgent || "");
+      const isTwaReferrer = typeof document !== 'undefined' && typeof document.referrer === 'string' && document.referrer.startsWith('android-app://');
+      return !(isAndroid && isTwaReferrer);
+    } catch {
+      return true;
+    }
+  })();
+
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: async () => {
@@ -143,7 +154,7 @@ export default function Subscription() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 overflow-x-hidden">
       {/* Payments are supported both in-app (TWA) and in browser */}
 
   {/* Header */}
@@ -153,12 +164,12 @@ export default function Subscription() {
             <Crown className="w-10 h-10 text-white" />
           </div>
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 bg-clip-text text-transparent">
           Unlock Premium Features
         </h1>
-        <p className="text-xl text-gray-600 mb-2">Choose the perfect plan for your learning journey</p>
+        <p className="text-xl text-gray-600 mb-2 break-words">Choose the perfect plan for your learning journey</p>
         <p className="text-md text-green-600 mb-2 font-semibold">Save 20% when you purchase any yearly plan!</p>
-        <p className="text-sm text-gray-500 mb-4">Secure payment powered by Square</p>
+        <p className="text-sm text-gray-500 mb-4 break-words">Secure payment powered by Square</p>
         {/* Trial Promo (Android app only) */}
         <div className="max-w-xl mx-auto"><AppTrialPromo compact /></div>
       </div>
@@ -167,14 +178,14 @@ export default function Subscription() {
       {isSubscribed && (
         <Card className="mb-12 border-4 border-green-400 shadow-xl bg-gradient-to-r from-green-50 to-emerald-50">
           <CardContent className="p-8">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 min-w-0">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
                   <CheckCircle className="w-8 h-8 text-white" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-2xl font-bold text-gray-800">
+                    <h3 className="text-2xl font-bold text-gray-800 break-words">
                       {currentTier === "premium_parent" ? "Premium Parent" : 
                        currentTier === "premium_player" ? "Premium Player" : 
                        "Family/Teacher Plan"}
@@ -183,7 +194,7 @@ export default function Subscription() {
                   </div>
                   <div className="space-y-1">
                     {subscriptionExpires && (
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 break-words">
                         {user?.subscription_auto_renew === false 
                           ? `Expires ${format(subscriptionExpires, 'MMMM d, yyyy')}`
                           : `Renews ${format(subscriptionExpires, 'MMMM d, yyyy')} • ${daysUntilRenewal} days left`
@@ -203,7 +214,7 @@ export default function Subscription() {
                 <Button
                   variant="destructive"
                   onClick={() => setShowCancelConfirm(true)}
-                  className="h-12"
+                  className="h-12 text-sm sm:text-base"
                 >
                   <XCircle className="w-4 h-4 mr-2" />
                   Cancel Subscription
@@ -259,17 +270,17 @@ export default function Subscription() {
               </div>
 
               <CardHeader>
-                <CardTitle className="text-2xl mb-2">{plan.name}</CardTitle>
+                <CardTitle className="text-2xl mb-2 break-words">{plan.name}</CardTitle>
                 <div className="space-y-2">
                   <div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-4xl font-bold">{plan.price}</span>
+                      <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
                       <span className="text-gray-600">/month</span>
                     </div>
                   </div>
                   <div className="bg-green-50 p-2 rounded-lg border border-green-200">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-green-700">{plan.annualPrice}/year</span>
+                      <span className="text-sm font-semibold text-green-700 break-words">{plan.annualPrice}/year</span>
                       <Badge className="bg-green-500 text-white text-xs">{plan.annualSavings}</Badge>
                     </div>
                   </div>
@@ -279,9 +290,9 @@ export default function Subscription() {
               <CardContent className="space-y-6">
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
+                    <li key={index} className="flex items-start gap-2 min-w-0">
                       <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700">{feature}</span>
+                      <span className="text-sm text-gray-700 flex-1 min-w-0 break-words">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -296,7 +307,7 @@ export default function Subscription() {
                     <Button
                       onClick={() => handleSubscribe(plan.id, "monthly")}
                       disabled={loading}
-                      className={`w-full h-12 text-lg bg-gradient-to-r ${plan.color} hover:opacity-90`}
+                      className={`w-full h-12 text-base sm:text-lg bg-gradient-to-r ${plan.color} hover:opacity-90`}
                     >
                       {loading ? (
                         <>
@@ -314,7 +325,7 @@ export default function Subscription() {
                       onClick={() => handleSubscribe(plan.id, "yearly")}
                       disabled={loading}
                       variant="outline"
-                      className="w-full h-12"
+                      className="w-full h-12 text-sm sm:text-base"
                     >
                       {loading ? (
                         'Processing...'
