@@ -38,16 +38,14 @@ const auth = getAuth(app);
 
 export const createUserProfile = async (email, additionalData = {}) => {
   const userRef = doc(db, 'users', email);
-  // New users get a 7-day free trial by default
-  const now = new Date();
-  const expiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  // Step 1: Create user with trial_start_date as serverTimestamp, trial_expires_at null
   const userData = {
     email,
     subscription_tier: 'free',
     subscription_expires_at: null,
     subscription_auto_renew: false,
     trial_start_date: serverTimestamp(),
-    trial_expires_at: Timestamp.fromDate(expiresAt),
+    trial_expires_at: null, // will be set after serverTimestamp resolves
     trial_used: false,
     trial_grace_used: false,
     coins: 0,
@@ -81,9 +79,30 @@ export const createUserProfile = async (email, additionalData = {}) => {
     updated_at: serverTimestamp(),
     ...additionalData
   };
-  
+
   await setDoc(userRef, userData);
-  return userData;
+
+  // Step 2: Fetch the document to get the resolved serverTimestamp
+  const snap = await getDoc(userRef);
+  const data = snap.data();
+  let trialStart = null;
+  if (data && data.trial_start_date && data.trial_start_date.toDate) {
+    trialStart = data.trial_start_date.toDate();
+  } else if (data && data.trial_start_date && data.trial_start_date.seconds) {
+    // fallback if Timestamp object
+    trialStart = new Date(data.trial_start_date.seconds * 1000);
+  }
+  if (trialStart) {
+    const expiresAt = new Date(trialStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+    await updateDoc(userRef, {
+      trial_expires_at: Timestamp.fromDate(expiresAt),
+      updated_at: serverTimestamp(),
+    });
+    // Return the updated data
+    return { ...data, trial_expires_at: Timestamp.fromDate(expiresAt) };
+  }
+  // If for some reason trialStart is not available, just return the initial data
+  return data || userData;
 };
 
 export const getUserProfile = async (email) => {

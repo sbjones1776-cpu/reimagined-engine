@@ -186,6 +186,7 @@ export default function Landing() {
         </motion.div>
       </div>
 
+
       {/* Hero Section */}
       <div className="relative max-w-7xl mx-auto px-4 py-12 md:py-20">
         <div className="text-center">
@@ -216,6 +217,28 @@ export default function Landing() {
               </motion.div>
             </div>
           </motion.div>
+
+          {/* Device Compatibility Banner */}
+          <div
+            style={{
+              background: "linear-gradient(90deg, #6a11cb 0%, #2575fc 100%)",
+              color: "#fff",
+              padding: "14px 0 12px 0",
+              textAlign: "center",
+              fontWeight: "bold",
+              fontSize: "1.1rem",
+              letterSpacing: "0.01em",
+              boxShadow: "0 2px 8px 0 rgba(0,0,0,0.08)",
+              borderBottom: "2px solid #fff",
+              borderRadius: 8,
+              margin: "0 auto 24px auto",
+              maxWidth: 900,
+            }}
+            className="mx-auto mb-8"
+          >
+            <span role="img" aria-label="lightbulb" style={{ marginRight: 8 }}>💡</span>
+            Best Experience: <span style={{ fontWeight: 700 }}>Math Adventure</span> works best on <span style={{ textDecoration: "underline" }}>tablets</span> and <span style={{ textDecoration: "underline" }}>desktop computers</span> for optimal gameplay and features.
+          </div>
 
           {/* Main Headline */}
           <motion.h1
