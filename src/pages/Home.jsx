@@ -1326,6 +1326,20 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 overflow-auto">
         <div className="max-w-7xl mx-auto px-4 py-12">
+          {/* Device Compatibility Notice */}
+          <div className="max-w-3xl mx-auto mb-6">
+            <div className="bg-white/95 backdrop-blur rounded-xl p-4 shadow-lg border-2 border-white/30">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">💡</span>
+                <div className="flex-1">
+                  <p className="text-sm md:text-base text-gray-800">
+                    <strong>Best Experience:</strong> Math Adventure works best on <strong>tablets</strong> and <strong>desktop computers</strong> for optimal gameplay and features.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Header */}
           <div className="text-center mb-12">
             <Logo size="xl" variant="circle" className="mx-auto mb-6" />
