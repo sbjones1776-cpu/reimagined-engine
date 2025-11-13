@@ -10,8 +10,8 @@
  *   node scripts/user-admin.js view user@example.com
  */
 
-const { initializeApp } = require('firebase/app');
-const { getFirestore, doc, getDoc, updateDoc, serverTimestamp, Timestamp } = require('firebase/firestore');
+import { initializeApp } from 'firebase/app';
+import { getFirestore, doc, getDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
 // Firebase config
 const firebaseConfig = {
