@@ -227,8 +227,8 @@ export default function ParentPortal() {
 
   // Check premium access
   React.useEffect(() => {
-    if (enrichedUser && !enrichedUser.hasPremiumAccess) {
-      setShowPremiumLock(true);
+    if (enrichedUser) {
+      setShowPremiumLock(!enrichedUser.hasPremiumAccess);
     }
   }, [enrichedUser]);
 
