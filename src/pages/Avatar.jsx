@@ -222,24 +222,28 @@ export default function Avatar() {
         {/* Display name editor */}
         <div className="mt-4 mx-auto max-w-sm">
           <Label className="text-sm text-gray-600">Display name</Label>
-          <div className="flex gap-2 mt-1">
+          <form className="flex gap-2 mt-1" onSubmit={async (e) => {
+            e.preventDefault();
+            const db = getFirestore(firebaseApp);
+            if (user?.email) {
+              await setDoc(doc(db, 'users', user.email), { full_name: displayName }, { merge: true });
+              queryClient.invalidateQueries({ queryKey: ['user', user.email] });
+              setSaveSuccess(true);
+              setTimeout(() => setSaveSuccess(false), 3000);
+            }
+          }}>
             <Input
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your name"
+              maxLength={32}
+              autoComplete="off"
             />
             <Button
               variant="outline"
-              onClick={async () => {
-                const db = getFirestore(firebaseApp);
-                if (user?.email) {
-                  await setDoc(doc(db, 'users', user.email), { full_name: displayName }, { merge: true });
-                  queryClient.invalidateQueries({ queryKey: ['user', user.email] });
-                  alert('Name saved!');
-                }
-              }}
+              type="submit"
             >Save</Button>
-          </div>
+          </form>
         </div>
       </div>
 
