@@ -1325,21 +1325,19 @@ export default function Home() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-blue-500 overflow-auto">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          {/* Device Compatibility Notice */}
-          <div className="max-w-3xl mx-auto mb-6">
-            <div className="bg-white/95 backdrop-blur rounded-xl p-4 shadow-lg border-2 border-white/30">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">💡</span>
-                <div className="flex-1">
-                  <p className="text-sm md:text-base text-gray-800">
-                    <strong>Best Experience:</strong> Math Adventure works best on <strong>tablets</strong> and <strong>desktop computers</strong> for optimal gameplay and features.
-                  </p>
-                </div>
-              </div>
+        {/* Device Compatibility Notice - Fixed at top */}
+        <div className="bg-gradient-to-r from-blue-500 to-purple-500 py-3 px-4 shadow-lg sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-center gap-3 text-white">
+              <span className="text-2xl">💡</span>
+              <p className="text-xs md:text-sm font-medium text-center">
+                <strong>Best Experience:</strong> Math Adventure works best on <strong>tablets</strong> and <strong>desktop computers</strong> for optimal gameplay and features.
+              </p>
             </div>
           </div>
+        </div>
 
+        <div className="max-w-7xl mx-auto px-4 py-12">
           {/* Header */}
           <div className="text-center mb-12">
             <Logo size="xl" variant="circle" className="mx-auto mb-6" />
@@ -1462,20 +1460,20 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
-      {/* Device Compatibility Notice for Logged-in Users */}
-      <div className="max-w-4xl mx-auto mb-6">
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-3 md:p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl md:text-3xl">💡</span>
-            <div className="flex-1">
-              <p className="text-xs md:text-sm text-gray-800">
-                <strong>Best Experience:</strong> Math Adventure works best on <strong>tablets</strong> and <strong>desktop computers</strong> for optimal gameplay and features.
-              </p>
-            </div>
+    <div className="min-h-screen">
+      {/* Device Compatibility Notice - Fixed at top */}
+      <div className="bg-gradient-to-r from-blue-500 to-purple-500 py-3 px-4 shadow-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center gap-3 text-white">
+            <span className="text-2xl">💡</span>
+            <p className="text-xs md:text-sm font-medium text-center">
+              <strong>Best Experience:</strong> Math Adventure works best on <strong>tablets</strong> and <strong>desktop computers</strong> for optimal gameplay and features.
+            </p>
           </div>
         </div>
       </div>
+
+      <div className="max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
 
       {/* Hero Section */}
       <div className="text-center mb-12">
@@ -1966,6 +1964,7 @@ export default function Home() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
