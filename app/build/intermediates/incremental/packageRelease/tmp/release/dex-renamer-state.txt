@@ -1,4 +1,0 @@
-#Mon Nov 10 15:43:30 CST 2025
-base.0=C\:\\Users\\Bama1\\OneDrive\\Apps\\Designer\\Google Play Console for App\\Android\\math-adventure-9f857897\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
-renamed.0=classes.dex
-path.0=classes.dex
