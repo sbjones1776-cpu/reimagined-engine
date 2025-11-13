@@ -24,3 +24,28 @@ dist-ssr
 *.sw?
 
 .env
+
+# Android / Gradle build outputs and local config
+.gradle/
+local.properties
+**/build/
+/build/
+/app/build/
+captures/
+*.iml
+*.apk
+*.aab
+*.idsig
+*.ap_
+*.keystore
+*.jks
+
+# Android Studio and NDK temp dirs
+.externalNativeBuild/
+**/.cxx/
+
+# Tooling artifacts from upgrade session
+.github/java-upgrade/
+
+# Firebase/Cloud Functions (explicit for nested workspace)
+functions/node_modules/
