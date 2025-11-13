@@ -313,7 +313,7 @@ export default function Layout({ children, currentPageName }) {
               )}
 
               {user && (
-                <div className="block">
+                <div className="hidden lg:block">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className={`${isDarkMode ? 'hover:bg-slate-700 text-gray-50' : 'hover:bg-purple-50 text-gray-900'} h-auto p-2`}>
@@ -327,7 +327,7 @@ export default function Layout({ children, currentPageName }) {
                                   </div>
                                 )}
                                 {petData && (
-                                  <div className="hidden md:block scale-50 origin-center -ml-2">
+                                  <div className="scale-50 origin-center -ml-2">
                                     <PetDisplay
                                       pet={petData}
                                       experience={user?.pet_experience?.[activePet] || 0}
@@ -338,11 +338,11 @@ export default function Layout({ children, currentPageName }) {
                               </React.Suspense>
                             </ChunkErrorBoundary>
                           </div>
-                          <div className="text-left hidden md:block">
+                          <div className="text-left">
                             <p className={`text-sm font-semibold ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
                             <p className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>{user.email}</p>
                           </div>
-                          <ChevronDown className={`hidden md:block w-4 h-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`} />
+                          <ChevronDown className={`w-4 h-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`} />
                         </div>
                       </Button>
                     </DropdownMenuTrigger>
@@ -442,16 +442,16 @@ export default function Layout({ children, currentPageName }) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`lg:hidden ${isDarkMode ? 'text-gray-50 hover:bg-slate-700' : ''}`}
+                className={isDarkMode ? 'text-gray-50 hover:bg-slate-700' : ''}
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </Button>
             </div>
           </div>
 
-          {/* Mobile Menu */}
+          {/* Mobile/Tablet Menu */}
           {mobileMenuOpen && (
-            <div className={`lg:hidden mt-4 pb-4 space-y-2 border-t pt-4 max-h-[calc(100vh-140px)] overflow-y-auto ${isDarkMode ? 'border-slate-700' : ''}`}>
+            <div className={`mt-4 pb-4 space-y-2 border-t pt-4 max-h-[calc(100vh-140px)] overflow-y-auto ${isDarkMode ? 'border-slate-700' : ''}`}>
               {user && (
                 <div className={`${isDarkMode ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-50' : 'bg-gradient-to-r from-purple-50 to-pink-50'} p-4 rounded-xl mb-4`}>
                   <div className="flex items-center gap-3 mb-3">
