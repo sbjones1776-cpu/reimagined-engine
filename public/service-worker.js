@@ -32,7 +32,7 @@
       '/icons/icon-512.png'
     ];
 
-    const APP_SHELL_CACHE = 'app-shell-v3'; // Bump version to force update
+    const APP_SHELL_CACHE = 'app-shell-v4'; // Bump version to force update
 
     // The Util Function to hack URLs of intercepted requests
     const getFixedUrl = (req) => {
