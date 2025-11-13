@@ -57,10 +57,10 @@ android {
         applicationId "app.web.math_adventure_app.twa"
         minSdkVersion 21
         targetSdkVersion 35
-    // Bumped versionCode for Google Play (previous 5 used). Increment when releasing.
-    // Version 7: Trial unlock fixes, grade K default, green TTS button, assetlinks updated
-    versionCode 7
-    versionName "Math Adv App Update 4"
+    // Bumped versionCode for Google Play. Increment when releasing.
+    // Version 8: Java 21 upgrade and UX notices
+    versionCode 8
+    versionName "Math Adv App Update 8"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
