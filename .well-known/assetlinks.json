@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.web.math_adventure_app.twa",
+      "sha256_cert_fingerprints": [
+        "30:14:6A:7D:AC:75:8F:45:08:7E:A2:E0:86:42:A3:E6:96:50:71:BF:74:75:19:4B:AA:F9:92:32:2E:90:02:59"
+      ]
+    }
+  }
+]

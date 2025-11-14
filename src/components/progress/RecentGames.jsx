@@ -73,7 +73,20 @@ export default function RecentGames({ progress }) {
                   ))}
                 </div>
                 <div className="text-sm text-gray-500">
-                  {format(new Date(game.created_date), "MMM d, h:mm a")}
+                  {(() => {
+                    // Prefer created_date, fallback to completed_at (Firestore Timestamp or ISO)
+                    let dateVal = game.created_date || game.completed_at;
+                    // Firestore Timestamp object
+                    if (dateVal && typeof dateVal === 'object' && typeof dateVal.toDate === 'function') {
+                      dateVal = dateVal.toDate();
+                    }
+                    const dateObj = dateVal ? new Date(dateVal) : null;
+                    if (dateObj && !isNaN(dateObj.getTime())) {
+                      return format(dateObj, "MMM d, h:mm a");
+                    } else {
+                      return "-";
+                    }
+                  })()}
                 </div>
               </div>
             </div>
