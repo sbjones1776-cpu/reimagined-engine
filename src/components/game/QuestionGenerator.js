@@ -459,7 +459,7 @@ function generateAddition(level) {
     question: `${num1} + ${num2}`,
     answer,
     options: generateOptions(answer),
-    explanation: `To add ${num1} + ${num2}, combine the two numbers. The answer is ${answer}.`,
+    explanation: generateStepByStepExplanation({ operation: 'addition', operands: [num1, num2], correct: answer }),
   };
 }
 
@@ -480,7 +480,7 @@ function generateSubtraction(level) {
     question: `${num1} - ${num2}`,
     answer,
     options: generateOptions(answer),
-    explanation: `To subtract ${num2} from ${num1}, the answer is ${answer}.`,
+    explanation: generateStepByStepExplanation({ operation: 'subtraction', operands: [num1, num2], correct: answer }),
   };
 }
 
@@ -501,7 +501,7 @@ function generateMultiplication(level) {
     question: `${num1} × ${num2}`,
     answer,
     options: generateOptions(answer),
-    explanation: `${num1} times ${num2} equals ${answer}.`,
+    explanation: generateStepByStepExplanation({ operation: 'multiplication', operands: [num1, num2], correct: answer }),
   };
 }
 
@@ -522,7 +522,7 @@ function generateDivision(level) {
     question: `${dividend} ÷ ${divisor}`,
     answer: quotient,
     options: generateOptions(quotient),
-    explanation: `${dividend} divided by ${divisor} equals ${quotient}.`,
+    explanation: generateStepByStepExplanation({ operation: 'division', operands: [dividend, divisor], correct: quotient }),
   };
 }
 
@@ -623,7 +623,7 @@ function generateOrderOperations(level) {
     question: problem.q,
     answer: problem.a,
     options: problem.opts,
-    explanation: problem.exp,
+    explanation: generateStepByStepExplanation({ operation: 'orderOfOperations', operands: [], correct: problem.a }),
   };
 }
 
@@ -643,7 +643,7 @@ function generateIntegers(level) {
     question: `${num1} + (${num2})`,
     answer,
     options: generateOptions(answer),
-    explanation: `Adding integers: ${num1} + ${num2} = ${answer}.`,
+    explanation: generateStepByStepExplanation({ operation: 'integer', operands: [num1, num2], correct: answer }),
   };
 }
 
@@ -672,7 +672,7 @@ function generateExponents(level) {
     question: problem.q,
     answer: problem.a,
     options: problem.opts,
-    explanation: problem.exp,
+    explanation: generateStepByStepExplanation({ operation: 'exponent', operands: [], correct: problem.a }),
   };
 }
 
@@ -700,7 +700,7 @@ function generateFractions(level) {
     question: problem.q,
     answer: problem.a,
     options: problem.opts,
-    explanation: problem.exp,
+    explanation: generateStepByStepExplanation({ operation: 'fraction', operands: [], correct: problem.a }),
   };
 }
 
@@ -722,7 +722,7 @@ function generateDecimals(level) {
     question: operation === "+" ? `${num1} + ${num2}` : `${a} - ${b}`,
     answer,
     options: generateOptions(answer, range.decimals),
-    explanation: `Line up decimal points and calculate.`,
+    explanation: generateStepByStepExplanation({ operation: operation === "+" ? 'addition' : 'subtraction', operands: [a, b], correct: answer }),
   };
 }
 
@@ -749,7 +749,7 @@ function generatePercentages(level) {
     question: problem.q,
     answer: problem.a,
     options: problem.opts,
-    explanation: problem.exp,
+    explanation: generateStepByStepExplanation({ operation: 'percentages', operands: [], correct: problem.a }),
   };
 }
 
@@ -783,7 +783,7 @@ function generateWordProblem(level) {
     question,
     answer,
     options: generateOptions(answer),
-    explanation: `Solve step by step to find the answer.`,
+    explanation: generateStepByStepExplanation({ operation: template.operation, operands: [n1, n2], correct: answer }),
   };
 }
 
@@ -806,7 +806,7 @@ function generateMoney(level) {
     question: problem.q,
     answer: problem.a,
     options: problem.opts,
-    explanation: problem.exp,
+    explanation: generateStepByStepExplanation({ operation: 'money', operands: [], correct: problem.a }),
   };
 }
 
@@ -830,7 +830,7 @@ function generateTime(level) {
     question: problem.q,
     answer: problem.a,
     options: problem.opts,
-    explanation: problem.exp,
+    explanation: generateStepByStepExplanation({ operation: 'time', operands: [], correct: problem.a }),
   };
 }
 
@@ -853,7 +853,7 @@ function generateMeasurement(level) {
     question: problem.q,
     answer: problem.a,
     options: problem.opts,
-    explanation: problem.exp,
+    explanation: generateStepByStepExplanation({ operation: 'measurement', operands: [], correct: problem.a }),
   };
 }
 
@@ -1754,7 +1754,7 @@ function generateFractionsEquivalent(level) {
     question: `What fraction is equivalent to ${numerator}/${denominator}?`,
     answer,
     options: [answer, `${numerator + 1}/${denominator + 1}`, `${numerator * 2}/${denominator * 3}`, `${numerator}/${denominator * 2}`],
-    explanation: `Multiply both by ${multiplier}: ${numerator}/${denominator} = ${answer}.`,
+    explanation: generateStepByStepExplanation({ operation: 'fractionEquivalent', operands: [numerator, denominator, multiplier], correct: answer }),
   };
 }
 
@@ -1769,7 +1769,7 @@ function generateFractionsSimplify(level) {
     question: `Simplify ${numerator}/${denominator}:`,
     answer,
     options: [answer, `${numerator - 1}/${denominator - 1}`, `${numerator}/${denominator + 1}`, '1/2'],
-    explanation: `Divide both by ${divisor}: ${numerator}/${denominator} = ${answer}.`,
+    explanation: generateStepByStepExplanation({ operation: 'fractionSimplify', operands: [numerator, denominator, divisor], correct: answer }),
   };
 }
 
@@ -1786,7 +1786,7 @@ function generateFractionsCompare(level) {
     question: `${num1}/${denom1} ___ ${num2}/${denom2}. Which symbol?`,
     answer,
     options: ['>', '<', '='],
-    explanation: `${num1}/${denom1} ${answer} ${num2}/${denom2}.`,
+    explanation: generateStepByStepExplanation({ operation: 'fractionCompare', operands: [num1, denom1, num2, denom2], correct: answer }),
   };
 }
 
@@ -1801,7 +1801,7 @@ function generateFractionsAddSubtract(level) {
     question: `${num1}/${denominator} ${operation} ${num2}/${denominator} = ?`,
     answer,
     options: [answer, `${num1}/${num2}`, `${num1 + num2}/${denominator * 2}`, `1/${denominator}`],
-    explanation: `Same denominator: ${answer}.`,
+    explanation: generateStepByStepExplanation({ operation: 'fractionAddSubtract', operands: [num1, num2, denominator, operation], correct: answer }),
   };
 }
 
@@ -1819,7 +1819,7 @@ function generateFractionsMultiplyDivide(level) {
     question: `${num1}/${denom1} ${operation} ${num2}/${denom2} = ?`,
     answer,
     options: [answer, `${num1}/${denom1}`, `${num2}/${denom2}`, '1/2'],
-    explanation: operation === '×' ? 'Multiply numerators and denominators.' : 'Flip and multiply.',
+    explanation: generateStepByStepExplanation({ operation: 'fractionMultiplyDivide', operands: [num1, denom1, num2, denom2, operation], correct: answer }),
   };
 }
 
