@@ -655,9 +655,14 @@ export default function DailyChallenge() {
             {/* TTS for the whole step-by-step */}
             {(() => {
               const built = buildStepByStep(explanationData.questionObj, explanationData.correctAnswer);
+              // Combine steps and explanation for TTS
+              let ttsText = built.tts;
+              if (explanationData.explanation) {
+                ttsText += '\n' + explanationData.explanation;
+              }
               return (
                 <div className="mb-4">
-                  <TextToSpeech text={built.tts} style="button" label="🔊 Read the steps" />
+                  <TextToSpeech text={ttsText} style="button" label="🔊 Read the steps & explanation" />
                 </div>
               );
             })()}

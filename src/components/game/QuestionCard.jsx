@@ -79,82 +79,70 @@ export default function QuestionCard({ question, onAnswer, questionNumber }) {
       </Card>
       {/* Question summary TTS */}
       <div className="mt-4 flex justify-center">
-        <button
-          onClick={() => {
-            const text = mathToSpeech(`Question ${questionNumber}: ${question.question}. Possible answers are: ${displayOptions.join(', ')}.`);
-            if (!("speechSynthesis" in window)) {
-              alert("Text-to-speech is not supported in this browser.");
-              return;
-            }
-            window.speechSynthesis.cancel();
-            
-            const speakWithFemaleVoice = () => {
-              const utterance = new window.SpeechSynthesisUtterance(text);
-              try {
-                const langPref = localStorage.getItem('tts.lang') === 'es' ? 'es' : 'en';
-                utterance.lang = langPref === 'es' ? 'es-ES' : 'en-US';
-                const savedRate = parseFloat(localStorage.getItem('tts.rate'));
-                utterance.rate = isNaN(savedRate) ? 1.0 : Math.min(2, Math.max(0.1, savedRate));
-                utterance.pitch = 1.2; // Higher pitch for more feminine sound
-                
-                // Get all available voices
-                const voices = window.speechSynthesis.getVoices();
-                console.log('Available voices:', voices.map(v => v.name));
-                
-                const langVoices = voices.filter(v => (v.lang || '').toLowerCase().startsWith(langPref));
-                const femaleNames = ['emma', 'female', 'woman', 'girl', 'zira', 'jenny', 'olivia', 'sonia', 'ana', 'isabella', 'sara', 'sofia', 'monica', 'paulina', 'samantha', 'victoria', 'heera', 'veena'];
-                const maleNames = ['david', 'male', 'man', 'boy', 'mark', 'james', 'richard', 'thomas', 'daniel', 'george', 'michael'];
-                
-                // Priority 1: Try to find Emma
-                let voice = langVoices.find(v => v.name.toLowerCase().includes('emma'));
-                console.log('Emma voice:', voice?.name);
-                
-                // Priority 2: Find any explicitly female voice
-                if (!voice) {
-                  voice = langVoices.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n)));
-                  console.log('Female voice found:', voice?.name);
-                }
-                
-                // Priority 3: Filter out ALL male voices
-                if (!voice) {
-                  const nonMaleVoices = langVoices.filter(v => !maleNames.some(m => v.name.toLowerCase().includes(m)));
-                  voice = nonMaleVoices[0];
-                  console.log('Non-male voice:', voice?.name);
-                }
-                
-                // Priority 4: Search ALL system voices (not just lang-filtered) for female
-                if (!voice) {
-                  voice = voices.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n)));
-                  console.log('Any female voice:', voice?.name);
-                }
-                
-                if (voice) {
-                  utterance.voice = voice;
-                  console.log('Selected voice:', voice.name);
-                } else {
-                  console.warn('No female voice found, will use default');
-                }
-              } catch (e) {
-                console.error('Voice selection error:', e);
-                utterance.lang = 'en-US';
-                utterance.rate = 1.0;
-                utterance.pitch = 1.2;
+        <div className="flex gap-4">
+          <button
+            onClick={() => {
+              const text = mathToSpeech(`Question ${questionNumber}: ${question.question}. Possible answers are: ${displayOptions.join(', ')}.`);
+              if (!("speechSynthesis" in window)) {
+                alert("Text-to-speech is not supported in this browser.");
+                return;
               }
-              window.speechSynthesis.speak(utterance);
-            };
-            
-            // Ensure voices are loaded before speaking
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length === 0) {
-              window.speechSynthesis.addEventListener('voiceschanged', speakWithFemaleVoice, { once: true });
-            } else {
-              speakWithFemaleVoice();
-            }
-          }}
-          className="px-6 py-3 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-4 border-green-300"
-        >
-          🔊 Read it to Me
-        </button>
+              window.speechSynthesis.cancel();
+              const speakWithFemaleVoice = () => {
+                const utterance = new window.SpeechSynthesisUtterance(text);
+                try {
+                  const langPref = localStorage.getItem('tts.lang') === 'es' ? 'es' : 'en';
+                  utterance.lang = langPref === 'es' ? 'es-ES' : 'en-US';
+                  const savedRate = parseFloat(localStorage.getItem('tts.rate'));
+                  utterance.rate = isNaN(savedRate) ? 1.0 : Math.min(2, Math.max(0.1, savedRate));
+                  utterance.pitch = 1.2;
+                  const voices = window.speechSynthesis.getVoices();
+                  const langVoices = voices.filter(v => (v.lang || '').toLowerCase().startsWith(langPref));
+                  const femaleNames = ['emma', 'female', 'woman', 'girl', 'zira', 'jenny', 'olivia', 'sonia', 'ana', 'isabella', 'sara', 'sofia', 'monica', 'paulina', 'samantha', 'victoria', 'heera', 'veena'];
+                  const maleNames = ['david', 'male', 'man', 'boy', 'mark', 'james', 'richard', 'thomas', 'daniel', 'george', 'michael'];
+                  let voice = langVoices.find(v => v.name.toLowerCase().includes('emma'));
+                  if (!voice) {
+                    voice = langVoices.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n)));
+                  }
+                  if (!voice) {
+                    const nonMaleVoices = langVoices.filter(v => !maleNames.some(m => v.name.toLowerCase().includes(m)));
+                    voice = nonMaleVoices[0];
+                  }
+                  if (!voice) {
+                    voice = voices.find(v => femaleNames.some(n => v.name.toLowerCase().includes(n)));
+                  }
+                  if (voice) {
+                    utterance.voice = voice;
+                  }
+                } catch (e) {
+                  utterance.lang = 'en-US';
+                  utterance.rate = 1.0;
+                  utterance.pitch = 1.2;
+                }
+                window.speechSynthesis.speak(utterance);
+              };
+              const voices = window.speechSynthesis.getVoices();
+              if (voices.length === 0) {
+                window.speechSynthesis.addEventListener('voiceschanged', speakWithFemaleVoice, { once: true });
+              } else {
+                speakWithFemaleVoice();
+              }
+            }}
+            className="px-6 py-3 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-4 border-green-300"
+          >
+            🔊 Read it to Me
+          </button>
+          <button
+            onClick={() => {
+              if ("speechSynthesis" in window) {
+                window.speechSynthesis.cancel();
+              }
+            }}
+            className="px-6 py-3 bg-gradient-to-r from-red-200 to-red-400 hover:from-red-300 hover:to-red-500 text-white font-bold text-lg rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-4 border-red-200"
+          >
+            ⏹️ Stop Read
+          </button>
+        </div>
       </div>
     </motion.div>
   );
