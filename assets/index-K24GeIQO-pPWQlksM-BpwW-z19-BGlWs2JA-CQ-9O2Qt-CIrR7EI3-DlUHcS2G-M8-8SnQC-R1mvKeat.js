@@ -1,0 +1,1 @@
+import{C as e}from"./index-SstUZUvR.js";function o(r,[u,t]){return Math.min(t,Math.max(u,r))}function c(r){const u=e.useRef({value:r,previous:r});return e.useMemo(()=>(u.current.value!==r&&(u.current.previous=u.current.value,u.current.value=r),u.current.previous),[r])}export{c,o};
