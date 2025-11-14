@@ -312,131 +312,16 @@ export default function Layout({ children, currentPageName }) {
                 </Link>
               )}
 
-              {user && (
-                <div className="hidden lg:block">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className={`${isDarkMode ? 'hover:bg-slate-700 text-gray-50' : 'hover:bg-purple-50 text-gray-900'} h-auto p-2`}>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            <ChunkErrorBoundary>
-                              <React.Suspense fallback={<div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" /> }>
-                                {avatarData && (
-                                  <div className="scale-75 origin-center">
-                                    <AvatarDisplay avatarData={avatarData} size="small" />
-                                  </div>
-                                )}
-                                {petData && (
-                                  <div className="scale-50 origin-center -ml-2">
-                                    <PetDisplay
-                                      pet={petData}
-                                      experience={user?.pet_experience?.[activePet] || 0}
-                                      size="small"
-                                    />
-                                  </div>
-                                )}
-                              </React.Suspense>
-                            </ChunkErrorBoundary>
-                          </div>
-                          <div className="text-left">
-                            <p className={`text-sm font-semibold ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
-                            <p className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>{user.email}</p>
-                          </div>
-                          <ChevronDown className={`w-4 h-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`} />
-                        </div>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className={`${isDarkMode ? 'bg-slate-800 border-slate-700 text-gray-50' : 'bg-white'} w-56`}>
-                      <DropdownMenuLabel>
-                        <div className="flex flex-col space-y-1">
-                          <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
-                          <p className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>{user.email}</p>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator className={isDarkMode ? 'bg-slate-700' : ''} />
-                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("Avatar")} className="cursor-pointer">
-                          <UserIcon className="w-4 h-4 mr-2" />
-                          View Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("Messages")} className="cursor-pointer">
-                          <Mail className="w-4 h-4 mr-2" />
-                          Messages
-                          {unreadMessageCount > 0 && (
-                            <Badge className="ml-auto bg-blue-500 text-white text-xs">
-                              {unreadMessageCount}
-                            </Badge>
-                          )}
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("DailyChallenge")} className="cursor-pointer">
-                          <Calendar className="w-4 h-4 mr-2" />
-                          Daily Challenge
-                          {!hasCompletedToday && (
-                            <Badge className="ml-auto bg-red-500 text-white text-xs animate-pulse">!</Badge>
-                          )}
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("AITutor")} className="cursor-pointer">
-                          <Brain className="w-4 h-4 mr-2" />
-                          AI Tutor
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("Progress")} className="cursor-pointer">
-                          <BarChart3 className="w-4 h-4 mr-2" />
-                          Progress & Stats
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("Shop")} className="cursor-pointer">
-                          <ShoppingBag className="w-4 h-4 mr-2" />
-                          Rewards Shop
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("ParentPortal")} className="cursor-pointer">
-                          <GraduationCap className="w-4 h-4 mr-2" />
-                          Parent Portal
-                          {user?.is_parent_mode && (
-                            <Badge className="ml-2 bg-blue-500 text-white text-xs">ON</Badge>
-                          )}
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className={isDarkMode ? 'bg-slate-700' : ''} />
-                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("Settings")} className="cursor-pointer">
-                          <Settings className="w-4 h-4 mr-2" />
-                          App Settings
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                        <Link to={createPageUrl("Subscription")} className="cursor-pointer">
-                          <CreditCard className="w-4 h-4 mr-2" />
-                          Manage Subscription
-                        </Link>
-                      </DropdownMenuItem>
-                      {isSubscribed && user?.subscription_auto_renew !== false && (
-                        <DropdownMenuItem asChild className={isDarkMode ? 'focus:bg-slate-700' : ''}>
-                          <Link to={createPageUrl("Subscription")} className="cursor-pointer text-orange-600 focus:text-orange-600">
-                            <XCircle className="w-4 h-4 mr-2" />
-                            Cancel Subscription
-                          </Link>
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator className={isDarkMode ? 'bg-slate-700' : ''} />
-                      <DropdownMenuItem onClick={handleLogout} className={`${isDarkMode ? 'text-red-400 focus:bg-slate-700 focus:text-red-400' : 'text-red-600 focus:text-red-600'} cursor-pointer`}>
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Logout
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
+              {/* Hamburger menu is now always visible for all screen sizes */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className={`ml-2 ${isDarkMode ? 'text-gray-50 hover:bg-slate-700' : ''}`}
+                aria-label="Open navigation menu"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </Button>
 
               <Button
                 variant="ghost"
@@ -449,9 +334,10 @@ export default function Layout({ children, currentPageName }) {
             </div>
           </div>
 
-          {/* Mobile/Tablet Menu */}
+          {/* Hamburger Menu (now for all screen sizes) */}
           {mobileMenuOpen && (
-            <div className={`mt-4 pb-4 space-y-2 border-t pt-4 max-h-[calc(100vh-140px)] overflow-y-auto ${isDarkMode ? 'border-slate-700' : ''}`}>
+            <div className={`fixed inset-0 z-50 bg-black/40 flex justify-end`}>
+              <div className={`w-full max-w-xs h-full bg-white dark:bg-slate-800 shadow-xl p-6 overflow-y-auto ${isDarkMode ? 'border-l border-slate-700' : ''}`}>
               {user && (
                 <div className={`${isDarkMode ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-50' : 'bg-gradient-to-r from-purple-50 to-pink-50'} p-4 rounded-xl mb-4`}>
                   <div className="flex items-center gap-3 mb-3">
@@ -467,7 +353,7 @@ export default function Layout({ children, currentPageName }) {
                       <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{user.email}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mb-2">
                     <Badge className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
                       <Coins className="w-3 h-3 mr-1" />
                       {user.coins || 0} Coins
@@ -478,6 +364,48 @@ export default function Layout({ children, currentPageName }) {
                         {subscriptionTier === "family_teacher" ? "Family" : subscriptionTier === "premium_player" ? "Premium" : "Parent"}
                       </Badge>
                     )}
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <NavLink to="Avatar" icon={UserIcon} label="Profile" isDarkMode={isDarkMode} />
+                    <NavLink to="Messages" icon={Mail} label="Messages" badge={unreadMessageCount > 0 ? unreadMessageCount : null} badgeColor="blue" isDarkMode={isDarkMode} />
+                    <NavLink to="DailyChallenge" icon={Calendar} label="Daily Challenge" badge={!hasCompletedToday ? "!" : null} isDarkMode={isDarkMode} />
+                    <NavLink to="AITutor" icon={Brain} label="AI Tutor" isDarkMode={isDarkMode} />
+                    <NavLink to="Progress" icon={Trophy} label="Progress" isDarkMode={isDarkMode} />
+                    <NavLink to="Leaderboards" icon={Award} label="Leaderboards" isDarkMode={isDarkMode} />
+                    <NavLink to="Shop" icon={ShoppingBag} label="Shop" isDarkMode={isDarkMode} />
+                    <NavLink to="TeamChallenges" icon={Users} label="Team Challenges" isDarkMode={isDarkMode} />
+                    <NavLink to="ParentPortal" icon={GraduationCap} label="Parent Portal" badge={user?.is_parent_mode ? "ON" : null} badgeColor="blue" isDarkMode={isDarkMode} />
+                    <Link to={createPageUrl("Settings")} onClick={() => setMobileMenuOpen(false)}>
+                      <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-50 hover:bg-gray-700' : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                        <Settings className="w-5 h-5" />
+                        <span className="font-medium">App Settings</span>
+                      </div>
+                    </Link>
+                    <Link to={createPageUrl("Subscription")}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full block"
+                    >
+                      <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${
+                        subscriptionTier !== "free"
+                          ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
+                          : "bg-gradient-to-r from-purple-500 to-pink-500 text-white animate-pulse"
+                      }`}>
+                        <Crown className="w-5 h-5" />
+                        <span className="font-medium">
+                          {subscriptionTier !== "free" ? "Manage Subscription" : "Upgrade to Premium"}
+                        </span>
+                      </div>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-red-900/20 text-red-400 hover:bg-red-900/40' : 'bg-red-50 text-red-600 hover:bg-red-100'} transition-colors`}
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span className="font-medium">Logout</span>
+                    </button>
                   </div>
                 </div>
               )}
