@@ -86,21 +86,32 @@ export default function DailyLoginRewards() {
     if (!user) return false;
     const today = format(startOfDay(new Date()), "yyyy-MM-dd");
     const lastLogin = user.last_login_date;
-    
+
     if (!lastLogin) return true;
     if (lastLogin === today) return false;
-    
-    // Check if streak is broken
-    const lastLoginDate = new Date(lastLogin);
+
+    // Defensive: check for invalid date
+    let lastLoginDate;
+    try {
+      lastLoginDate = new Date(lastLogin);
+      if (isNaN(lastLoginDate.getTime())) return true; // treat as never logged in
+    } catch (e) {
+      return true;
+    }
     const todayDate = startOfDay(new Date());
     const daysDiff = differenceInDays(todayDate, lastLoginDate);
-    
     return daysDiff === 1;
   };
 
   const isStreakBroken = () => {
     if (!user?.last_login_date) return false;
-    const lastLoginDate = new Date(user.last_login_date);
+    let lastLoginDate;
+    try {
+      lastLoginDate = new Date(user.last_login_date);
+      if (isNaN(lastLoginDate.getTime())) return false;
+    } catch (e) {
+      return false;
+    }
     const todayDate = startOfDay(new Date());
     const daysDiff = differenceInDays(todayDate, lastLoginDate);
     return daysDiff > 1;
@@ -114,6 +125,14 @@ export default function DailyLoginRewards() {
   const hasClaimedToday = () => {
     if (!user?.last_login_date) return false;
     const today = format(startOfDay(new Date()), "yyyy-MM-dd");
+    // Defensive: if last_login_date is invalid, treat as not claimed
+    let lastLoginDate;
+    try {
+      lastLoginDate = new Date(user.last_login_date);
+      if (isNaN(lastLoginDate.getTime())) return false;
+    } catch (e) {
+      return false;
+    }
     return user.last_login_date === today;
   };
 
