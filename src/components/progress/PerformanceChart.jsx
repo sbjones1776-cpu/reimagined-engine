@@ -6,12 +6,18 @@ import { TrendingUp } from "lucide-react";
 export default function PerformanceChart({ progress }) {
   // Get last 10 games
   const recentGames = progress.slice(0, 10).reverse();
-  
-  const chartData = recentGames.map((game, index) => ({
-    name: `Game ${index + 1}`,
-    score: game.score,
-    accuracy: Math.round((game.correct_answers / game.total_questions) * 100),
-  }));
+
+  const chartData = recentGames.map((game, index) => {
+    let score = typeof game.score === 'number' ? game.score : 0;
+    let correct = typeof game.correct_answers === 'number' ? game.correct_answers : 0;
+    let total = typeof game.total_questions === 'number' && game.total_questions > 0 ? game.total_questions : 1;
+    let accuracy = Math.round((correct / total) * 100);
+    return {
+      name: `Game ${index + 1}`,
+      score,
+      accuracy,
+    };
+  });
 
   return (
     <Card className="mb-8">
