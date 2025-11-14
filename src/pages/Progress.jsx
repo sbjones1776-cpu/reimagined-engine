@@ -19,6 +19,38 @@ import PerformanceChart from "../components/progress/PerformanceChart";
 import RecentGames from "../components/progress/RecentGames";
 import Logo from "@/components/Logo";
 
+
+// Utility to sanitize a single game object
+function sanitizeGame(game) {
+  // Defensive: ensure all expected fields are present and valid
+  const safe = { ...game };
+  // Dates: created_date, completed_at
+  ["created_date", "completed_at"].forEach((field) => {
+    let val = safe[field];
+    if (val && typeof val === "object" && typeof val.toDate === "function") {
+      val = val.toDate();
+    }
+    if (val && isNaN(new Date(val).getTime())) {
+      safe[field] = null;
+    } else {
+      safe[field] = val;
+    }
+  });
+  // Numbers: score, correct_answers, total_questions, time_taken, stars_earned
+  ["score", "correct_answers", "total_questions", "time_taken", "stars_earned"].forEach((field) => {
+    if (typeof safe[field] !== "number" || isNaN(safe[field])) {
+      safe[field] = 0;
+    }
+  });
+  // Strings: operation, level
+  ["operation", "level"].forEach((field) => {
+    if (typeof safe[field] !== "string") {
+      safe[field] = "";
+    }
+  });
+  return safe;
+}
+
 export default function Progress() {
   const { user } = useFirebaseUser();
 
@@ -48,7 +80,9 @@ export default function Progress() {
     return () => unsubscribe();
   }, [user?.email]);
 
-  const progress = realtimeProgress.length ? realtimeProgress : initialProgress;
+  // Sanitize progress data before using in UI
+  const rawProgress = realtimeProgress.length ? realtimeProgress : initialProgress;
+  const progress = Array.isArray(rawProgress) ? rawProgress.map(sanitizeGame) : [];
 
   const { data: dailyChallenges = [] } = useQuery({
     queryKey: ['userDailyChallenges', user?.email],

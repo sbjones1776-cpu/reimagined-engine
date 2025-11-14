@@ -1,0 +1,1 @@
+import{S as r}from"./index-DElVeBpj.js";function o(e,[u,t]){return Math.min(t,Math.max(u,e))}function c(e){const u=r.useRef({value:e,previous:e});return r.useMemo(()=>(u.current.value!==e&&(u.current.previous=u.current.value,u.current.value=e),u.current.previous),[e])}export{c,o};
