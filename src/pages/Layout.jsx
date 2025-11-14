@@ -16,14 +16,7 @@ import { Button } from "@/components/ui/button";
 import SimpleAuth from "@/components/SimpleAuth";
 import { useUser } from '@/hooks/UserProvider.jsx';
 import TrialBanner from '@/components/TrialBanner.jsx';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
+// DropdownMenu imports removed; only hamburger menu will be used
 const AvatarDisplay = React.lazy(() => import("../components/avatar/AvatarDisplay"));
 const PetDisplay = React.lazy(() => import("../components/rewards/PetDisplay"));
 const InstallPrompt = React.lazy(() => import("../components/InstallPrompt"));
@@ -289,29 +282,6 @@ export default function Layout({ children, currentPageName }) {
                 </Link>
               )}
 
-              {user && (
-                <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-3 py-2 rounded-xl shadow-md">
-                  <Coins className="w-4 h-4" />
-                  <span className="font-bold text-sm">{user.coins || 0}</span>
-                </div>
-              )}
-
-              {subscriptionTier !== "free" ? (
-                <Link to={createPageUrl("Subscription")} className="hidden md:block">
-                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 px-3 py-1.5 cursor-pointer">
-                    <Crown className="w-3 h-3 mr-1" />
-                    {subscriptionTier === "family_teacher" ? "Family" : subscriptionTier === "premium_player" ? "Premium" : "Parent"}
-                  </Badge>
-                </Link>
-              ) : (
-                <Link to={createPageUrl("Subscription")} className="hidden md:block">
-                  <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 px-3 py-1.5 cursor-pointer animate-pulse">
-                    <Crown className="w-3 h-3 mr-1" />
-                    Upgrade
-                  </Badge>
-                </Link>
-              )}
-
               {/* Hamburger menu is now always visible for all screen sizes */}
               <Button
                 variant="ghost"
@@ -322,167 +292,84 @@ export default function Layout({ children, currentPageName }) {
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </Button>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`lg:hidden ${isDarkMode ? 'text-gray-50 hover:bg-slate-700' : ''}`}
-              >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </Button>
             </div>
           </div>
-
-          {/* Hamburger Menu (now for all screen sizes) */}
+          {/* Hamburger Menu (side drawer) for all screen sizes */}
           {mobileMenuOpen && (
             <div className={`fixed inset-0 z-50 bg-black/40 flex justify-end`}>
               <div className={`w-full max-w-xs h-full bg-white dark:bg-slate-800 shadow-xl p-6 overflow-y-auto ${isDarkMode ? 'border-l border-slate-700' : ''}`}>
-              {user && (
-                <div className={`${isDarkMode ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-50' : 'bg-gradient-to-r from-purple-50 to-pink-50'} p-4 rounded-xl mb-4`}>
-                  <div className="flex items-center gap-3 mb-3">
-                    <React.Suspense fallback={null}>
-                      {avatarData && (
-                        <div className="scale-90 origin-center">
-                          <AvatarDisplay avatarData={avatarData} size="small" />
-                        </div>
+                {user && (
+                  <div className={`${isDarkMode ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-50' : 'bg-gradient-to-r from-purple-50 to-pink-50'} p-4 rounded-xl mb-4`}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <React.Suspense fallback={null}>
+                        {avatarData && (
+                          <div className="scale-90 origin-center">
+                            <AvatarDisplay avatarData={avatarData} size="small" />
+                          </div>
+                        )}
+                      </React.Suspense>
+                      <div>
+                        <p className={`font-bold ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
+                        <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{user.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
+                        <Coins className="w-3 h-3 mr-1" />
+                        {user.coins || 0} Coins
+                      </Badge>
+                      {subscriptionTier !== "free" && (
+                        <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                          <Crown className="w-3 h-3 mr-1" />
+                          {subscriptionTier === "family_teacher" ? "Family" : subscriptionTier === "premium_player" ? "Premium" : "Parent"}
+                        </Badge>
                       )}
-                    </React.Suspense>
-                    <div>
-                      <p className={`font-bold ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
-                      <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{user.email}</p>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <NavLink to="Avatar" icon={UserIcon} label="Profile" isDarkMode={isDarkMode} />
+                      <NavLink to="Messages" icon={Mail} label="Messages" badge={unreadMessageCount > 0 ? unreadMessageCount : null} badgeColor="blue" isDarkMode={isDarkMode} />
+                      <NavLink to="DailyChallenge" icon={Calendar} label="Daily Challenge" badge={!hasCompletedToday ? "!" : null} isDarkMode={isDarkMode} />
+                      <NavLink to="AITutor" icon={Brain} label="AI Tutor" isDarkMode={isDarkMode} />
+                      <NavLink to="Progress" icon={Trophy} label="Progress" isDarkMode={isDarkMode} />
+                      <NavLink to="Leaderboards" icon={Award} label="Leaderboards" isDarkMode={isDarkMode} />
+                      <NavLink to="Shop" icon={ShoppingBag} label="Shop" isDarkMode={isDarkMode} />
+                      <NavLink to="TeamChallenges" icon={Users} label="Team Challenges" isDarkMode={isDarkMode} />
+                      <NavLink to="ParentPortal" icon={GraduationCap} label="Parent Portal" badge={user?.is_parent_mode ? "ON" : null} badgeColor="blue" isDarkMode={isDarkMode} />
+                      <Link to={createPageUrl("Settings")} onClick={() => setMobileMenuOpen(false)}>
+                        <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-50 hover:bg-gray-700' : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:bg-gray-300'}`}>
+                          <Settings className="w-5 h-5" />
+                          <span className="font-medium">App Settings</span>
+                        </div>
+                      </Link>
+                      <Link to={createPageUrl("Subscription")}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="w-full block"
+                      >
+                        <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${
+                          subscriptionTier !== "free"
+                            ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
+                            : "bg-gradient-to-r from-purple-500 to-pink-500 text-white animate-pulse"
+                        }`}>
+                          <Crown className="w-5 h-5" />
+                          <span className="font-medium">
+                            {subscriptionTier !== "free" ? "Manage Subscription" : "Upgrade to Premium"}
+                          </span>
+                        </div>
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-red-900/20 text-red-400 hover:bg-red-900/40' : 'bg-red-50 text-red-600 hover:bg-red-100'} transition-colors`}
+                      >
+                        <LogOut className="w-5 h-5" />
+                        <span className="font-medium">Logout</span>
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
-                      <Coins className="w-3 h-3 mr-1" />
-                      {user.coins || 0} Coins
-                    </Badge>
-                    {subscriptionTier !== "free" && (
-                      <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                        <Crown className="w-3 h-3 mr-1" />
-                        {subscriptionTier === "family_teacher" ? "Family" : subscriptionTier === "premium_player" ? "Premium" : "Parent"}
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <NavLink to="Avatar" icon={UserIcon} label="Profile" isDarkMode={isDarkMode} />
-                    <NavLink to="Messages" icon={Mail} label="Messages" badge={unreadMessageCount > 0 ? unreadMessageCount : null} badgeColor="blue" isDarkMode={isDarkMode} />
-                    <NavLink to="DailyChallenge" icon={Calendar} label="Daily Challenge" badge={!hasCompletedToday ? "!" : null} isDarkMode={isDarkMode} />
-                    <NavLink to="AITutor" icon={Brain} label="AI Tutor" isDarkMode={isDarkMode} />
-                    <NavLink to="Progress" icon={Trophy} label="Progress" isDarkMode={isDarkMode} />
-                    <NavLink to="Leaderboards" icon={Award} label="Leaderboards" isDarkMode={isDarkMode} />
-                    <NavLink to="Shop" icon={ShoppingBag} label="Shop" isDarkMode={isDarkMode} />
-                    <NavLink to="TeamChallenges" icon={Users} label="Team Challenges" isDarkMode={isDarkMode} />
-                    <NavLink to="ParentPortal" icon={GraduationCap} label="Parent Portal" badge={user?.is_parent_mode ? "ON" : null} badgeColor="blue" isDarkMode={isDarkMode} />
-                    <Link to={createPageUrl("Settings")} onClick={() => setMobileMenuOpen(false)}>
-                      <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-50 hover:bg-gray-700' : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:bg-gray-300'}`}>
-                        <Settings className="w-5 h-5" />
-                        <span className="font-medium">App Settings</span>
-                      </div>
-                    </Link>
-                    <Link to={createPageUrl("Subscription")}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="w-full block"
-                    >
-                      <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${
-                        subscriptionTier !== "free"
-                          ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
-                          : "bg-gradient-to-r from-purple-500 to-pink-500 text-white animate-pulse"
-                      }`}>
-                        <Crown className="w-5 h-5" />
-                        <span className="font-medium">
-                          {subscriptionTier !== "free" ? "Manage Subscription" : "Upgrade to Premium"}
-                        </span>
-                      </div>
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        handleLogout();
-                      }}
-                      className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-red-900/20 text-red-400 hover:bg-red-900/40' : 'bg-red-50 text-red-600 hover:bg-red-100'} transition-colors`}
-                    >
-                      <LogOut className="w-5 h-5" />
-                      <span className="font-medium">Logout</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <NavLink to="Home" icon={Home} label="Home" isDarkMode={isDarkMode} />
-              <NavLink
-                to="DailyChallenge"
-                icon={Calendar}
-                label="Daily Challenge"
-                badge={!hasCompletedToday ? "!" : null}
-                isDarkMode={isDarkMode}
-              />
-              <NavLink to="Progress" icon={Trophy} label="Progress" isDarkMode={isDarkMode} />
-              <NavLink to="AITutor" icon={Brain} label="AI Tutor" isDarkMode={isDarkMode} />
-              <NavLink
-                to="Messages"
-                icon={Mail}
-                label="Messages"
-                badge={unreadMessageCount > 0 ? unreadMessageCount : null}
-                badgeColor="blue"
-                isDarkMode={isDarkMode}
-              />
-              <NavLink to="Leaderboards" icon={Award} label="Leaderboards" isDarkMode={isDarkMode} />
-              <NavLink to="Shop" icon={ShoppingBag} label="Shop" isDarkMode={isDarkMode} />
-              <NavLink to="TeamChallenges" icon={Users} label="Team Challenges" isDarkMode={isDarkMode} />
-              <NavLink
-                to="ParentPortal"
-                icon={GraduationCap}
-                label="Parent Portal"
-                badge={user?.is_parent_mode ? "ON" : null}
-                badgeColor="blue"
-                isDarkMode={isDarkMode}
-              />
-              <NavLink to="Avatar" icon={UserIcon} label="Profile" isDarkMode={isDarkMode} />
-
-              <div className={`pt-2 mt-2 border-t ${isDarkMode ? 'border-slate-700' : ''}`}>
-                <Link to={createPageUrl("Settings")} onClick={() => setMobileMenuOpen(false)}>
-                  <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-50 hover:bg-gray-700' : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:bg-gray-300'}`}>
-                    <Settings className="w-5 h-5" />
-                    <span className="font-medium">App Settings</span>
-                  </div>
-                </Link>
+                )}
               </div>
-
-              <div className={`pt-2 border-t ${isDarkMode ? 'border-slate-700' : ''}`}>
-                <Link
-                  to={createPageUrl("Subscription")}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full block"
-                >
-                  <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${
-                    subscriptionTier !== "free"
-                      ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
-                      : "bg-gradient-to-r from-purple-500 to-pink-500 text-white animate-pulse"
-                  }`}>
-                    <Crown className="w-5 h-5" />
-                    <span className="font-medium">
-                      {subscriptionTier !== "free" ? "Manage Subscription" : "Upgrade to Premium"}
-                    </span>
-                  </div>
-                </Link>
-              </div>
-
-              {user && (
-                <div className={`pt-2 border-t ${isDarkMode ? 'border-slate-700' : ''}`}>
-                  <button
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      handleLogout();
-                    }}
-                    className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-red-900/20 text-red-400 hover:bg-red-900/40' : 'bg-red-50 text-red-600 hover:bg-red-100'} transition-colors`}
-                  >
-                    <LogOut className="w-5 h-5" />
-                    <span className="font-medium">Logout</span>
-                  </button>
-                </div>
-              )}
             </div>
           )}
         </div>
