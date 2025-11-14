@@ -1,4 +1,5 @@
 // Question Generator for all math concepts
+import { generateStepByStepExplanation } from '../../lib/explanations';
 // Comprehensive K-8 Math Curriculum (corrected types and options)
 
 /**
