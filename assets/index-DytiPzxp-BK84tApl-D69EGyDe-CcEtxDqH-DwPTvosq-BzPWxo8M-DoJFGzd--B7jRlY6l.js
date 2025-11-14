@@ -1,0 +1,1 @@
+import{S as i,x as o,aq as d}from"./index-DS6ADruV.js";var t=Object.freeze({position:"absolute",border:0,width:1,height:1,padding:0,margin:-1,overflow:"hidden",clip:"rect(0, 0, 0, 0)",whiteSpace:"nowrap",wordWrap:"normal"}),n="VisuallyHidden",e=i.forwardRef((r,a)=>o.jsx(d.span,{...r,ref:a,style:{...t,...r.style}}));e.displayName=n;var s=e;export{t as d,s};

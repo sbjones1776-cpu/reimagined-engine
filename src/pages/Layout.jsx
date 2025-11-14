@@ -10,13 +10,13 @@ import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 // TODO: Refactor to use Firebase or new backend. Base44 import removed.
-import { Home, Trophy, Calendar, User as UserIcon, ShoppingBag, Menu, X, Crown, Coins, Award, Users, GraduationCap, Sparkles, LogOut, Settings, BarChart3, CreditCard, ChevronDown, XCircle, Mail, Brain } from "lucide-react";
+import { Home, Trophy, Calendar, User as UserIcon, ShoppingBag, Menu, X, Crown, Coins, Award, Users, GraduationCap, Sparkles, LogOut, Settings, BarChart3, CreditCard, XCircle, Mail, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import SimpleAuth from "@/components/SimpleAuth";
 import { useUser } from '@/hooks/UserProvider.jsx';
 import TrialBanner from '@/components/TrialBanner.jsx';
-// DropdownMenu imports removed; only hamburger menu will be used
+// DropdownMenu and dropdown logic fully removed; only hamburger menu is used
 const AvatarDisplay = React.lazy(() => import("../components/avatar/AvatarDisplay"));
 const PetDisplay = React.lazy(() => import("../components/rewards/PetDisplay"));
 const InstallPrompt = React.lazy(() => import("../components/InstallPrompt"));
@@ -281,8 +281,7 @@ export default function Layout({ children, currentPageName }) {
                   </Button>
                 </Link>
               )}
-
-              {/* Hamburger menu is now always visible for all screen sizes */}
+              {/* Hamburger menu is always visible for all screen sizes */}
               <Button
                 variant="ghost"
                 size="icon"
