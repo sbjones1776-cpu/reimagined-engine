@@ -1,7 +1,15 @@
 // Script to fix existing users: set trial_start_date = created_at if they differ
 // Run this with Node.js after setting up Firebase Admin SDK credentials
 
-const admin = require('firebase-admin');
+
+import admin from 'firebase-admin';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// ESM workaround for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 admin.initializeApp();
 const db = admin.firestore();
 
