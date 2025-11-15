@@ -89,11 +89,11 @@ export function useFirebaseUser() {
               (async () => {
                 try {
                   if (!userData.trial_start_date || !userData.trial_expires_at) {
-                    const days = 7;
-                    const now = Date.now();
-                    const expiresAt = new Date(now + days * 24 * 60 * 60 * 1000);
+                    // Use created_at if available, otherwise fallback to now
+                    let createdAt = userData.created_at?.toDate ? userData.created_at.toDate() : (userData.created_at?.seconds ? new Date(userData.created_at.seconds * 1000) : new Date());
+                    const expiresAt = new Date(createdAt.getTime() + 7 * 24 * 60 * 60 * 1000);
                     await updateUserProfile(fbUser.email, {
-                      trial_start_date: serverTimestamp(),
+                      trial_start_date: Timestamp.fromDate(createdAt),
                       trial_expires_at: Timestamp.fromDate(expiresAt),
                       trial_used: false,
                       trial_grace_used: false
