@@ -270,19 +270,76 @@ export default function Layout({ children, currentPageName }) {
 
             <div className="flex items-center gap-2">
               {user && (
-                <Link to={createPageUrl("Home")} className="hidden md:inline-block">
-                  <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Play Now
-                  </Button>
-                </Link>
+                <>
+                  <Link to={createPageUrl("Home")} className="hidden md:inline-block">
+                    <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Play Now
+                    </Button>
+                  </Link>
+                  {/* Desktop menu: show new menu as dropdown on desktop */}
+                  <div className="hidden md:block relative">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                      className={`ml-2 ${isDarkMode ? 'text-gray-50 hover:bg-slate-700' : ''}`}
+                      aria-label="Open navigation menu"
+                    >
+                      <Menu className="w-6 h-6" />
+                    </Button>
+                    {mobileMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 shadow-xl rounded-xl z-50 p-4 border border-gray-200 dark:border-slate-700">
+                        <div className="flex items-center gap-3 mb-3">
+                          <React.Suspense fallback={null}>
+                            {avatarData && (
+                              <div className="scale-90 origin-center">
+                                <AvatarDisplay avatarData={avatarData} size="small" />
+                              </div>
+                            )}
+                          </React.Suspense>
+                          <div>
+                            <p className={`font-bold ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
+                            <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{user.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1 mt-4">
+                          <MenuLink to="Home" label="Home" icon={Home} />
+                          <MenuLink to="DailyChallenge" label="Daily Challenge" icon={Calendar} />
+                          <MenuLink to="AITutor" label="AI Tutor" icon={Brain} />
+                          <MenuLink to="Progress" label="Progress" icon={Trophy} />
+                          <MenuLink to="Leaderboards" label="Leaderboards" icon={Award} />
+                          <MenuLink to="Shop" label="Shop" icon={ShoppingBag} />
+                          <MenuLink to="TeamChallenges" label="Team Challenges" icon={Users} />
+                          <MenuLink to="ParentPortal" label="Parent Portal" icon={GraduationCap} />
+                          <MenuLink to="Messages" label="Messages" icon={Mail} />
+                          <MenuLink to="Avatar" label="Profile" icon={UserIcon} />
+                          <MenuLink to="Settings" label="Settings" icon={Settings} />
+                          <MenuLink to="Subscription" label="Subscription" icon={Crown} />
+                          <MenuLink to="PrivacyPolicy" label="Privacy Policy" icon={XCircle} />
+                          {user?.is_admin && <MenuLink to="AdminTestAccount" label="Admin" icon={BarChart3} />}
+                          <button
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              handleLogout();
+                            }}
+                            className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl mt-4 ${isDarkMode ? 'bg-red-900/20 text-red-400 hover:bg-red-900/40' : 'bg-red-50 text-red-600 hover:bg-red-100'} transition-colors`}
+                          >
+                            <LogOut className="w-5 h-5" />
+                            <span className="font-medium">Logout</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
-              {/* Hamburger menu is always visible for all screen sizes */}
+              {/* Hamburger menu for mobile (unchanged) */}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`ml-2 ${isDarkMode ? 'text-gray-50 hover:bg-slate-700' : ''}`}
+                className={`ml-2 md:hidden ${isDarkMode ? 'text-gray-50 hover:bg-slate-700' : ''}`}
                 aria-label="Open navigation menu"
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
