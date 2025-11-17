@@ -376,7 +376,7 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Bottom Navigation (Mobile) */}
       <div className={`lg:hidden fixed bottom-0 left-0 right-0 ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-t'} backdrop-blur-md shadow-lg z-40`}>
-        <div className="grid grid-cols-5 gap-1 px-2 py-2">
+        <div className="grid grid-cols-6 gap-1 px-2 py-2">
           <Link
             to={createPageUrl("Home")}
             className={`flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-all ${
@@ -414,6 +414,18 @@ export default function Layout({ children, currentPageName }) {
           >
             <Brain className="w-5 h-5" />
             <span className="text-xs font-medium">Tutor</span>
+          </Link>
+
+          <Link
+            to={createPageUrl("Progress")}
+            className={`flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-all ${
+              location.pathname === createPageUrl("Progress")
+                ? "bg-purple-500 text-white"
+                : isDarkMode ? "text-gray-300 hover:bg-slate-700" : "text-gray-600"
+            }`}
+          >
+            <Trophy className="w-5 h-5" />
+            <span className="text-xs font-medium">Progress</span>
           </Link>
 
           <Link
