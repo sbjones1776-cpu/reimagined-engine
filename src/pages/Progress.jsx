@@ -247,7 +247,7 @@ export default function Progress() {
                     </div>
                   </div>
                   <Link to={createPageUrl("Shop")}>
-                    <Button className="h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                    <Button className="h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600" aria-label="Visit Shop">
                       <ShoppingBag className="w-5 h-5 mr-2" />
                       Visit Shop
                     </Button>
@@ -272,7 +272,7 @@ export default function Progress() {
                     ))}
                   </div>
                   <Link to={createPageUrl("Shop")}>
-                    <Button variant="outline" className="w-full border-green-400 text-green-700 hover:bg-green-100">
+                    <Button variant="outline" className="w-full border-green-400 text-green-700 hover:bg-green-100" aria-label="Claim Rewards">
                       Claim Rewards
                     </Button>
                   </Link>
