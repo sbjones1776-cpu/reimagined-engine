@@ -9,7 +9,14 @@ export default function ProgressTimeline({ childProgress, childDailyChallenges }
   const allActivities = [
     ...childProgress.map(p => ({ ...p, type: "game" })),
     ...childDailyChallenges.map(c => ({ ...c, type: "daily" }))
-  ].sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+  ].sort((a, b) => {
+    // Defensive: handle missing/invalid dates
+    const dateA = a.created_date ? new Date(a.created_date) : null;
+    const dateB = b.created_date ? new Date(b.created_date) : null;
+    const timeA = dateA && !isNaN(dateA.getTime()) ? dateA.getTime() : 0;
+    const timeB = dateB && !isNaN(dateB.getTime()) ? dateB.getTime() : 0;
+    return timeB - timeA;
+  });
 
   const recentActivities = allActivities.slice(0, 20);
 
@@ -73,7 +80,18 @@ export default function ProgressTimeline({ childProgress, childDailyChallenges }
                           </>
                         )}
                         <span className="text-sm text-gray-500">
-                          {format(new Date(activity.created_date), "MMM d, h:mm a")}
+                          {(() => {
+                            let dateVal = activity.created_date;
+                            if (dateVal && typeof dateVal === 'object' && typeof dateVal.toDate === 'function') {
+                              dateVal = dateVal.toDate();
+                            }
+                            const dateObj = dateVal ? new Date(dateVal) : null;
+                            if (dateObj && !isNaN(dateObj.getTime())) {
+                              return format(dateObj, "MMM d, h:mm a");
+                            } else {
+                              return "-";
+                            }
+                          })()}
                         </span>
                       </div>
 
