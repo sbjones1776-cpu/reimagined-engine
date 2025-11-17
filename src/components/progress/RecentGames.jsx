@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Clock, Target } from "lucide-react";
-import { format } from "date-fns";
+import { safeFormatDate } from "@/utils/utils";
 
 export default function RecentGames({ progress }) {
   const recentGames = progress.slice(0, 10);
@@ -73,20 +73,7 @@ export default function RecentGames({ progress }) {
                   ))}
                 </div>
                 <div className="text-sm text-gray-500">
-                  {(() => {
-                    // Prefer created_date, fallback to completed_at (Firestore Timestamp or ISO)
-                    let dateVal = game.created_date || game.completed_at;
-                    // Firestore Timestamp object
-                    if (dateVal && typeof dateVal === 'object' && typeof dateVal.toDate === 'function') {
-                      dateVal = dateVal.toDate();
-                    }
-                    const dateObj = dateVal ? new Date(dateVal) : null;
-                    if (dateObj && !isNaN(dateObj.getTime())) {
-                      return format(dateObj, "MMM d, h:mm a");
-                    } else {
-                      return "-";
-                    }
-                  })()}
+                  {safeFormatDate(game.created_date || game.completed_at)}
                 </div>
               </div>
             </div>

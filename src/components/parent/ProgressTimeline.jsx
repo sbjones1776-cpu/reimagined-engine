@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Star, Clock, Calendar, Target } from "lucide-react";
-import { format } from "date-fns";
+import { safeFormatDate } from "@/utils/utils";
 
 export default function ProgressTimeline({ childProgress, childDailyChallenges }) {
   // Combine and sort all activities
@@ -80,18 +80,7 @@ export default function ProgressTimeline({ childProgress, childDailyChallenges }
                           </>
                         )}
                         <span className="text-sm text-gray-500">
-                          {(() => {
-                            let dateVal = activity.created_date;
-                            if (dateVal && typeof dateVal === 'object' && typeof dateVal.toDate === 'function') {
-                              dateVal = dateVal.toDate();
-                            }
-                            const dateObj = dateVal ? new Date(dateVal) : null;
-                            if (dateObj && !isNaN(dateObj.getTime())) {
-                              return format(dateObj, "MMM d, h:mm a");
-                            } else {
-                              return "-";
-                            }
-                          })()}
+                          {safeFormatDate(activity.created_date)}
                         </span>
                       </div>
 
