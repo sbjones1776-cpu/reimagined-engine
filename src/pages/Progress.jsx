@@ -20,44 +20,15 @@ import RecentGames from "../components/progress/RecentGames";
 import Logo from "@/components/Logo";
 
 
-// Utility to sanitize a single game object
-function sanitizeGame(game) {
-  // Defensive: ensure all expected fields are present and valid
-  const safe = { ...game };
-  // Dates: created_date, completed_at
-  ["created_date", "completed_at"].forEach((field) => {
-    let val = safe[field];
-    if (val && typeof val === "object" && typeof val.toDate === "function") {
-      val = val.toDate();
-    }
-    if (val && isNaN(new Date(val).getTime())) {
-      safe[field] = null;
-    } else {
-      safe[field] = val;
-    }
-  });
-  // Numbers: score, correct_answers, total_questions, time_taken, stars_earned
-  ["score", "correct_answers", "total_questions", "time_taken", "stars_earned"].forEach((field) => {
-    if (typeof safe[field] !== "number" || isNaN(safe[field])) {
-      safe[field] = 0;
-    }
-  });
-  // Strings: operation, level
-  ["operation", "level"].forEach((field) => {
-    if (typeof safe[field] !== "string") {
-      safe[field] = "";
-    }
-  });
-  return safe;
-}
+
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getUserGameProgress } from "@/api/firebaseService";
+import { useFirebaseUser } from '@/hooks/useFirebaseUser';
 
 export default function Progress() {
   const { user } = useFirebaseUser();
-
-  // Local state for realtime progress (will be kept in sync with query for initial load)
-  const [realtimeProgress, setRealtimeProgress] = React.useState([]);
-
-  const { data: initialProgress = [], isLoading } = useQuery({
+  const { data: progress = [], isLoading } = useQuery({
     queryKey: ['gameProgress', user?.email],
     queryFn: async () => {
       if (!user?.email) return [];
@@ -65,160 +36,87 @@ export default function Progress() {
     },
     initialData: [],
     enabled: !!user?.email,
-    onSuccess: (data) => {
-      // Seed realtime state if empty
-      if (!realtimeProgress.length) setRealtimeProgress(data);
-    }
   });
 
-  // Subscribe to realtime updates
-  React.useEffect(() => {
-    if (!user?.email) return;
-    const unsubscribe = subscribeUserGameProgress(user.email, (data) => {
-      setRealtimeProgress(data);
-    });
-    return () => unsubscribe();
-  }, [user?.email]);
-
-  // Sanitize progress data before using in UI, log any invalid dates or numbers
-  const rawProgress = realtimeProgress.length ? realtimeProgress : initialProgress;
-  const progress = Array.isArray(rawProgress)
-    ? rawProgress.map((g, i) => {
-        const safe = sanitizeGame(g);
-        // Log any invalid date fields
+  // Defensive: filter and sanitize
+  const safeProgress = Array.isArray(progress)
+    ? progress.map((g, i) => {
+        const safe = { ...g };
+        // Defensive date
         ["created_date", "completed_at"].forEach((field) => {
-          if (safe[field] === null || safe[field] === undefined || isNaN(new Date(safe[field]).getTime())) {
-            console.warn(`Progress[${i}] invalid date for field '${field}':`, g[field]);
-          }
+          let val = safe[field];
+          if (val && typeof val === "object" && typeof val.toDate === "function") val = val.toDate();
+          if (!val || isNaN(new Date(val).getTime())) safe[field] = null;
+          else safe[field] = val;
         });
-        // Log any invalid numbers
+        // Defensive numbers
         ["score", "correct_answers", "total_questions", "time_taken", "stars_earned"].forEach((field) => {
-          if (typeof safe[field] !== "number" || isNaN(safe[field])) {
-            console.warn(`Progress[${i}] invalid number for field '${field}':`, g[field]);
-          }
+          if (typeof safe[field] !== "number" || isNaN(safe[field])) safe[field] = 0;
+        });
+        // Defensive strings
+        ["operation", "level"].forEach((field) => {
+          if (typeof safe[field] !== "string") safe[field] = "";
         });
         return safe;
       })
     : [];
 
-  const { data: dailyChallenges = [] } = useQuery({
-    queryKey: ['userDailyChallenges', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return [];
-      return await getUserDailyChallenges(user.email);
-    },
-    initialData: [],
-    enabled: !!user?.email,
-  });
-
-  const { data: tutorSessions = [] } = useQuery({
-    queryKey: ['tutorSessions', user?.email],
-    queryFn: async () => {
-      if (!user?.email) return [];
-      return await getUserTutorSessions(user.email);
-    },
-    initialData: [],
-    enabled: !!user?.email,
-  });
-
-  const getTotalStars = () => {
-
-    import React from "react";
-    import { useQuery } from "@tanstack/react-query";
-    import { getUserGameProgress } from "@/api/firebaseService";
-    import { useFirebaseUser } from '@/hooks/useFirebaseUser';
-
-    export default function Progress() {
-      const { user } = useFirebaseUser();
-      const { data: progress = [], isLoading } = useQuery({
-        queryKey: ['gameProgress', user?.email],
-        queryFn: async () => {
-          if (!user?.email) return [];
-          return await getUserGameProgress(user.email);
-        },
-        initialData: [],
-        enabled: !!user?.email,
-      });
-
-      // Defensive: filter and sanitize
-      const safeProgress = Array.isArray(progress)
-        ? progress.map((g, i) => {
-            const safe = { ...g };
-            // Defensive date
-            ["created_date", "completed_at"].forEach((field) => {
-              let val = safe[field];
-              if (val && typeof val === "object" && typeof val.toDate === "function") val = val.toDate();
-              if (!val || isNaN(new Date(val).getTime())) safe[field] = null;
-              else safe[field] = val;
-            });
-            // Defensive numbers
-            ["score", "correct_answers", "total_questions", "time_taken", "stars_earned"].forEach((field) => {
-              if (typeof safe[field] !== "number" || isNaN(safe[field])) safe[field] = 0;
-            });
-            // Defensive strings
-            ["operation", "level"].forEach((field) => {
-              if (typeof safe[field] !== "string") safe[field] = "";
-            });
-            return safe;
-          })
-        : [];
-
-      if (isLoading) {
-        return (
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center">
-              <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-xl text-gray-600">Loading your progress...</p>
-            </div>
-          </div>
-        );
-      }
-
-      // Basic stats
-      const totalGames = safeProgress.length;
-      const totalStars = safeProgress.reduce((sum, p) => sum + (p.stars_earned || 0), 0);
-      const totalScore = safeProgress.reduce((sum, p) => sum + (p.score || 0), 0);
-
-      return (
-        <div className="max-w-2xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-6 text-center">Your Progress</h1>
-          <div className="flex justify-around mb-8">
-            <div className="text-center">
-              <div className="text-2xl font-bold">{totalGames}</div>
-              <div className="text-gray-600">Games Played</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold">{totalStars}</div>
-              <div className="text-gray-600">Stars Earned</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold">{totalScore}</div>
-              <div className="text-gray-600">Total Score</div>
-            </div>
-          </div>
-          <h2 className="text-xl font-semibold mb-4">Game History</h2>
-          <div className="bg-white rounded-lg shadow divide-y">
-            {safeProgress.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">No games played yet.</div>
-            ) : (
-              safeProgress.slice(0, 20).map((game, i) => (
-                <div key={i} className="flex items-center justify-between px-4 py-3">
-                  <div>
-                    <div className="font-bold capitalize">{game.operation || "-"}</div>
-                    <div className="text-xs text-gray-500">{game.level || "-"}</div>
-                  </div>
-                  <div className="text-sm text-gray-700">{game.score} pts</div>
-                  <div className="text-sm text-yellow-600">{game.stars_earned} ⭐</div>
-                  <div className="text-xs text-gray-400">
-                    {game.created_date ? new Date(game.created_date).toLocaleString() : "-"}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-xl text-gray-600">Loading your progress...</p>
         </div>
-      );
-    }
+      </div>
+    );
+  }
+
+  // Basic stats
+  const totalGames = safeProgress.length;
+  const totalStars = safeProgress.reduce((sum, p) => sum + (p.stars_earned || 0), 0);
+  const totalScore = safeProgress.reduce((sum, p) => sum + (p.score || 0), 0);
+
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6 text-center">Your Progress</h1>
+      <div className="flex justify-around mb-8">
+        <div className="text-center">
+          <div className="text-2xl font-bold">{totalGames}</div>
+          <div className="text-gray-600">Games Played</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold">{totalStars}</div>
+          <div className="text-gray-600">Stars Earned</div>
+        </div>
+        <div className="text-center">
+          <div className="text-2xl font-bold">{totalScore}</div>
+          <div className="text-gray-600">Total Score</div>
+        </div>
+      </div>
+      <h2 className="text-xl font-semibold mb-4">Game History</h2>
+      <div className="bg-white rounded-lg shadow divide-y">
+        {safeProgress.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">No games played yet.</div>
+        ) : (
+          safeProgress.slice(0, 20).map((game, i) => (
+            <div key={i} className="flex items-center justify-between px-4 py-3">
+              <div>
+                <div className="font-bold capitalize">{game.operation || "-"}</div>
+                <div className="text-xs text-gray-500">{game.level || "-"}</div>
+              </div>
+              <div className="text-sm text-gray-700">{game.score} pts</div>
+              <div className="text-sm text-yellow-600">{game.stars_earned} ⭐</div>
+              <div className="text-xs text-gray-400">
+                {game.created_date ? new Date(game.created_date).toLocaleString() : "-"}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
                         <span className="font-medium">{item.name}</span>
                       </div>
                     ))}
