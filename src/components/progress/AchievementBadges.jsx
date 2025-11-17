@@ -27,7 +27,10 @@ export default function AchievementBadges({ progress }) {
       description: "Get 100% on any level",
       icon: Trophy,
       color: "from-purple-400 to-pink-600",
-      unlocked: progress.some(p => (p.correct_answers / p.total_questions) === 1),
+      unlocked: progress.some(p => {
+        if (typeof p.correct_answers !== 'number' || typeof p.total_questions !== 'number' || p.total_questions === 0) return false;
+        return (p.correct_answers / p.total_questions) === 1;
+      }),
     },
     {
       id: "three_stars",
@@ -52,7 +55,10 @@ export default function AchievementBadges({ progress }) {
       icon: Award,
       color: "from-indigo-400 to-purple-600",
       unlocked: ["addition", "subtraction", "multiplication", "division"].every(op =>
-        progress.some(p => p.operation === op && p.level === "hard" && p.stars_earned >= 2)
+        progress.some(p => {
+          if (typeof p.stars_earned !== 'number' || typeof p.operation !== 'string' || typeof p.level !== 'string') return false;
+          return p.operation === op && p.level === "hard" && p.stars_earned >= 2;
+        })
       ),
     },
   ];

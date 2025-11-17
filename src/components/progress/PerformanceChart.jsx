@@ -8,10 +8,11 @@ export default function PerformanceChart({ progress }) {
   const recentGames = progress.slice(0, 10).reverse();
 
   const chartData = recentGames.map((game, index) => {
-    let score = typeof game.score === 'number' ? game.score : 0;
-    let correct = typeof game.correct_answers === 'number' ? game.correct_answers : 0;
-    let total = typeof game.total_questions === 'number' && game.total_questions > 0 ? game.total_questions : 1;
+    let score = typeof game.score === 'number' && !isNaN(game.score) ? game.score : 0;
+    let correct = typeof game.correct_answers === 'number' && !isNaN(game.correct_answers) ? game.correct_answers : 0;
+    let total = typeof game.total_questions === 'number' && game.total_questions > 0 && !isNaN(game.total_questions) ? game.total_questions : 1;
     let accuracy = Math.round((correct / total) * 100);
+    if (isNaN(accuracy)) accuracy = 0;
     return {
       name: `Game ${index + 1}`,
       score,

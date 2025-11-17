@@ -80,9 +80,26 @@ export default function Progress() {
     return () => unsubscribe();
   }, [user?.email]);
 
-  // Sanitize progress data before using in UI
+  // Sanitize progress data before using in UI, log any invalid dates or numbers
   const rawProgress = realtimeProgress.length ? realtimeProgress : initialProgress;
-  const progress = Array.isArray(rawProgress) ? rawProgress.map(sanitizeGame) : [];
+  const progress = Array.isArray(rawProgress)
+    ? rawProgress.map((g, i) => {
+        const safe = sanitizeGame(g);
+        // Log any invalid date fields
+        ["created_date", "completed_at"].forEach((field) => {
+          if (safe[field] === null || safe[field] === undefined || isNaN(new Date(safe[field]).getTime())) {
+            console.warn(`Progress[${i}] invalid date for field '${field}':`, g[field]);
+          }
+        });
+        // Log any invalid numbers
+        ["score", "correct_answers", "total_questions", "time_taken", "stars_earned"].forEach((field) => {
+          if (typeof safe[field] !== "number" || isNaN(safe[field])) {
+            console.warn(`Progress[${i}] invalid number for field '${field}':`, g[field]);
+          }
+        });
+        return safe;
+      })
+    : [];
 
   const { data: dailyChallenges = [] } = useQuery({
     queryKey: ['userDailyChallenges', user?.email],
