@@ -188,13 +188,14 @@ export default function Layout({ children, currentPageName }) {
     window.location.href = '/';
   };
 
-  const NavLink = ({ to, icon: Icon, label, badge, badgeColor = "red", isDarkMode }) => {
+  // New unified menu link component
+  const MenuLink = ({ to, label, icon: Icon }) => {
     const isActive = location.pathname === createPageUrl(to);
     return (
       <Link
         to={createPageUrl(to)}
         onClick={() => setMobileMenuOpen(false)}
-        className={`relative flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-medium ${
           isActive
             ? "bg-purple-500 text-white shadow-lg"
             : isDarkMode
@@ -202,13 +203,8 @@ export default function Layout({ children, currentPageName }) {
               : "text-gray-600 hover:bg-purple-50"
         }`}
       >
-        <Icon className="w-5 h-5" />
-        <span className="font-medium">{label}</span>
-        {badge && (
-          <Badge className={`absolute -top-1 -right-1 bg-${badgeColor}-500 text-white text-xs px-1.5 py-0.5 ${badgeColor === 'red' ? 'animate-pulse' : ''}`}>
-            {badge}
-          </Badge>
-        )}
+        {Icon && <Icon className="w-5 h-5" />}
+        {label}
       </Link>
     );
   };
@@ -293,7 +289,7 @@ export default function Layout({ children, currentPageName }) {
               </Button>
             </div>
           </div>
-          {/* Hamburger Menu (side drawer) for all screen sizes */}
+          {/* New Hamburger Menu (side drawer) for all screen sizes */}
           {mobileMenuOpen && (
             <div className={`fixed inset-0 z-50 bg-black/40 flex justify-end`}>
               <div className={`w-full max-w-xs h-full bg-white dark:bg-slate-800 shadow-xl p-6 overflow-y-auto ${isDarkMode ? 'border-l border-slate-700' : ''}`}>
@@ -312,55 +308,29 @@ export default function Layout({ children, currentPageName }) {
                         <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{user.email}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
-                        <Coins className="w-3 h-3 mr-1" />
-                        {user.coins || 0} Coins
-                      </Badge>
-                      {subscriptionTier !== "free" && (
-                        <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                          <Crown className="w-3 h-3 mr-1" />
-                          {subscriptionTier === "family_teacher" ? "Family" : subscriptionTier === "premium_player" ? "Premium" : "Parent"}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <NavLink to="Avatar" icon={UserIcon} label="Profile" isDarkMode={isDarkMode} />
-                      <NavLink to="Messages" icon={Mail} label="Messages" badge={unreadMessageCount > 0 ? unreadMessageCount : null} badgeColor="blue" isDarkMode={isDarkMode} />
-                      <NavLink to="DailyChallenge" icon={Calendar} label="Daily Challenge" badge={!hasCompletedToday ? "!" : null} isDarkMode={isDarkMode} />
-                      <NavLink to="AITutor" icon={Brain} label="AI Tutor" isDarkMode={isDarkMode} />
-                      <NavLink to="Progress" icon={Trophy} label="Progress" isDarkMode={isDarkMode} />
-                      <NavLink to="Leaderboards" icon={Award} label="Leaderboards" isDarkMode={isDarkMode} />
-                      <NavLink to="Shop" icon={ShoppingBag} label="Shop" isDarkMode={isDarkMode} />
-                      <NavLink to="TeamChallenges" icon={Users} label="Team Challenges" isDarkMode={isDarkMode} />
-                      <NavLink to="ParentPortal" icon={GraduationCap} label="Parent Portal" badge={user?.is_parent_mode ? "ON" : null} badgeColor="blue" isDarkMode={isDarkMode} />
-                      <Link to={createPageUrl("Settings")} onClick={() => setMobileMenuOpen(false)}>
-                        <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-50 hover:bg-gray-700' : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:bg-gray-300'}`}>
-                          <Settings className="w-5 h-5" />
-                          <span className="font-medium">App Settings</span>
-                        </div>
-                      </Link>
-                      <Link to={createPageUrl("Subscription")}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="w-full block"
-                      >
-                        <div className={`flex items-center gap-2 px-4 py-3 rounded-xl ${
-                          subscriptionTier !== "free"
-                            ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white"
-                            : "bg-gradient-to-r from-purple-500 to-pink-500 text-white animate-pulse"
-                        }`}>
-                          <Crown className="w-5 h-5" />
-                          <span className="font-medium">
-                            {subscriptionTier !== "free" ? "Manage Subscription" : "Upgrade to Premium"}
-                          </span>
-                        </div>
-                      </Link>
+                    <div className="flex flex-col gap-1 mt-4">
+                      <MenuLink to="Home" label="Home" icon={Home} />
+                      <MenuLink to="DailyChallenge" label="Daily Challenge" icon={Calendar} />
+                      <MenuLink to="AITutor" label="AI Tutor" icon={Brain} />
+                      <MenuLink to="Progress" label="Progress" icon={Trophy} />
+                      <MenuLink to="Leaderboards" label="Leaderboards" icon={Award} />
+                      <MenuLink to="Shop" label="Shop" icon={ShoppingBag} />
+                      <MenuLink to="TeamChallenges" label="Team Challenges" icon={Users} />
+                      <MenuLink to="ParentPortal" label="Parent Portal" icon={GraduationCap} />
+                      <MenuLink to="Messages" label="Messages" icon={Mail} />
+                      <MenuLink to="Avatar" label="Profile" icon={UserIcon} />
+                      <MenuLink to="Settings" label="Settings" icon={Settings} />
+                      <MenuLink to="Subscription" label="Subscription" icon={Crown} />
+                      <MenuLink to="PrivacyPolicy" label="Privacy Policy" icon={XCircle} />
+                      {/* Add more MenuLink entries for any other main pages as needed */}
+                      {/* Admin-only link example: */}
+                      {user?.is_admin && <MenuLink to="AdminTestAccount" label="Admin" icon={BarChart3} />}
                       <button
                         onClick={() => {
                           setMobileMenuOpen(false);
                           handleLogout();
                         }}
-                        className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl ${isDarkMode ? 'bg-red-900/20 text-red-400 hover:bg-red-900/40' : 'bg-red-50 text-red-600 hover:bg-red-100'} transition-colors`}
+                        className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl mt-4 ${isDarkMode ? 'bg-red-900/20 text-red-400 hover:bg-red-900/40' : 'bg-red-50 text-red-600 hover:bg-red-100'} transition-colors`}
                       >
                         <LogOut className="w-5 h-5" />
                         <span className="font-medium">Logout</span>
