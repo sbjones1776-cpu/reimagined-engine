@@ -16,7 +16,13 @@ import { Button } from "@/components/ui/button";
 import SimpleAuth from "@/components/SimpleAuth";
 import { useUser } from '@/hooks/UserProvider.jsx';
 import TrialBanner from '@/components/TrialBanner.jsx';
-// DropdownMenu and dropdown logic fully removed; only hamburger menu is used
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 const AvatarDisplay = React.lazy(() => import("../components/avatar/AvatarDisplay"));
 const PetDisplay = React.lazy(() => import("../components/rewards/PetDisplay"));
 const InstallPrompt = React.lazy(() => import("../components/InstallPrompt"));
@@ -270,12 +276,44 @@ export default function Layout({ children, currentPageName }) {
 
             <div className="flex items-center gap-2">
               {user && (
-                <Link to={createPageUrl("Home")} className="hidden md:inline-block">
-                  <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Play Now
-                  </Button>
-                </Link>
+                <>
+                  <Link to={createPageUrl("Home")}" className="hidden md:inline-block">
+                    <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg">
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Play Now
+                    </Button>
+                  </Link>
+                  {/* Dropdown menu for user actions */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="flex items-center gap-2 px-3">
+                        <UserIcon className="w-5 h-5" />
+                        <span className="hidden md:inline-block font-medium">{user.displayName || user.email || 'Account'}</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link to={createPageUrl("Avatar")}>Profile</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to={createPageUrl("Settings")}>Settings</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to={createPageUrl("Subscription")}>Subscription</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to={createPageUrl("PrivacyPolicy")}>Privacy Policy</Link>
+                      </DropdownMenuItem>
+                      {user?.is_admin && (
+                        <DropdownMenuItem asChild>
+                          <Link to={createPageUrl("AdminTestAccount")}>Admin</Link>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout} className="text-red-600">Logout</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
               )}
               {/* Hamburger menu is now always visible for all users and screen sizes */}
               <Button
