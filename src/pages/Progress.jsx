@@ -45,18 +45,21 @@ export default function Progress() {
         // Defensive date
         ["created_date", "completed_at"].forEach((field) => {
           let val = safe[field];
-          // If Firestore Timestamp
-          if (val && typeof val === "object" && typeof val.toDate === "function") val = val.toDate();
-          // If seconds property (Firestore raw timestamp)
-          else if (val && typeof val === "object" && typeof val.seconds === "number") val = new Date(val.seconds * 1000);
-          // If string or number, try to convert
-          else if (typeof val === "string" || typeof val === "number") val = new Date(val);
-          // If already a Date
-          else if (Object.prototype.toString.call(val) === "[object Date]") val = val;
-          else val = null;
+          let dateVal = null;
+          if (val && typeof val === "object" && typeof val.toDate === "function") {
+            dateVal = val.toDate();
+          } else if (val && typeof val === "object" && typeof val.seconds === "number") {
+            dateVal = new Date(val.seconds * 1000);
+          } else if (typeof val === "string" || typeof val === "number") {
+            // Only treat as date if string is ISO or number is plausible timestamp
+            const tryDate = new Date(val);
+            dateVal = isNaN(tryDate.getTime()) ? null : tryDate;
+          } else if (Object.prototype.toString.call(val) === "[object Date]") {
+            dateVal = val;
+          }
           // Final check
-          if (!val || isNaN(new Date(val).getTime())) safe[field] = null;
-          else safe[field] = val;
+          if (!dateVal || isNaN(dateVal.getTime())) safe[field] = null;
+          else safe[field] = dateVal;
         });
         // Defensive numbers
         ["score", "correct_answers", "total_questions", "time_taken", "stars_earned"].forEach((field) => {
@@ -118,23 +121,9 @@ export default function Progress() {
               <div className="text-sm text-yellow-600">{game.stars_earned} ⭐</div>
               <div className="text-xs text-gray-400">
                 {(() => {
-                  // Defensive: Only try to create a date if value is string/number/object
                   const val = game.created_date;
-                  if (!val) return "-";
-                  let dateObj = val;
-                  if (typeof dateObj === "object" && typeof dateObj.toDate === "function") {
-                    dateObj = dateObj.toDate();
-                  }
-                  // If it's a string or number, try to convert
-                  if (
-                    typeof dateObj === "string" ||
-                    typeof dateObj === "number" ||
-                    Object.prototype.toString.call(dateObj) === "[object Date]"
-                  ) {
-                    const d = new Date(dateObj);
-                    return isNaN(d.getTime()) ? "-" : d.toLocaleString();
-                  }
-                  return "-";
+                  if (!val || Object.prototype.toString.call(val) !== "[object Date]" || isNaN(val.getTime())) return "-";
+                  return val.toLocaleString();
                 })()}
               </div>
             </div>
