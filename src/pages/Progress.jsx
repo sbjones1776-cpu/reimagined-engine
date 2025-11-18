@@ -21,10 +21,7 @@ import Logo from "@/components/Logo";
 
 
 
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getUserGameProgress } from "@/api/firebaseService";
-import { useFirebaseUser } from '@/hooks/useFirebaseUser';
+
 
 export default function Progress() {
   const { user } = useFirebaseUser();
@@ -121,32 +118,31 @@ export default function Progress() {
               <div className="text-sm text-yellow-600">{game.stars_earned} ⭐</div>
               <div className="text-xs text-gray-400">
                 {(() => {
-                  const val = game.created_date;
-                  if (!val || Object.prototype.toString.call(val) !== "[object Date]" || isNaN(val.getTime())) return "-";
-                  return val.toLocaleString();
+                  try {
+                    const val = game.created_date;
+                    if (!val || Object.prototype.toString.call(val) !== "[object Date]" || isNaN(val.getTime())) return "-";
+                    return val.toLocaleString();
+                  } catch (err) {
+                    // eslint-disable-next-line no-console
+                    console.error("Invalid date in Progress page:", game.created_date, err);
+                    return "-";
+                  }
                 })()}
               </div>
             </div>
           ))
         )}
       </div>
+
+      {/* Achievements */}
+      <AchievementBadges progress={progress} />
+      {/* Performance Chart */}
+      <PerformanceChart progress={progress} />
+      {/* Recent Games */}
+      <RecentGames progress={progress} />
     </div>
   );
 }
-                        <span className="font-medium">{item.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Link to={createPageUrl("Shop")}>
-                    <Button variant="outline" className="w-full border-green-400 text-green-700 hover:bg-green-100" aria-label="Claim Rewards">
-                      <span className="sr-only">Claim Rewards</span>
-                      Claim Rewards
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            )}
-          </div>
 
           {/* AI Tutor Stats */}
           {tutorSessions.length > 0 && (
@@ -266,7 +262,6 @@ export default function Progress() {
 
           {/* Recent Games */}
           <RecentGames progress={progress} />
-        </>
       )}
     </div>
   );

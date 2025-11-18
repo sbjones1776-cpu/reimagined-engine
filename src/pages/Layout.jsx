@@ -277,7 +277,7 @@ export default function Layout({ children, currentPageName }) {
             <div className="flex items-center gap-2">
               {user && (
                 <>
-                  <Link to={createPageUrl("Home")}" className="hidden md:inline-block">
+                    <Link to={createPageUrl("Home")} className="hidden md:inline-block">
                     <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg">
                       <Sparkles className="w-4 h-4 mr-2" />
                       Play Now
@@ -338,6 +338,7 @@ export default function Layout({ children, currentPageName }) {
                       <Button> {/* ...existing code... */} </Button>
                       {/* Profile dropdown removed: only hamburger menu remains for navigation */}
                     </div>
+                    <div>
                       <MenuLink to="Avatar" label="Profile" icon={UserIcon} />
                       <MenuLink to="Settings" label="Settings" icon={Settings} />
                       <MenuLink to="Subscription" label="Subscription" icon={Crown} />
