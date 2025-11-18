@@ -9,7 +9,6 @@ const Home = lazy(() => import('./Home'));
 
 // Lazy load all other pages for better code splitting
 const Game = lazy(() => import("./Game"));
-const Progress = lazy(() => import("./Progress"));
 const Avatar = lazy(() => import("./Avatar"));
 const DailyChallenge = lazy(() => import("./DailyChallenge"));
 const ParentPortal = lazy(() => import("./ParentPortal"));
@@ -33,7 +32,6 @@ const PAGES = {
     
     Game: Game,
     
-    Progress: Progress,
     
     Avatar: Avatar,
     
@@ -112,7 +110,7 @@ function PagesContent() {
                 
                 <Route path="/Game" element={<Game />} />
                 
-                <Route path="/Progress" element={<Progress />} />
+
                 
                 <Route path="/Avatar" element={<Avatar />} />
                 
