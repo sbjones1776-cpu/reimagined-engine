@@ -84,17 +84,6 @@ export default function Layout({ children, currentPageName }) {
 
     const appleStatusStyleMeta = document.createElement('meta');
     appleStatusStyleMeta.name = 'apple-mobile-web-app-status-bar-style';
-    appleStatusStyleMeta.content = 'default';
-    document.head.appendChild(appleStatusStyleMeta);
-
-    const appleTitleMeta = document.createElement('meta');
-    appleTitleMeta.name = 'apple-mobile-web-app-title';
-    appleTitleMeta.content = 'Math Adventure';
-    document.head.appendChild(appleTitleMeta);
-
-    // Add apple touch icon
-    const appleIcon = document.createElement('link');
-    appleIcon.rel = 'apple-touch-icon';
   // TODO: Refactor to use Firebase or new backend
   // appleIcon.href = '/icons/apple-touch-icon.png'; // Use your own hosted icon
     document.head.appendChild(appleIcon);
@@ -407,17 +396,6 @@ export default function Layout({ children, currentPageName }) {
             <span className="text-xs font-medium">Tutor</span>
           </Link>
 
-          <Link
-            to={createPageUrl("Progress")}
-            className={`flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-all ${
-              location.pathname === createPageUrl("Progress")
-                ? "bg-purple-500 text-white"
-                : isDarkMode ? "text-gray-300 hover:bg-slate-700" : "text-gray-600"
-            }`}
-          >
-            <Trophy className="w-5 h-5" />
-            <span className="text-xs font-medium">Progress</span>
-          </Link>
 
           <Link
             to={createPageUrl("Shop")}
