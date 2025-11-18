@@ -109,15 +109,23 @@ export default function Progress() {
               <div className="text-sm text-yellow-600">{game.stars_earned} ⭐</div>
               <div className="text-xs text-gray-400">
                 {(() => {
-                  if (!game.created_date) return "-";
-                  let dateObj = game.created_date;
-                  // If it's a Firestore Timestamp, convert
-                  if (dateObj && typeof dateObj === "object" && typeof dateObj.toDate === "function") {
+                  // Defensive: Only try to create a date if value is string/number/object
+                  const val = game.created_date;
+                  if (!val) return "-";
+                  let dateObj = val;
+                  if (typeof dateObj === "object" && typeof dateObj.toDate === "function") {
                     dateObj = dateObj.toDate();
                   }
                   // If it's a string or number, try to convert
-                  const d = new Date(dateObj);
-                  return isNaN(d.getTime()) ? "-" : d.toLocaleString();
+                  if (
+                    typeof dateObj === "string" ||
+                    typeof dateObj === "number" ||
+                    Object.prototype.toString.call(dateObj) === "[object Date]"
+                  ) {
+                    const d = new Date(dateObj);
+                    return isNaN(d.getTime()) ? "-" : d.toLocaleString();
+                  }
+                  return "-";
                 })()}
               </div>
             </div>
