@@ -1,0 +1,1 @@
+import{C as i,x as o,aq as d}from"./index-8_HM-GMx.js";var p=Object.freeze({position:"absolute",border:0,width:1,height:1,padding:0,margin:-1,overflow:"hidden",clip:"rect(0, 0, 0, 0)",whiteSpace:"nowrap",wordWrap:"normal"}),t="VisuallyHidden",e=i.forwardRef((r,a)=>o.jsx(d.span,{...r,ref:a,style:{...p,...r.style}}));e.displayName=t;var s=e;export{p as d,s as l};
