@@ -45,7 +45,16 @@ export default function Progress() {
         // Defensive date
         ["created_date", "completed_at"].forEach((field) => {
           let val = safe[field];
+          // If Firestore Timestamp
           if (val && typeof val === "object" && typeof val.toDate === "function") val = val.toDate();
+          // If seconds property (Firestore raw timestamp)
+          else if (val && typeof val === "object" && typeof val.seconds === "number") val = new Date(val.seconds * 1000);
+          // If string or number, try to convert
+          else if (typeof val === "string" || typeof val === "number") val = new Date(val);
+          // If already a Date
+          else if (Object.prototype.toString.call(val) === "[object Date]") val = val;
+          else val = null;
+          // Final check
           if (!val || isNaN(new Date(val).getTime())) safe[field] = null;
           else safe[field] = val;
         });
