@@ -277,7 +277,7 @@ export default function Layout({ children, currentPageName }) {
                   </Button>
                 </Link>
               )}
-              {/* Hamburger menu is now always visible for all screen sizes */}
+              {/* Hamburger menu is now always visible for all users and screen sizes */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -295,29 +295,11 @@ export default function Layout({ children, currentPageName }) {
               <div className={`w-full max-w-xs h-full bg-white dark:bg-slate-800 shadow-xl p-6 overflow-y-auto ${isDarkMode ? 'border-l border-slate-700' : ''}`}>
                 {user && (
                   <div className={`${isDarkMode ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-50' : 'bg-gradient-to-r from-purple-50 to-pink-50'} p-4 rounded-xl mb-4`}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <React.Suspense fallback={null}>
-                        {avatarData && (
-                          <div className="scale-90 origin-center">
-                            <AvatarDisplay avatarData={avatarData} size="small" />
-                          </div>
-                        )}
-                      </React.Suspense>
-                      <div>
-                        <p className={`font-bold ${isDarkMode ? 'text-gray-50' : 'text-gray-900'}`}>{user.full_name || 'Player'}</p>
-                        <p className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{user.email}</p>
-                      </div>
+                    <div className="flex items-center gap-2 md:gap-4">
+                      <Link to={createPageUrl("Home")}> {/* ...existing code... */} </Link>
+                      <Button> {/* ...existing code... */} </Button>
+                      {/* Profile dropdown removed: only hamburger menu remains for navigation */}
                     </div>
-                    <div className="flex flex-col gap-1 mt-4">
-                      <MenuLink to="Home" label="Home" icon={Home} />
-                      <MenuLink to="DailyChallenge" label="Daily Challenge" icon={Calendar} />
-                      <MenuLink to="AITutor" label="AI Tutor" icon={Brain} />
-                      <MenuLink to="Progress" label="Progress" icon={Trophy} />
-                      <MenuLink to="Leaderboards" label="Leaderboards" icon={Award} />
-                      <MenuLink to="Shop" label="Shop" icon={ShoppingBag} />
-                      <MenuLink to="TeamChallenges" label="Team Challenges" icon={Users} />
-                      <MenuLink to="ParentPortal" label="Parent Portal" icon={GraduationCap} />
-                      <MenuLink to="Messages" label="Messages" icon={Mail} />
                       <MenuLink to="Avatar" label="Profile" icon={UserIcon} />
                       <MenuLink to="Settings" label="Settings" icon={Settings} />
                       <MenuLink to="Subscription" label="Subscription" icon={Crown} />
