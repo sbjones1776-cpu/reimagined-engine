@@ -2,8 +2,8 @@ const functions = require('firebase-functions');
 const functionsV1 = require('firebase-functions/v1');
 const admin = require('firebase-admin');
 const { Client, Environment } = require('square');
-const { defineString } = require('firebase-functions/params');
-const { onSchedule } = require('firebase-functions/v2/scheduler');
+// const { defineString } = require('firebase-functions/params');
+// const { onSchedule } = require('firebase-functions/v2/scheduler');
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -11,20 +11,20 @@ const db = admin.firestore();
 // Environment parameters (firebase-functions v7+)
 // Configure via: firebase functions:config:set or Firebase Console > Build > Functions > Variables
 // Recommended: use new params API or environment variables
-const SQUARE_ACCESS_TOKEN = defineString('SQUARE_ACCESS_TOKEN');
-const SQUARE_ENVIRONMENT = defineString('SQUARE_ENVIRONMENT'); // 'sandbox' or 'production'
-const PLAY_PACKAGE_NAME = defineString('PLAY_PACKAGE_NAME');
-const SQUARE_LOCATION_ID = defineString('SQUARE_LOCATION_ID');
+const SQUARE_ACCESS_TOKEN = process.env.SQUARE_ACCESS_TOKEN;
+const SQUARE_ENVIRONMENT = process.env.SQUARE_ENVIRONMENT; // 'sandbox' or 'production'
+const PLAY_PACKAGE_NAME = process.env.PLAY_PACKAGE_NAME;
+const SQUARE_LOCATION_ID = process.env.SQUARE_LOCATION_ID;
 
 // Lazy Square client (evaluate params at runtime, not deploy time)
 let squareClientInstance = null;
 function getSquareClient() {
   if (squareClientInstance) return squareClientInstance;
-  const env = ((SQUARE_ENVIRONMENT.value() || process.env.SQUARE_ENVIRONMENT) === 'sandbox')
+  const env = (SQUARE_ENVIRONMENT === 'sandbox')
     ? Environment.Sandbox
     : Environment.Production;
   squareClientInstance = new Client({
-    accessToken: SQUARE_ACCESS_TOKEN.value() || process.env.SQUARE_ACCESS_TOKEN,
+    accessToken: SQUARE_ACCESS_TOKEN,
     environment: env
   });
   return squareClientInstance;
@@ -63,7 +63,7 @@ exports.verifyPlayPurchase = functionsV1.https.onRequest(async (req, res) => {
     const authClient = await auth.getClient();
     const publisher = google.androidpublisher({ version: 'v3', auth: authClient });
 
-    const packageName = PLAY_PACKAGE_NAME.value() || process.env.PLAY_PACKAGE_NAME;
+    const packageName = PLAY_PACKAGE_NAME;
     if (!packageName) {
       throw new Error('Missing Play package name (functions.config().play.package or PLAY_PACKAGE_NAME)');
     }
@@ -163,7 +163,7 @@ exports.createSubscription = functionsV1.https.onRequest(async (req, res) => {
   }
 
   try {
-  const locationId = SQUARE_LOCATION_ID.value() || process.env.SQUARE_LOCATION_ID;
+  const locationId = SQUARE_LOCATION_ID;
 
     // Create or use existing customer
     let finalCustomerId = customerId;
@@ -329,7 +329,7 @@ exports.grantPremiumAccess = functionsV1.https.onRequest(async (req, res) => {
  * Detects users with trial_expires_at nearing expiration (day 6, day 7, grace day 8)
  * and writes notification docs to Firestore 'notifications' collection.
  */
-exports.checkTrialExpirations = onSchedule('every day 09:00', async (event) => {
+exports.checkTrialExpirations = functions.pubsub.schedule('every day 09:00').onRun(async (context) => {
   console.log('Trial expiration check started');
   const now = admin.firestore.Timestamp.now();
   const nowMs = now.toMillis();
