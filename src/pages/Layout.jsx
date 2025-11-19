@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import SimpleAuth from "@/components/SimpleAuth";
 import { useUser } from '@/hooks/UserProvider.jsx';
 import TrialBanner from '@/components/TrialBanner.jsx';
-import MuiDrawerMenu from '@/components/MuiDrawerMenu.jsx';
+import TopBar from '@/components/TopBar.jsx';
 const AvatarDisplay = React.lazy(() => import("../components/avatar/AvatarDisplay"));
 const PetDisplay = React.lazy(() => import("../components/rewards/PetDisplay"));
 const InstallPrompt = React.lazy(() => import("../components/InstallPrompt"));
@@ -256,32 +256,7 @@ export default function Layout({ children, currentPageName }) {
 
       <header className={`${isDarkMode ? 'bg-slate-800/90' : 'bg-white/80'} backdrop-blur-md shadow-sm sticky top-0 z-50`}>
         <div className="max-w-7xl mx-auto px-2 md:px-4 py-2 md:py-3">
-          <div className="flex items-center justify-between">
-            <Link to={createPageUrl("Home")} className="flex items-center gap-3">
-              {/* App logo replaced emoji */}
-              <Logo size="md" variant="circle" />
-              <div>
-                <h1 className={`text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent ${isDarkMode && 'from-purple-400 to-pink-400'}`}>
-                  Math Adventure
-                </h1>
-              </div>
-            </Link>
-
-            <div className="flex items-center gap-2">
-              {user && (
-                <>
-                  <Link to={createPageUrl("Home")} className="hidden md:inline-block">
-                    <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg">
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Play Now
-                    </Button>
-                  </Link>
-                  <span className="hidden md:inline-block font-medium ml-2">{user.displayName || user.email || 'Account'}</span>
-                  <MuiDrawerMenu user={user} onLogout={handleLogout} />
-                </>
-              )}
-            </div>
-          </div>
+          <TopBar user={user} onLogout={handleLogout} onPlayNow={() => { window.location.href = createPageUrl('Home'); }} />
           {/* Material-UI Drawer menu replaces old hamburger menu */}
         </div>
       </header>
