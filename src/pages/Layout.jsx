@@ -16,13 +16,7 @@ import { Button } from "@/components/ui/button";
 import SimpleAuth from "@/components/SimpleAuth";
 import { useUser } from '@/hooks/UserProvider.jsx';
 import TrialBanner from '@/components/TrialBanner.jsx';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
+import MuiDrawerMenu from '@/components/MuiDrawerMenu.jsx';
 const AvatarDisplay = React.lazy(() => import("../components/avatar/AvatarDisplay"));
 const PetDisplay = React.lazy(() => import("../components/rewards/PetDisplay"));
 const InstallPrompt = React.lazy(() => import("../components/InstallPrompt"));
@@ -31,7 +25,6 @@ import ChunkErrorBoundary from "@/components/ChunkErrorBoundary.jsx";
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // Consolidated auth via global context
   const { user, loading: authLoading } = useUser();
 
@@ -277,91 +270,19 @@ export default function Layout({ children, currentPageName }) {
             <div className="flex items-center gap-2">
               {user && (
                 <>
-                    <Link to={createPageUrl("Home")} className="hidden md:inline-block">
+                  <Link to={createPageUrl("Home")} className="hidden md:inline-block">
                     <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg">
                       <Sparkles className="w-4 h-4 mr-2" />
                       Play Now
                     </Button>
                   </Link>
-                  {/* Dropdown menu for user actions */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="flex items-center gap-2 px-3">
-                        <UserIcon className="w-5 h-5" />
-                        <span className="hidden md:inline-block font-medium">{user.displayName || user.email || 'Account'}</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link to={createPageUrl("Avatar")}>Profile</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to={createPageUrl("Settings")}>Settings</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to={createPageUrl("Subscription")}>Subscription</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to={createPageUrl("PrivacyPolicy")}>Privacy Policy</Link>
-                      </DropdownMenuItem>
-                      {user?.is_admin && (
-                        <DropdownMenuItem asChild>
-                          <Link to={createPageUrl("AdminTestAccount")}>Admin</Link>
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleLogout} className="text-red-600">Logout</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <span className="hidden md:inline-block font-medium ml-2">{user.displayName || user.email || 'Account'}</span>
+                  <MuiDrawerMenu user={user} onLogout={handleLogout} />
                 </>
               )}
-              {/* Hamburger menu is now always visible for all users and screen sizes */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`ml-2 ${isDarkMode ? 'text-gray-50 hover:bg-slate-700' : ''}`}
-                aria-label="Open navigation menu"
-              >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </Button>
             </div>
           </div>
-          {/* New Hamburger Menu (side drawer) for all screen sizes */}
-          {mobileMenuOpen && (
-            <div className={`fixed inset-0 z-50 bg-black/40 flex justify-end`}>
-              <div className={`w-full max-w-xs h-full bg-white dark:bg-slate-800 shadow-xl p-6 overflow-y-auto ${isDarkMode ? 'border-l border-slate-700' : ''}`}>
-                {user && (
-                  <div className={`${isDarkMode ? 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-50' : 'bg-gradient-to-r from-purple-50 to-pink-50'} p-4 rounded-xl mb-4`}>
-                    <div className="flex items-center gap-2 md:gap-4">
-                      <Link to={createPageUrl("Home")}> {/* ...existing code... */} </Link>
-                      <Button> {/* ...existing code... */} </Button>
-                      {/* Profile dropdown removed: only hamburger menu remains for navigation */}
-                    </div>
-                    <div>
-                      <MenuLink to="Avatar" label="Profile" icon={UserIcon} />
-                      <MenuLink to="Settings" label="Settings" icon={Settings} />
-                      <MenuLink to="Subscription" label="Subscription" icon={Crown} />
-                      <MenuLink to="PrivacyPolicy" label="Privacy Policy" icon={XCircle} />
-                      {/* Add more MenuLink entries for any other main pages as needed */}
-                      {/* Admin-only link example: */}
-                      {user?.is_admin && <MenuLink to="AdminTestAccount" label="Admin" icon={BarChart3} />}
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          handleLogout();
-                        }}
-                        className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl mt-4 ${isDarkMode ? 'bg-red-900/20 text-red-400 hover:bg-red-900/40' : 'bg-red-50 text-red-600 hover:bg-red-100'} transition-colors`}
-                      >
-                        <LogOut className="w-5 h-5" />
-                        <span className="font-medium">Logout</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Material-UI Drawer menu replaces old hamburger menu */}
         </div>
       </header>
 
