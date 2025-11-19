@@ -77,11 +77,14 @@ export default function Layout({ children, currentPageName }) {
     themeColorMeta.content = isDarkMode ? "#1e293b" : "#9333ea";
     document.head.appendChild(themeColorMeta);
 
+
     const appleCapableMeta = document.createElement('meta');
     appleCapableMeta.name = 'apple-mobile-web-app-capable';
     appleCapableMeta.content = 'yes';
     document.head.appendChild(appleCapableMeta);
 
+    const appleStatusStyleMeta = document.createElement('meta');
+    appleStatusStyleMeta.name = 'apple-mobile-web-app-status-bar-style';
     appleStatusStyleMeta.content = 'black-translucent';
     document.head.appendChild(appleStatusStyleMeta);
 
