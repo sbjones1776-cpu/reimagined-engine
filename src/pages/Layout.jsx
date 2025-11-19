@@ -82,18 +82,26 @@ export default function Layout({ children, currentPageName }) {
     appleCapableMeta.content = 'yes';
     document.head.appendChild(appleCapableMeta);
 
-    const appleStatusStyleMeta = document.createElement('meta');
-    appleStatusStyleMeta.name = 'apple-mobile-web-app-status-bar-style';
-  // TODO: Refactor to use Firebase or new backend
-  // appleIcon.href = '/icons/apple-touch-icon.png'; // Use your own hosted icon
-    document.head.appendChild(appleIcon);
+    appleStatusStyleMeta.content = 'black-translucent';
+    document.head.appendChild(appleStatusStyleMeta);
+
+    // Add apple-touch-icon if not already present
+    let appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+    let addedAppleIcon = false;
+    if (!appleIcon) {
+      appleIcon = document.createElement('link');
+      appleIcon.rel = 'apple-touch-icon';
+      appleIcon.href = '/icons/apple-touch-icon.png'; // Use your own hosted icon
+      document.head.appendChild(appleIcon);
+      addedAppleIcon = true;
+    }
 
     // Cleanup function
     return () => {
-      // Leave manifest and primary meta tags in place to avoid flicker if layout unmounts
-      if (appleIcon.parentNode) appleIcon.remove();
+      // Only remove if we added it (avoid removing if present globally)
+      if (addedAppleIcon && appleIcon && appleIcon.parentNode) appleIcon.remove();
     };
-  }, [isDarkMode]); // Added isDarkMode as a dependency to ensure theme-color updates if user settings change
+  }, [isDarkMode]);
 
   // Check for unread messages
   // Firebase unread messages (stub)
