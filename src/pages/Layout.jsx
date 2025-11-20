@@ -341,7 +341,7 @@ export default function Layout({ children, currentPageName }) {
         </React.Suspense>
       </ChunkErrorBoundary>
 
-      <main className="flex-1 pb-20 lg:pb-0">
+      <main className="flex-1 pb-20 lg:pb-0 pt-16">
         <ChunkErrorBoundary>
           <React.Suspense
             fallback={
