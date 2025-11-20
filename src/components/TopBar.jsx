@@ -17,7 +17,7 @@ export default function TopBar({ user, onLogout, onPlayNow }) {
   const handleClose = () => setAnchorEl(null);
 
   return (
-    <AppBar position="static" color="default" elevation={1} sx={{ mb: 2 }}>
+    <AppBar position="fixed" color="default" elevation={1} sx={{ mb: 2, zIndex: (theme) => theme.zIndex.drawer + 1 }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         {/* Left: Logo and App Name */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
