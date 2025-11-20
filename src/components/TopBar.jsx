@@ -54,7 +54,16 @@ export default function TopBar({ user, onLogout, onPlayNow }) {
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
           >
+            <MenuItem component={Link} to="/home" onClick={handleClose}>Home</MenuItem>
+            <MenuItem component={Link} to="/progress" onClick={handleClose}>Progress</MenuItem>
+            <MenuItem component={Link} to="/dailychallenge" onClick={handleClose}>Daily Challenge</MenuItem>
+            <MenuItem component={Link} to="/aitutor" onClick={handleClose}>AI Tutor</MenuItem>
+            <MenuItem component={Link} to="/shop" onClick={handleClose}>Shop</MenuItem>
             <MenuItem component={Link} to="/avatar" onClick={handleClose}>Profile</MenuItem>
+            <MenuItem component={Link} to="/teamchallenges" onClick={handleClose}>Team Challenges</MenuItem>
+            <MenuItem component={Link} to="/leaderboards" onClick={handleClose}>Leaderboards</MenuItem>
+            <MenuItem component={Link} to="/messages" onClick={handleClose}>Messages</MenuItem>
+            <MenuItem component={Link} to="/parentportal" onClick={handleClose}>Parent Portal</MenuItem>
             <MenuItem component={Link} to="/settings" onClick={handleClose}>Settings</MenuItem>
             <MenuItem component={Link} to="/subscription" onClick={handleClose}>Subscription</MenuItem>
             <MenuItem component={Link} to="/privacypolicy" onClick={handleClose}>Privacy Policy</MenuItem>
